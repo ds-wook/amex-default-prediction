@@ -2,8 +2,8 @@ import hydra
 from omegaconf import DictConfig
 
 from data.dataset import load_train_dataset
+from evaluation.evaluate import amex_metric
 from models.boosting import LightGBMTrainer
-from utils.utils import amex_metric
 
 
 @hydra.main(config_path="../config/modeling/", config_name="lgbm.yaml")

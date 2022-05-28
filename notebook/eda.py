@@ -3,9 +3,6 @@ import pandas as pd
 
 # %%
 train = pd.read_feather("../input/amex-default-prediction/train_data.ftr")
-test = pd.read_feather("../input/amex-default-prediction/test_data.ftr")
-# %%
-train.shape
 # %%
 train = (
     train.groupby("customer_ID")

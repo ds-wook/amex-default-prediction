@@ -41,7 +41,7 @@ model:
     subsample_freq: 5
     min_child_samples: 5
     max_bin: 449
-  path: res/models/10fold_lightgbm_models.pkl
+  path: res/models/10fold_lightgbm_select_models.pkl
   early_stopping_rounds: 100
   search: False
   seed: 42

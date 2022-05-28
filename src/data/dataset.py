@@ -9,6 +9,7 @@ from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 
 from features.build import categorical_test_encoding, categorical_train_encoding
+from features.build import train_kfold_mean_encoding
 
 warnings.filterwarnings("ignore")
 
@@ -23,8 +24,8 @@ def load_train_dataset(config: DictConfig) -> Tuple[pd.DataFrame, pd.Series]:
         train_y: train target
     """
     path = Path(get_original_cwd()) / config.dataset.path
-
     logging.info("Loading dataset...")
+
     train = pd.read_feather(path / config.dataset.train)
     train = (
         train.groupby("customer_ID")
@@ -36,7 +37,9 @@ def load_train_dataset(config: DictConfig) -> Tuple[pd.DataFrame, pd.Series]:
 
     train_y = train[config.dataset.target]
     train = train.drop(columns=config.dataset.target)
-    train_x = categorical_train_encoding(train, cat_col=config.dataset.cat_features)
+    train_x, train_y = train_kfold_mean_encoding(
+        train, train_y, cat_features=config.dataset.cat_features
+    )
 
     return train_x, train_y
 
