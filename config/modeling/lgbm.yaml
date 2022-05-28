@@ -7,7 +7,6 @@ dataset:
   target: target
   train: train_data.ftr
   test: test_data.ftr
-  is_catboost: False
   cat_features:
   - B_30
   - B_38
@@ -23,7 +22,7 @@ dataset:
 experiment:
   project: amex-default-prediction
   entity: ds-wook
-  name: lightgbm_1
+  name: lightgbm_3
   tags:
   - LightGBM
 model:
@@ -43,7 +42,6 @@ model:
     min_child_samples: 5
     max_bin: 449
   path: res/models/10fold_lightgbm_models.pkl
-  metric: logloss
   early_stopping_rounds: 100
   search: False
   seed: 42

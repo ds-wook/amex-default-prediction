@@ -108,7 +108,7 @@ class BaseModel(metaclass=ABCMeta):
 
         oof_score = self.metric(
             pd.DataFrame({"target": train_y.to_numpy()}),
-            pd.Series(oof_preds, name="oof_prediciton"),
+            pd.Series(oof_preds, name="prediction"),
         )
         logging.info(f"OOF Score: {oof_score}")
 

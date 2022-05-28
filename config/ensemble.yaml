@@ -1,0 +1,10 @@
+hydra:
+  run:
+    dir: log/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  output_subdir: null
+output:
+  name: output
+  nn_preds: nn_preds.csv
+  lgbm_preds: 10fold_lightgbm_seed42.csv
+  cb_preds: cb_preds.csv
+  preds: ensemble_preds.csv

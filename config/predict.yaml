@@ -1,0 +1,28 @@
+hydra:
+  run:
+    dir: ../log/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  output_subdir: null
+dataset:
+  path: input/amex-default-prediction/
+  target: target
+  train: train_data.ftr
+  test: test_data.ftr
+  cat_features:
+  - B_30
+  - B_38
+  - D_114
+  - D_116
+  - D_117
+  - D_120
+  - D_126
+  - D_63
+  - D_64
+  - D_66
+  - D_68
+model:
+  catboost: res/models/10fold_catboost_models.pkl
+  lightgbm: res/models/10fold_lightgbm_models.pkl
+  xgboost: res/models/10fold_xgboost_models.pkl
+output:
+  path: output
+  name: 10fold_lightgbm_seed42.csv
