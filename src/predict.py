@@ -12,6 +12,7 @@ from models.infer import load_model, predict
 @hydra.main(config_path="../config/", config_name="predict.yaml")
 def _main(cfg: DictConfig):
     test_x = load_test_dataset(cfg)
+    test_x = test_x.drop(columns=cfg.dataset.del_features)
     path = Path(get_original_cwd()) / cfg.output.path
 
     # model load

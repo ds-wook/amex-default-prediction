@@ -1,18 +1,16 @@
 # %%
+import pickle
+
 import pandas as pd
 
 # %%
 train = pd.read_feather("../input/amex-default-prediction/train_data.ftr")
 # %%
-train = (
-    train.groupby("customer_ID")
-    .tail(1)
-    .set_index("customer_ID", drop=True)
-    .sort_index()
-    .drop(["S_2"], axis="columns")
-)
+model_path = "../res/models/10fold_lightgbm_avg_models.pkl"
+with open(model_path, "rb") as output:
+    model_result = pickle.load(output)
 
-train.head()
+model_result
 # %%
 train.columns
 # %%

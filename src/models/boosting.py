@@ -1,8 +1,8 @@
 import warnings
 
 import pandas as pd
-import wandb.lightgbm as wandb_lgb
 import wandb.catboost as wandb_cb
+import wandb.lightgbm as wandb_lgb
 from catboost import CatBoostClassifier, Pool
 from lightgbm import LGBMClassifier
 

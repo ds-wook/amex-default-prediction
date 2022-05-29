@@ -1,13 +1,14 @@
 from typing import List, Tuple
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import seaborn as sns
 from matplotlib import figure
 
 
 def plot_importance(
-    importances,
+    importances: np.ndarray,
     features_names: List[str],
     PLOT_TOP_N: int = 20,
     figsize: Tuple[int, int] = (10, 10),

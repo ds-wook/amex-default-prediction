@@ -1,28 +1,17 @@
+import gc
 from typing import List
 
 import numpy as np
 import pandas as pd
+from category_encoders import CountEncoder
 from category_encoders.ordinal import OrdinalEncoder
+from omegaconf import DictConfig
 from sklearn.model_selection import KFold
 from tqdm import tqdm
 
 
-def categorical_train_encoding(train: pd.DataFrame, cat_col: List[str]) -> pd.DataFrame:
-    """
-    Categorical encoding
-    Args:
-        df: dataframe
-        cat_col: list of categorical columns
-    Returns:
-        dataframe
-    """
-    encoder = OrdinalEncoder(cols=cat_col)
-    train = encoder.fit_transform(train)
-    return train
-
-
-def categorical_test_encoding(
-    train: pd.DataFrame, test: pd.DataFrame, cat_col: List[str]
+def categorical_train_encoding(
+    train: pd.DataFrame, cat_features: List[str]
 ) -> pd.DataFrame:
     """
     Categorical encoding
@@ -32,7 +21,37 @@ def categorical_test_encoding(
     Returns:
         dataframe
     """
-    encoder = OrdinalEncoder(cols=cat_col)
+    encoder = OrdinalEncoder(cols=cat_features)
+    train = encoder.fit_transform(train)
+    return train
+
+
+def count_train_encoding(train: pd.DataFrame, cat_features: List[str]) -> pd.DataFrame:
+    """
+    Categorical encoding
+    Args:
+        df: dataframe
+        cat_col: list of categorical columns
+    Returns:
+        dataframe
+    """
+    encoder = CountEncoder(cols=cat_features)
+    train = encoder.fit_transform(train)
+    return train
+
+
+def categorical_test_encoding(
+    train: pd.DataFrame, test: pd.DataFrame, cat_features: List[str]
+) -> pd.DataFrame:
+    """
+    Categorical encoding
+    Args:
+        df: dataframe
+        cat_col: list of categorical columns
+    Returns:
+        dataframe
+    """
+    encoder = OrdinalEncoder(cols=cat_features)
     train = encoder.fit_transform(train)
     test = encoder.transform(test)
     return train, test
@@ -77,3 +96,43 @@ def test_kfold_mean_encoding(
         test_x[c] = test_x[c].map(target_mean)
 
     return test_x
+
+
+def create_avg_features(df: pd.DataFrame, config: DictConfig) -> pd.DataFrame:
+    """
+    Create average features
+    Args:
+        df: dataframe
+        config: config file
+    Returns:
+        dataframe
+    """
+    cid = pd.Categorical(df.pop("customer_ID"), ordered=True)
+    last = cid != np.roll(cid, -1)  # mask for last statement of every customer
+
+    if config.dataset.is_train:
+        target = df.loc[last, config.dataset.target]
+        gc.collect()
+
+    df_avg = (
+        df[config.dataset.features_avg]
+        .groupby(cid)
+        .mean()
+        .rename(columns={f: f"{f}_avg" for f in config.dataset.features_avg})
+    )
+    gc.collect()
+
+    df = (
+        df.loc[last, config.dataset.features_last]
+        .rename(columns={f: f"{f}_last" for f in config.dataset.features_last})
+        .set_index(np.asarray(cid[last]))
+    )
+    gc.collect()
+
+    df = pd.concat([df, df_avg], axis=1)
+    del df_avg, cid, last
+
+    if config.dataset.is_train:
+        return df, target
+
+    return df

@@ -4,13 +4,11 @@ import warnings
 from pathlib import Path
 from typing import Tuple
 
+import numpy as np
 import pandas as pd
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
-
-from features.build import categorical_test_encoding, categorical_train_encoding
-from features.build import train_kfold_mean_encoding
-
+from features.build import create_avg_features
 warnings.filterwarnings("ignore")
 
 
@@ -27,19 +25,9 @@ def load_train_dataset(config: DictConfig) -> Tuple[pd.DataFrame, pd.Series]:
     logging.info("Loading dataset...")
 
     train = pd.read_feather(path / config.dataset.train)
-    train = (
-        train.groupby("customer_ID")
-        .tail(1)
-        .set_index("customer_ID", drop=True)
-        .sort_index()
-        .drop(["S_2"], axis="columns")
-    )
+    train_x, train_y = create_avg_features(train, config)
 
-    train_y = train[config.dataset.target]
-    train = train.drop(columns=config.dataset.target)
-    train_x, train_y = train_kfold_mean_encoding(
-        train, train_y, cat_features=config.dataset.cat_features
-    )
+    logging.info(f"train: {train_x.shape}, target: {train_y.shape}")
 
     return train_x, train_y
 
@@ -55,33 +43,29 @@ def load_test_dataset(config: DictConfig) -> pd.DataFrame:
     path = Path(get_original_cwd()) / config.dataset.path
 
     logging.info("Loading dataset...")
-    train = pd.read_feather(path / config.dataset.train)
     test = pd.read_feather(path / config.dataset.test)
+    gc.collect()
 
-    train = (
-        train.groupby("customer_ID")
-        .tail(1)
-        .set_index("customer_ID", drop=True)
-        .sort_index()
-        .drop(["S_2"], axis="columns")
+    cid = pd.Categorical(test.pop("customer_ID"), ordered=True)
+    last = cid != np.roll(cid, -1)  # mask for last statement of every customer
+    df_avg = (
+        test[config.dataset.features_avg]
+        .groupby(cid)
+        .mean()
+        .rename(columns={f: f"{f}_avg" for f in config.dataset.features_avg})
     )
+    gc.collect()
 
     test = (
-        test.groupby("customer_ID")
-        .tail(1)
-        .set_index("customer_ID", drop=True)
-        .sort_index()
-        .drop(["S_2"], axis="columns")
+        test.loc[last, config.dataset.features_last]
+        .rename(columns={f: f"{f}_last" for f in config.dataset.features_last})
+        .set_index(np.asarray(cid[last]))
     )
-
     gc.collect()
 
-    train = train.drop(columns=config.dataset.target)
-    train_x, test_x = categorical_test_encoding(
-        train, test, cat_col=config.dataset.cat_features
-    )
+    test_x = pd.concat([test, df_avg], axis=1)
+    del df_avg, cid, last, test
 
-    del train_x
-    gc.collect()
+    logging.info(f"test: {test_x.shape}")
 
     return test_x

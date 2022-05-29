@@ -14,6 +14,7 @@ from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 from sklearn.model_selection import StratifiedKFold
 
+
 warnings.filterwarnings("ignore")
 
 
@@ -87,6 +88,7 @@ class BaseModel(metaclass=ABCMeta):
                 X_valid,
                 y_valid,
             )
+
             models[f"fold_{fold}"] = model
 
             # validation
