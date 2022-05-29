@@ -13,7 +13,7 @@ import wandb
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 from sklearn.model_selection import StratifiedKFold
-
+from wandb.sklearn import plot_feature_importances
 
 warnings.filterwarnings("ignore")
 
@@ -90,6 +90,7 @@ class BaseModel(metaclass=ABCMeta):
             )
 
             models[f"fold_{fold}"] = model
+            plot_feature_importances(model, X_train.columns.tolist())
 
             # validation
             oof_preds[valid_idx] = model.predict_proba(X_valid)[:, 1]

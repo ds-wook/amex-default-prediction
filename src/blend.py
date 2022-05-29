@@ -16,10 +16,9 @@ def _main(cfg: DictConfig):
 
     preds = nn_preds.copy()
     ensemble_perds = (
-        gru_preds["prediction"] * 0.1
-        + nn_preds["prediction"] * 0.05
-        + lgbm_preds["prediction"] * 0.15
-        + cb_preds["prediction"] * 0.7
+        + nn_preds["prediction"] * 0.1
+        + lgbm_preds["prediction"] * 0.1
+        + cb_preds["prediction"] * 0.8
     )
     preds["prediction"] = ensemble_perds
     preds.to_csv(path / cfg.output.preds, index=False)
