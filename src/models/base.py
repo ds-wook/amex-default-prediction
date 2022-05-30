@@ -13,6 +13,7 @@ import wandb
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 from sklearn.model_selection import StratifiedKFold
+from wandb.sklearn import plot_feature_importances
 
 warnings.filterwarnings("ignore")
 
@@ -87,10 +88,16 @@ class BaseModel(metaclass=ABCMeta):
                 X_valid,
                 y_valid,
             )
+
             models[f"fold_{fold}"] = model
+            plot_feature_importances(
+                model, X_train.columns.tolist(), max_num_features=20
+            )
 
             # validation
-            oof_preds[valid_idx] = model.predict_proba(X_valid)[:, 1]
+            oof_preds[valid_idx] = model.predict_proba(
+                X_valid, num_iteration=model.best_iteration_
+            )[:, 1]
             score = self.metric(
                 pd.DataFrame({"target": y_valid.to_numpy()}),
                 pd.Series(oof_preds[valid_idx], name="prediction"),
@@ -108,7 +115,7 @@ class BaseModel(metaclass=ABCMeta):
 
         oof_score = self.metric(
             pd.DataFrame({"target": train_y.to_numpy()}),
-            pd.Series(oof_preds, name="oof_prediciton"),
+            pd.Series(oof_preds, name="prediction"),
         )
         logging.info(f"OOF Score: {oof_score}")
 

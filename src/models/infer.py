@@ -36,7 +36,7 @@ def predict(result: ModelResult, test_x: pd.DataFrame) -> ArrayLike:
         predict probabilities for each class
     """
     folds = len(result.models)
-    preds_proba = np.zeros((test_x.shape[0], ))
+    preds_proba = np.zeros((test_x.shape[0],))
 
     for model in tqdm(result.models.values(), total=folds):
         preds_proba += model.predict_proba(test_x)[:, 1] / folds

@@ -4,7 +4,7 @@ hydra:
   output_subdir: null
 dataset:
   path: input/amex-default-prediction/
-  is_train: true
+  is_train: false
   target: target
   train: train_agg.pkl
   test: test_agg.pkl
@@ -230,29 +230,10 @@ dataset:
   - D_64_last
   - D_66_last
   - D_68_last
-experiment:
-  project: amex-default-prediction
-  entity: ds-wook
-  name: lightgbm_dart_1
-  tags:
-  - LightGBM
 model:
-  fold: 5
-  params:
-    boosting_type: dart
-    learning_rate: 0.05
-    n_estimators: 5000
-    objective: binary
-    reg_alpha: 5.998770177220496e-05
-    reg_lambda: 0.07127674208132959
-    max_depth: 18
-    num_leaves: 125
-    colsample_bytree: 0.4241631237880101
-    subsample: 0.8876057928391585
-    subsample_freq: 5
-    min_child_samples: 5
-    max_bin: 449
-  path: res/models/5fold_lightgbm_categorical_dart.pkl
-  search: False
-  seed: 42
-  verbose: 100
+  catboost: res/models/10fold_catboost_models.pkl
+  lightgbm: res/models/10fold_lightgbm_categorical_models.pkl
+  xgboost: res/models/10fold_xgboost_models.pkl
+output:
+  path: output
+  name: 10fold_cat_lightgbm_seed42.csv
