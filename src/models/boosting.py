@@ -41,7 +41,7 @@ class LightGBMTrainer(BaseModel):
                 verbose=self.config.model.verbose,
                 callbacks=[wandb_lgb.wandb_callback()],
             )
-    
+
         else:
             model.fit(
                 X_train,
@@ -86,7 +86,7 @@ class CatBoostTrainer(BaseModel):
             eval_metric=self.config.model.metric,
             early_stopping_rounds=self.config.model.early_stopping_rounds,
             verbose=self.config.model.verbose,
-            callbacks=[wandb_cb.WandbCallback()]
+            callbacks=[wandb_cb.WandbCallback()],
         )
 
         wandb_cb.log_summary(model)

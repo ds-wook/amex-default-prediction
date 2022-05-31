@@ -1,18 +1,16 @@
 import gc
-from typing import List
+import pickle
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from category_encoders import CountEncoder
+from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
-from sklearn.model_selection import KFold
 from sklearn.preprocessing import LabelEncoder
 from tqdm import tqdm
 
 
-def categorical_train_encoding(
-    train: pd.DataFrame, cat_features: List[str]
-) -> pd.DataFrame:
+def categorical_train_encoding(train: pd.DataFrame, config: DictConfig) -> pd.DataFrame:
     """
     Categorical encoding
     Args:
@@ -21,17 +19,22 @@ def categorical_train_encoding(
     Returns:
         dataframe
     """
+    path = Path(get_original_cwd())
+
     le_encoder = LabelEncoder()
-    for categorical_feature in tqdm(cat_features):
+
+    for categorical_feature in tqdm(config.dataset.features_categorical):
         train[categorical_feature] = le_encoder.fit_transform(
             train[categorical_feature]
         )
+
+    with open(path / config.dataset.encoder, "wb") as f:
+        pickle.dump(le_encoder, f)
+
     return train
 
 
-def categorical_test_encoding(
-    train: pd.DataFrame, test: pd.DataFrame, cat_features: List[str]
-) -> pd.DataFrame:
+def categorical_test_encoding(test: pd.DataFrame, config: DictConfig) -> pd.DataFrame:
     """
     Categorical encoding
     Args:
@@ -40,69 +43,14 @@ def categorical_test_encoding(
     Returns:
         dataframe
     """
-    le_encoder = LabelEncoder()
-    for categorical_feature in tqdm(cat_features):
-        train[categorical_feature] = le_encoder.fit_transform(train[categorical_feature])
+    path = Path(get_original_cwd())
+
+    le_encoder = pickle.load(open(path / config.dataset.encoder, "rb"))
+
+    for categorical_feature in tqdm(config.dataset.features_categorical):
         test[categorical_feature] = le_encoder.transform(test[categorical_feature])
 
-    del train
-
     return test
-
-
-def count_train_encoding(train: pd.DataFrame, cat_features: List[str]) -> pd.DataFrame:
-    """
-    Categorical encoding
-    Args:
-        df: dataframe
-        cat_col: list of categorical columns
-    Returns:
-        dataframe
-    """
-    encoder = CountEncoder(cols=cat_features)
-    train = encoder.fit_transform(train)
-    return train
-
-
-def train_kfold_mean_encoding(
-    train_x: pd.DataFrame,
-    train_y: pd.Series,
-    cat_features: List[str],
-) -> pd.DataFrame:
-    for c in tqdm(cat_features):
-        data_tmp = pd.DataFrame({c: train_x[c], "target": train_y})
-        target_mean = data_tmp.groupby(c)["target"].mean()
-
-        # 학습 데이터 변환 후 값을 저장하는 배열 준비
-        tmp = np.repeat(np.nan, train_x.shape[0])
-
-        kf = KFold(n_splits=4, shuffle=True, random_state=42)
-
-        for train_idx, valid_idx in kf.split(train_x):
-            # out of fold 로 각 범주형 목적변수 평균 계산
-            target_mean = data_tmp.iloc[train_idx].groupby(c)["target"].mean()
-            # 변환 후의 값을 날짜 배열에 저장
-            tmp[valid_idx] = train_x[c].iloc[valid_idx].map(target_mean)
-
-        train_x[c] = tmp
-
-    return train_x, train_y
-
-
-def test_kfold_mean_encoding(
-    train_x: pd.DataFrame,
-    test_x: pd.DataFrame,
-    train_y: pd.Series,
-    cat_features: List[str],
-) -> pd.DataFrame:
-    for c in tqdm(cat_features):
-        data_tmp = pd.DataFrame({c: train_x[c], "target": train_y})
-        target_mean = data_tmp.groupby(c)["target"].mean()
-
-        # 테스트 데이터의 카테고리 변경
-        test_x[c] = test_x[c].map(target_mean)
-
-    return test_x
 
 
 def create_avg_features(df: pd.DataFrame, config: DictConfig) -> pd.DataFrame:
@@ -129,15 +77,42 @@ def create_avg_features(df: pd.DataFrame, config: DictConfig) -> pd.DataFrame:
     )
     gc.collect()
 
-    df = (
+    df_max = (
+        df.groupby(cid)
+        .max()[config.dataset.features_max]
+        .rename(columns={f: f"{f}_max" for f in config.dataset.features_max})
+    )
+    gc.collect()
+
+    df_min = (
+        df.groupby(cid)
+        .min()[config.dataset.features_min]
+        .rename(columns={f: f"{f}_min" for f in config.dataset.features_min})
+    )
+    gc.collect()
+
+    df_last = (
         df.loc[last, config.dataset.features_last]
         .rename(columns={f: f"{f}_last" for f in config.dataset.features_last})
         .set_index(np.asarray(cid[last]))
     )
     gc.collect()
 
-    df = pd.concat([df, df_avg], axis=1)
-    del df_avg, cid, last
+    df_categorical = df_last[config.dataset.features_categorical].astype(object)
+    features_not_cat = [
+        f for f in df_last.columns if f not in config.dataset.features_categorical
+    ]
+
+    df_categorical = (
+        categorical_train_encoding(df_categorical, config)
+        if config.dataset.is_train
+        else categorical_test_encoding(df_categorical, config)
+    )
+
+    df = pd.concat(
+        [df_last[features_not_cat], df_categorical, df_avg, df_min, df_max], axis=1
+    )
+    del df_avg, df_max, df_min, df_last, df_categorical, cid, last, features_not_cat
 
     if config.dataset.is_train:
         return df, target

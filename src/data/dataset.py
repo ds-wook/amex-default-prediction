@@ -4,7 +4,6 @@ import warnings
 from pathlib import Path
 from typing import Tuple
 
-import numpy as np
 import pandas as pd
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
@@ -73,27 +72,7 @@ def load_test_dataset(config: DictConfig) -> pd.DataFrame:
     logging.info("Loading dataset...")
     test = pd.read_feather(path / config.dataset.test)
     gc.collect()
-
-    cid = pd.Categorical(test.pop("customer_ID"), ordered=True)
-    last = cid != np.roll(cid, -1)  # mask for last statement of every customer
-    df_avg = (
-        test[config.dataset.features_avg]
-        .groupby(cid)
-        .mean()
-        .rename(columns={f: f"{f}_avg" for f in config.dataset.features_avg})
-    )
-    gc.collect()
-
-    test = (
-        test.loc[last, config.dataset.features_last]
-        .rename(columns={f: f"{f}_last" for f in config.dataset.features_last})
-        .set_index(np.asarray(cid[last]))
-    )
-    gc.collect()
-
-    test_x = pd.concat([test, df_avg], axis=1)
-    del df_avg, cid, last, test
-
+    test_x = create_avg_features(test, config)
     logging.info(f"test: {test_x.shape}")
 
     return test_x
