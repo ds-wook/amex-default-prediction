@@ -8,7 +8,7 @@ output:
   name: output
   nn_preds: 5fold_nn_preds.csv
   lgbm_preds: 5fold_dart_lightgbm.csv
-  cb_preds: 10fold_catboost_preds_seed42.csv
+  cb_preds: 10fold_catboost_preds_seed42_gpu.csv
   gru_preds: 5fold_gru_preds.csv
   ensemble_preds: ensemble_preds.csv
-  preds: blend_preds.csv
+  preds: 2tree_2nn_blend_preds.csv

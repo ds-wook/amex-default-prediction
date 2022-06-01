@@ -7,10 +7,8 @@ import pandas as pd
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 
-from features.build import (
-    categorical_test_encoding,
-    categorical_train_encoding,
-)
+from features.build import categorize_test, categorize_train
+
 
 warnings.filterwarnings("ignore")
 
@@ -25,10 +23,10 @@ def load_train_dataset(config: DictConfig) -> Tuple[pd.DataFrame, pd.Series]:
         train_y: train target
     """
     path = Path(get_original_cwd()) / config.dataset.path
-    logging.info("Loading dataset...")
+    logging.info("Loading train dataset...")
 
     train = pd.read_pickle(path / config.dataset.train, compression="gzip")
-    train = categorical_train_encoding(train, config)
+    train = categorize_train(train, config)
     train_x = train.drop(columns=config.dataset.target)
     train_y = train[config.dataset.target]
 
@@ -46,11 +44,9 @@ def load_test_dataset(config: DictConfig) -> pd.DataFrame:
         test_x: test dataset
     """
     path = Path(get_original_cwd()) / config.dataset.path
-    logging.info("Loading dataset...")
-    train = pd.read_pickle(path / config.dataset.train, compression="gzip")
+    logging.info("Loading test dataset...")
     test = pd.read_pickle(path / config.dataset.test, compression="gzip")
-    test_x = categorical_test_encoding(test, config)
-    del train
+    test_x = categorize_test(test, config)
     logging.info(f"test: {test_x.shape}")
 
     return test_x

@@ -1,10 +1,10 @@
-import logging
 from typing import List
 
 import numpy as np
 import pandas as pd
 from lightgbm import LGBMClassifier
 from shap import TreeExplainer
+import logging
 
 
 def select_features(

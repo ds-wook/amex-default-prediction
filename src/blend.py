@@ -14,20 +14,20 @@ def _main(cfg: DictConfig):
     lgbm_preds = pd.read_csv(path / cfg.output.lgbm_preds)
     cb_preds = pd.read_csv(path / cfg.output.cb_preds)
 
-    ensemble_preds = pd.merge(lgbm_preds, gru_preds, on="customer_ID")
+    ensemble_preds = pd.merge(nn_preds, gru_preds, on="customer_ID")
     ensemble_preds.rename(
-        columns={"prediction_x": "lgbm_preds", "prediction_y": "gru_preds"},
+        columns={"prediction_x": "nn_preds", "prediction_y": "gru_preds"},
         inplace=True,
     )
     ensemble_preds["prediction"] = (
-        ensemble_preds["lgbm_preds"] * 0.9 + ensemble_preds["gru_preds"] * 0.1
+        ensemble_preds["nn_preds"] * 0.6 + ensemble_preds["gru_preds"] * 0.4
     )
 
     preds = nn_preds.copy()
     preds["prediction"] = (
-        ensemble_preds["prediction"] * 0.6
+        ensemble_preds["prediction"] * 0.2
         + cb_preds["prediction"] * 0.2
-        + nn_preds["prediction"] * 0.2
+        + lgbm_preds["prediction"] * 0.6
     )
     preds.to_csv(path / cfg.output.preds, index=False)
 

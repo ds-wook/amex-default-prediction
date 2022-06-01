@@ -10,7 +10,7 @@ from sklearn.preprocessing import LabelEncoder
 from tqdm import tqdm
 
 
-def categorical_train_encoding(train: pd.DataFrame, config: DictConfig) -> pd.DataFrame:
+def categorize_train(train: pd.DataFrame, config: DictConfig) -> pd.DataFrame:
     """
     Categorical encoding
     Args:
@@ -32,7 +32,7 @@ def categorical_train_encoding(train: pd.DataFrame, config: DictConfig) -> pd.Da
     return train
 
 
-def categorical_test_encoding(test: pd.DataFrame, config: DictConfig) -> pd.DataFrame:
+def categorize_test(test: pd.DataFrame, config: DictConfig) -> pd.DataFrame:
     """
     Categorical encoding
     Args:
@@ -46,6 +46,7 @@ def categorical_test_encoding(test: pd.DataFrame, config: DictConfig) -> pd.Data
     for cat_feature in tqdm(config.dataset.cat_features):
         le_encoder = pickle.load(open(path / f"{cat_feature}.pkl", "rb"))
         test[cat_feature] = le_encoder.transform(test[cat_feature])
+        gc.collect()
 
     return test
 
@@ -101,9 +102,9 @@ def create_features(df: pd.DataFrame, config: DictConfig) -> pd.DataFrame:
     ]
 
     df_categorical = (
-        categorical_train_encoding(df_categorical, config)
+        categorize_train(df_categorical, config)
         if config.dataset.is_train
-        else categorical_test_encoding(df_categorical, config)
+        else categorize_test(df_categorical, config)
     )
 
     df = pd.concat(
@@ -115,3 +116,4 @@ def create_features(df: pd.DataFrame, config: DictConfig) -> pd.DataFrame:
         return df, target
 
     return df
+
