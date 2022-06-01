@@ -1,3 +1,4 @@
+import itertools
 import logging
 import logging.handlers
 import os
@@ -6,11 +7,10 @@ import time
 from contextlib import contextmanager
 from typing import Any
 
-import numpy as np
-from pandas import DataFrame
-
 import matplotlib.pyplot as plt
-import itertools
+import numpy as np
+import pandas as pd
+from tqdm import tqdm
 
 
 def plot_confusion_matrix(
@@ -52,11 +52,11 @@ def timer(name: Any, logger: logging.getLogger) -> None:
     logger.debug(f"[{name}] done in {time.time() - t0:.0f} s")
 
 
-def reduce_mem_usage(df: DataFrame, verbose: bool = True) -> DataFrame:
+def reduce_mem_usage(df: pd.DataFrame, verbose: bool = True) -> pd.DataFrame:
     numerics = ["int16", "int32", "int64", "float16", "float32", "float64"]
     start_mem = df.memory_usage().sum() / 1024**2
 
-    for col in df.columns:
+    for col in tqdm(df.columns):
         col_type = df[col].dtypes
         if col_type in numerics:
             c_min = df[col].min()

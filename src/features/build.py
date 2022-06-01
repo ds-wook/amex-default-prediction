@@ -117,3 +117,50 @@ def create_features(df: pd.DataFrame, config: DictConfig) -> pd.DataFrame:
 
     return df
 
+
+def add_features(df: pd.DataFrame, config: DictConfig) -> pd.DataFrame:
+    """
+    Add features
+
+    Args:
+        df: Dataset
+        config: config file
+    Return:
+       feature engineered Dataset
+    """
+    df_num_agg = df.groupby("customer_ID")[config.dataset.num_features].agg(
+        ["mean", "std", "min", "max", "last"]
+    )
+    df_num_agg.columns = ["_".join(x) for x in df_num_agg.columns]
+
+    df_cat_agg = df.groupby("customer_ID")[config.dataset.cat_features].agg(
+        ["count", "last", "nunique"]
+    )
+    df_cat_agg.columns = ["_".join(x) for x in df_cat_agg.columns]
+
+    if config.dataset.is_train:
+        df_target = (
+            df.groupby("customer_ID")
+            .tail(1)
+            .set_index("customer_ID", drop=True)
+            .sort_index()["target"]
+        )
+        df = pd.concat([df_num_agg, df_cat_agg, df_target], axis=1)
+        del df_num_agg, df_cat_agg, df_target
+    else:
+        df = pd.concat([df_num_agg, df_cat_agg], axis=1)
+        del df_num_agg, df_cat_agg
+
+    return df
+
+
+def make_nan_feature(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Create nan feature
+    Args:
+        df: dataframe
+    Returns:
+        dataframe
+    """
+    df["nan_feature"] = df.isna().sum(axis=1)
+    return df
