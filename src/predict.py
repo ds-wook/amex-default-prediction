@@ -5,14 +5,15 @@ import pandas as pd
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 
-from data.dataset import load_test_dataset
+from data.dataset import load_cat_test_dataset
 from models.infer import load_model, predict
+from utils.utils import reduce_mem_usage
 
 
 @hydra.main(config_path="../config/", config_name="predict.yaml")
 def _main(cfg: DictConfig):
-    test_x = load_test_dataset(cfg)
-    test_x = test_x.drop(columns=cfg.dataset.del_features)
+    test_x = load_cat_test_dataset(cfg)
+    test_x = reduce_mem_usage(test_x)
     path = Path(get_original_cwd()) / cfg.output.path
 
     # model load
