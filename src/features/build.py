@@ -53,7 +53,7 @@ def categorical_test_encoding(test: pd.DataFrame, config: DictConfig) -> pd.Data
     return test
 
 
-def create_avg_features(df: pd.DataFrame, config: DictConfig) -> pd.DataFrame:
+def create_features(df: pd.DataFrame, config: DictConfig) -> pd.DataFrame:
     """
     Create average features
     Args:
