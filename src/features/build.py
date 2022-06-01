@@ -19,17 +19,15 @@ def categorical_train_encoding(train: pd.DataFrame, config: DictConfig) -> pd.Da
     Returns:
         dataframe
     """
-    path = Path(get_original_cwd())
+    path = Path(get_original_cwd()) / config.dataset.encoder
 
     le_encoder = LabelEncoder()
 
-    for categorical_feature in tqdm(config.dataset.features_categorical):
-        train[categorical_feature] = le_encoder.fit_transform(
-            train[categorical_feature]
-        )
+    for cat_feature in tqdm(config.dataset.cat_features):
+        train[cat_feature] = le_encoder.fit_transform(train[cat_feature])
 
-    with open(path / config.dataset.encoder, "wb") as f:
-        pickle.dump(le_encoder, f)
+        with open(path / f"{cat_feature}.pkl", "wb") as f:
+            pickle.dump(le_encoder, f)
 
     return train
 
@@ -43,12 +41,11 @@ def categorical_test_encoding(test: pd.DataFrame, config: DictConfig) -> pd.Data
     Returns:
         dataframe
     """
-    path = Path(get_original_cwd())
+    path = Path(get_original_cwd()) / config.dataset.encoder
 
-    le_encoder = pickle.load(open(path / config.dataset.encoder, "rb"))
-
-    for categorical_feature in tqdm(config.dataset.features_categorical):
-        test[categorical_feature] = le_encoder.transform(test[categorical_feature])
+    for cat_feature in tqdm(config.dataset.cat_features):
+        le_encoder = pickle.load(open(path / f"{cat_feature}.pkl", "rb"))
+        test[cat_feature] = le_encoder.transform(test[cat_feature])
 
     return test
 

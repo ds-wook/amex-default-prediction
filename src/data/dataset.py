@@ -28,7 +28,7 @@ def load_train_dataset(config: DictConfig) -> Tuple[pd.DataFrame, pd.Series]:
     logging.info("Loading dataset...")
 
     train = pd.read_pickle(path / config.dataset.train, compression="gzip")
-    train = categorical_train_encoding(train, config.dataset.cat_features)
+    train = categorical_train_encoding(train, config)
     train_x = train.drop(columns=config.dataset.target)
     train_y = train[config.dataset.target]
 
@@ -49,7 +49,7 @@ def load_test_dataset(config: DictConfig) -> pd.DataFrame:
     logging.info("Loading dataset...")
     train = pd.read_pickle(path / config.dataset.train, compression="gzip")
     test = pd.read_pickle(path / config.dataset.test, compression="gzip")
-    test_x = categorical_test_encoding(train, test, config.dataset.cat_features)
+    test_x = categorical_test_encoding(test, config)
     del train
     logging.info(f"test: {test_x.shape}")
 

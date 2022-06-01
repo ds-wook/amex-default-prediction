@@ -6,8 +6,8 @@ dataset:
   path: input/amex-default-prediction/
   is_train: true
   target: target
-  train: train_data.ftr
-  test: test_data.ftr
+  train: train_agg.pkl
+  test: test_agg.pkl
   cat_features:
   - B_30_last
   - B_38_last
@@ -20,7 +20,7 @@ dataset:
   - D_64_last
   - D_66_last
   - D_68_last
-  encoder: res/data/cat_encoder.pkl
+  encoder: res/data/
 experiment:
   project: amex-default-prediction
   entity: ds-wook
@@ -34,7 +34,7 @@ model:
     reg_lambda: 0.07127674208132959
     boosting_type: dart
     learning_rate: 0.05
-    n_estimators: 2500
+    n_estimators: 5000
     objective: binary
     max_depth: 16
     num_leaves: 128
