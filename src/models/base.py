@@ -88,8 +88,8 @@ class BaseModel(metaclass=ABCMeta):
                 X_valid,
                 y_valid,
             )
-
             models[f"fold_{fold}"] = model
+
             plot_feature_importances(
                 model, X_train.columns.tolist(), max_num_features=20
             )

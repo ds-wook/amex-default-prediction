@@ -12,4 +12,5 @@ output:
   xgb_preds: 5fold_xgboost_preds.csv
   gru_preds: 5fold_gru_preds.csv
   ensemble_preds: ensemble_preds.csv
-  preds: 3tree_2nn_blend_preds.csv
+  lb_preds: lb_best_ensemble.csv
+  preds: lb_blend_preds.csv

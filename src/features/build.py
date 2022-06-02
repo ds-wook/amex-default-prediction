@@ -10,7 +10,7 @@ from sklearn.preprocessing import LabelEncoder
 from tqdm import tqdm
 
 
-def categorize_train(train: pd.DataFrame, config: DictConfig) -> pd.DataFrame:
+def create_categorical_train(train: pd.DataFrame, config: DictConfig) -> pd.DataFrame:
     """
     Categorical encoding
     Args:
@@ -32,7 +32,7 @@ def categorize_train(train: pd.DataFrame, config: DictConfig) -> pd.DataFrame:
     return train
 
 
-def categorize_test(test: pd.DataFrame, config: DictConfig) -> pd.DataFrame:
+def create_categorical_test(test: pd.DataFrame, config: DictConfig) -> pd.DataFrame:
     """
     Categorical encoding
     Args:
@@ -102,9 +102,9 @@ def create_features(df: pd.DataFrame, config: DictConfig) -> pd.DataFrame:
     ]
 
     df_categorical = (
-        categorize_train(df_categorical, config)
+        create_categorical_train(df_categorical, config)
         if config.dataset.is_train
-        else categorize_test(df_categorical, config)
+        else create_categorical_test(df_categorical, config)
     )
 
     df = pd.concat(

@@ -31,13 +31,12 @@ class LightGBMTrainer(BaseModel):
             random_state=self.config.model.seed, **self.config.model.params
         )
 
-        if self.config.model.params.boosting_type == "gdbt":
+        if self.config.model.params.boosting_type == "dart":
             model.fit(
                 X_train,
                 y_train,
                 eval_set=[(X_train, y_train), (X_valid, y_valid)],
                 eval_metric=lgb_amex_metric,
-                early_stopping_rounds=self.config.model.early_stopping_rounds,
                 verbose=self.config.model.verbose,
                 callbacks=[wandb_lgb.wandb_callback()],
             )
@@ -48,9 +47,11 @@ class LightGBMTrainer(BaseModel):
                 y_train,
                 eval_set=[(X_train, y_train), (X_valid, y_valid)],
                 eval_metric=lgb_amex_metric,
+                early_stopping_rounds=self.config.model.early_stopping_rounds,
                 verbose=self.config.model.verbose,
                 callbacks=[wandb_lgb.wandb_callback()],
             )
+
         return model
 
 
