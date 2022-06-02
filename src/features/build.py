@@ -131,11 +131,15 @@ def add_features(df: pd.DataFrame, config: DictConfig) -> pd.DataFrame:
     df_num_agg = df.groupby("customer_ID")[config.dataset.num_features].agg(
         ["mean", "std", "min", "max", "last"]
     )
+    gc.collect()
+
     df_num_agg.columns = ["_".join(x) for x in df_num_agg.columns]
 
     df_cat_agg = df.groupby("customer_ID")[config.dataset.cat_features].agg(
         ["count", "last", "nunique"]
     )
+    gc.collect()
+
     df_cat_agg.columns = ["_".join(x) for x in df_cat_agg.columns]
 
     if config.dataset.is_train:
@@ -145,6 +149,7 @@ def add_features(df: pd.DataFrame, config: DictConfig) -> pd.DataFrame:
             .set_index("customer_ID", drop=True)
             .sort_index()["target"]
         )
+        gc.collect()
         df = pd.concat([df_num_agg, df_cat_agg, df_target], axis=1)
         del df_num_agg, df_cat_agg, df_target
     else:
@@ -154,7 +159,7 @@ def add_features(df: pd.DataFrame, config: DictConfig) -> pd.DataFrame:
     return df
 
 
-def make_nan_feature(df: pd.DataFrame) -> pd.DataFrame:
+def make_trick(df: pd.DataFrame) -> pd.DataFrame:
     """
     Create nan feature
     Args:
@@ -162,5 +167,10 @@ def make_nan_feature(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         dataframe
     """
-    df["nan_feature"] = df.isna().sum(axis=1)
+
+    for col in df.columns:
+        if df[col].dtype == "float16":
+            df[col] = df[col].astype("float32").round(decimals=2).astype("float16")
+        gc.collect()
+
     return df

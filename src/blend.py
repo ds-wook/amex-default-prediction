@@ -12,6 +12,7 @@ def _main(cfg: DictConfig):
     gru_preds = pd.read_csv(path / cfg.output.gru_preds)
     nn_preds = pd.read_csv(path / cfg.output.nn_preds)
     lgbm_preds = pd.read_csv(path / cfg.output.lgbm_preds)
+    xgb_preds = pd.read_csv(path / cfg.output.xgb_preds)
     cb_preds = pd.read_csv(path / cfg.output.cb_preds)
 
     ensemble_preds = pd.merge(nn_preds, gru_preds, on="customer_ID")
@@ -23,10 +24,19 @@ def _main(cfg: DictConfig):
         ensemble_preds["nn_preds"] * 0.6 + ensemble_preds["gru_preds"] * 0.4
     )
 
+    tree_ensemble_preds = pd.merge(cb_preds, xgb_preds, on="customer_ID")
+    tree_ensemble_preds.rename(
+        columns={"prediction_x": "cb_preds", "prediction_y": "xgb_preds"},
+        inplace=True,
+    )
+    tree_ensemble_preds["prediction"] = (
+        tree_ensemble_preds["cb_preds"] * 0.5 + tree_ensemble_preds["xgb_preds"] * 0.5
+    )
+
     preds = nn_preds.copy()
     preds["prediction"] = (
         ensemble_preds["prediction"] * 0.2
-        + cb_preds["prediction"] * 0.2
+        + tree_ensemble_preds["prediction"] * 0.2
         + lgbm_preds["prediction"] * 0.6
     )
     preds.to_csv(path / cfg.output.preds, index=False)
