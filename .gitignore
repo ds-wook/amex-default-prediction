@@ -133,7 +133,9 @@ input/*
 !input/.gitkeep
 output/*
 !output/.gitkeep
-res/*
-res/.gitkeep
+res/models/*
+!res/models/.gitkeep
+res/data/*
+!res/data/.gitkeep
 log/*
 !log/.gitkeep
