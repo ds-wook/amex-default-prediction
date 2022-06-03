@@ -35,7 +35,7 @@ model:
     reg_lambda: 0.07127674208132959
     boosting_type: dart
     learning_rate: 0.05
-    n_estimators: 5000
+    n_estimators: 2500
     objective: cross_entropy
     max_depth: 16
     num_leaves: 128

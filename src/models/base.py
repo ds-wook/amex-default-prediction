@@ -110,14 +110,17 @@ class BaseModel(metaclass=ABCMeta):
             gc.collect()
 
             del X_train, X_valid, y_train, y_valid
-            # Close run for that fold
-            wandb.join()
 
         oof_score = self.metric(
             pd.DataFrame({"target": train_y.to_numpy()}),
             pd.Series(oof_preds, name="prediction"),
         )
         logging.info(f"OOF Score: {oof_score}")
+
+        wandb.log({"OOF Score": oof_score})
+
+        # Close run for that fold
+        wandb.join()
 
         self.result = ModelResult(
             oof_preds=oof_preds,
