@@ -6,7 +6,7 @@ import wandb.lightgbm as wandb_lgb
 from catboost import CatBoostClassifier, Pool
 from lightgbm import LGBMClassifier
 
-from evaluation.evaluate import lgb_amex_metric
+from evaluation.evaluate import CatBoostEvalMetricAmex, lgb_amex_metric
 from models.base import BaseModel
 
 warnings.filterwarnings("ignore")
@@ -84,7 +84,7 @@ class CatBoostTrainer(BaseModel):
         model.fit(
             train_data,
             eval_set=valid_data,
-            eval_metric=self.config.model.metric,
+            eval_metric=CatBoostEvalMetricAmex(),
             early_stopping_rounds=self.config.model.early_stopping_rounds,
             verbose=self.config.model.verbose,
             callbacks=[wandb_cb.WandbCallback()],

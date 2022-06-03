@@ -49,7 +49,6 @@ def load_test_dataset(config: DictConfig, num: int = 0) -> pd.DataFrame:
     test = pd.read_pickle(path / f"{config.dataset.test}_{num}.pkl", compression="gzip")
     test_x = test.drop(columns=[config.dataset.drop_features])
     test_x = make_trick(test_x)
-    test_x = reduce_mem_usage(test_x)
 
     logging.info(f"test: {test_x.shape}")
 
@@ -67,6 +66,6 @@ def split_test_dataset(config: DictConfig) -> None:
     test = pd.read_pickle(path / config.dataset.test, compression="gzip")
 
     for i in range(10):
-        test.iloc[i : (i + 1) * 100000].to_pickle(
+        test.iloc[i * 100000 : (i + 1) * 100000].to_pickle(
             path / f"part_test_{i}.pkl", compression="gzip"
         )
