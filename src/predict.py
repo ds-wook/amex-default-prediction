@@ -13,10 +13,10 @@ def _main(cfg: DictConfig):
     path = Path(get_original_cwd()) / cfg.output.path
     submit_path = Path(get_original_cwd()) / cfg.dataset.submit_path
     # model load
-    lgb_results = load_model(cfg.model.lightgbm)
+    result = load_model(cfg.model)
 
     # infer test
-    preds = predict(lgb_results, cfg)
+    preds = predict(result, cfg)
     submit = pd.read_csv(submit_path / cfg.dataset.submit)
     submit["prediction"] = preds
     submit.to_csv(path / cfg.output.name, index=False)

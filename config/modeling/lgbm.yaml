@@ -36,7 +36,7 @@ model:
     boosting_type: dart
     learning_rate: 0.05
     n_estimators: 5000
-    objective: binary
+    objective: cross-entropy
     max_depth: 16
     num_leaves: 128
     colsample_bytree: 0.4241631237880101
@@ -44,7 +44,7 @@ model:
     subsample_freq: 5
     min_child_samples: 5
     max_bin: 449
-  path: res/models/10fold_lightgbm_dart_trick.pkl
+  path: res/models/10fold_lightgbm_dart_cross-entropy_trick.pkl
   search: False
   seed: 42
   verbose: 100

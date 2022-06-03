@@ -174,3 +174,5 @@ def make_trick(df: pd.DataFrame) -> pd.DataFrame:
         gc.collect()
 
     return df
+
+

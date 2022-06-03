@@ -22,10 +22,7 @@ dataset:
   - D_66_last
   - D_68_last
   encoder: res/data/
-model:
-  catboost: res/models/10fold_catboost_models.pkl
-  lightgbm: res/models/10fold_lightgbm_dart_trick.pkl
-  xgboost: res/models/10fold_xgboost_models.pkl
+model: res/models/10fold_lightgbm_dart_trick.pkl
 output:
   path: output
   name: 10fold_lightgbm_dart.csv
