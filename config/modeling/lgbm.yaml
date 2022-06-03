@@ -48,4 +48,4 @@ model:
   name: 10fold_lightgbm_dart_trick_cross_entropy.pkl
   search: False
   seed: 42
-  verbose: 100
+  verbose: 500
