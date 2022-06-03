@@ -8,7 +8,6 @@ from omegaconf import DictConfig
 from models.infer import load_model, predict
 
 
-
 @hydra.main(config_path="../config/", config_name="predict.yaml")
 def _main(cfg: DictConfig):
     path = Path(get_original_cwd()) / cfg.output.path
