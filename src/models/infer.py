@@ -39,14 +39,19 @@ def predict(result: ModelResult, config: DictConfig) -> List[np.ndarray]:
         predict probabilities for each class
     """
     preds_proba = []
+    folds = len(result.models)
 
     for num in range(10):
         test_sample = load_test_dataset(config, num)
-        logging.info("Predicting...")
+        logging.info(f"Test dataset {num} predicting...")
         test_sample = make_trick(test_sample)
+        preds = np.zeros((test_sample.shape[0],))
 
-        for model in tqdm(result.models.values()):
-            preds = model.predict_proba(test_sample)[:, 1]
-            preds_proba += list(preds)
+        for model in tqdm(result.models.values(), total=folds):
+            preds += model.predict_proba(test_sample)[:, 1] / folds
+
+        preds_proba += preds.tolist()
+
+    logging.info(f"preds: {len(preds_proba)}")
 
     return preds_proba

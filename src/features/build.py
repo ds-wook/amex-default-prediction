@@ -1,6 +1,7 @@
 import gc
 import pickle
 from pathlib import Path
+from typing import Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -51,7 +52,9 @@ def create_categorical_test(test: pd.DataFrame, config: DictConfig) -> pd.DataFr
     return test
 
 
-def create_features(df: pd.DataFrame, config: DictConfig) -> pd.DataFrame:
+def create_features(
+    df: pd.DataFrame, config: DictConfig
+) -> Union[pd.DataFrame, Tuple[pd.DataFrame, pd.DataFrame]]:
     """
     Create average features
     Args:
@@ -174,5 +177,3 @@ def make_trick(df: pd.DataFrame) -> pd.DataFrame:
         gc.collect()
 
     return df
-
-
