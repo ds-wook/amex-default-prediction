@@ -22,7 +22,9 @@ dataset:
   - D_66_last
   - D_68_last
   encoder: res/data/
-model: res/models/10fold_lightgbm_dart_trick.pkl
+model:
+  path: res/models/
+  name: 10fold_lightgbm_dart_trick.pkl
 output:
   path: output
-  name: 10fold_lightgbm_dart.csv
+  name: 10fold_lightgbm_dart_trick.csv

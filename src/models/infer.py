@@ -13,7 +13,7 @@ from features.build import make_trick
 from models.base import ModelResult
 
 
-def load_model(model_name: str) -> ModelResult:
+def load_model(config: DictConfig) -> ModelResult:
     """
     Load model
     Args:
@@ -21,7 +21,7 @@ def load_model(model_name: str) -> ModelResult:
     Returns:
         ModelResult object
     """
-    model_path = Path(get_original_cwd()) / model_name
+    model_path = Path(get_original_cwd()) / config.model.path / config.model.name
 
     with open(model_path, "rb") as output:
         model_result = pickle.load(output)

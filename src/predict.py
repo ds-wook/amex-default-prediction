@@ -12,8 +12,9 @@ from models.infer import load_model, predict
 def _main(cfg: DictConfig):
     path = Path(get_original_cwd()) / cfg.output.path
     submit_path = Path(get_original_cwd()) / cfg.dataset.submit_path
+
     # model load
-    result = load_model(cfg.model)
+    result = load_model(cfg)
 
     # infer test
     preds = predict(result, cfg)
