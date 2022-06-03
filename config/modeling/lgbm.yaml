@@ -25,18 +25,18 @@ dataset:
 experiment:
   project: amex-default-prediction
   entity: ds-wook
-  name: lightgbm_dart_test
+  name: lightgbm_dart_6
   tags:
   - LightGBM
 model:
-  fold: 5
+  fold: 10
   params:
     reg_alpha: 5.998770177220496e-05
     reg_lambda: 0.07127674208132959
     boosting_type: dart
     learning_rate: 0.05
-    n_estimators: 2500
-    objective: binary
+    n_estimators: 5000
+    objective: cross_entropy
     max_depth: 16
     num_leaves: 128
     colsample_bytree: 0.4241631237880101
@@ -44,7 +44,8 @@ model:
     subsample_freq: 5
     min_child_samples: 5
     max_bin: 449
-  path: res/models/5fold_lightgbm_dart_test.pkl
+  path: res/models/
+  name: 10fold_lightgbm_dart_trick_cross_entropy.pkl
   search: False
   seed: 42
   verbose: 100

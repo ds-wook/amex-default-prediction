@@ -21,8 +21,8 @@ dataset:
   encoder: res/data/
 model:
   path: res/models/
-  name: 10fold_lightgbm_dart_trick.pkl
+  name: 10fold_lightgbm_dart_trick_cross_entropy.pkl
 output:
   path: output
-  name: 10fold_lightgbm_dart_trick_test.csv
+  name: 10fold_lightgbm_dart_trick_cross_entropy.csv
   submit: sample_submission.csv

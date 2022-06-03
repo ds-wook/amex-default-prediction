@@ -1,4 +1,4 @@
 python src/train_lgbm.py 
-\ model.path=res/models/10fold_lightgbm_dart_trick.pkl
+\ model.name=10fold_lightgbm_dart_trick_cross_entropy.pkl
 
 python src/predict.py

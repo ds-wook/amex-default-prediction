@@ -49,7 +49,9 @@ class BaseModel(metaclass=ABCMeta):
         """
         Save model
         """
-        model_path = Path(get_original_cwd()) / self.config.model.path
+        model_path = (
+            Path(get_original_cwd()) / self.config.model.path / self.config.model.name
+        )
 
         with open(model_path, "wb") as output:
             pickle.dump(self.result, output, pickle.HIGHEST_PROTOCOL)
@@ -90,9 +92,7 @@ class BaseModel(metaclass=ABCMeta):
             )
             models[f"fold_{fold}"] = model
 
-            plot_feature_importances(
-                model, X_train.columns.tolist(), max_num_features=20
-            )
+            plot_feature_importances(model, X_train.columns.tolist())
 
             # validation
             oof_preds[valid_idx] = model.predict_proba(
