@@ -5,7 +5,7 @@ import os
 import random
 import time
 from contextlib import contextmanager
-from typing import Any
+from typing import Any, Iterable
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -45,11 +45,11 @@ def seed_everything(seed: int = 42) -> None:
 
 
 @contextmanager
-def timer(name: Any, logger: logging.getLogger) -> None:
+def timer(name: Any) -> Iterable:
     t0 = time.time()
     logging.debug(f"[{name}] start")
     yield
-    logger.debug(f"[{name}] done in {time.time() - t0:.0f} s")
+    logging.debug(f"[{name}] done in {time.time() - t0:.0f} s")
 
 
 def reduce_mem_usage(df: pd.DataFrame, verbose: bool = True) -> pd.DataFrame:

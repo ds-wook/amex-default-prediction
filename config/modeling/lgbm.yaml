@@ -7,7 +7,7 @@ dataset:
   is_train: true
   target: target
   train: train_agg_f32_credit.pkl
-  test: test_agg_f32_part
+  test: test_agg_f32_part_credit
   drop_features: customer_ID
   cat_features:
   - B_30_last
@@ -46,7 +46,7 @@ model:
     max_bin: 449
   path: res/models/
   name: 10fold_lightgbm_trick_credit.pkl
-  early_stopping_rounds: 100
+  early_stopping_rounds: 200
   search: False
   seed: 42
   verbose: 100
