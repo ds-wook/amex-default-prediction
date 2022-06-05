@@ -49,7 +49,9 @@ class BaseModel(metaclass=ABCMeta):
         """
         Save model
         """
-        model_path = Path(get_original_cwd()) / self.config.model.path
+        model_path = (
+            Path(get_original_cwd()) / self.config.model.path / self.config.model.name
+        )
 
         with open(model_path, "wb") as output:
             pickle.dump(self.result, output, pickle.HIGHEST_PROTOCOL)
@@ -81,6 +83,7 @@ class BaseModel(metaclass=ABCMeta):
                 name=self.config.experiment.name + f"_fold_{fold}",
                 reinit=True,
             )
+            wandb.run.name = self.config.experiment.name + f"_fold_{fold}"
             # model
             model = self._train(
                 X_train,
@@ -90,14 +93,12 @@ class BaseModel(metaclass=ABCMeta):
             )
             models[f"fold_{fold}"] = model
 
-            plot_feature_importances(
-                model, X_train.columns.tolist(), max_num_features=20
-            )
+            plot_feature_importances(model, X_train.columns.tolist())
 
             # validation
-            oof_preds[valid_idx] = model.predict_proba(
-                X_valid, num_iteration=model.best_iteration_
-            )[:, 1]
+            oof_preds[valid_idx] = model.predict_proba(X_valid)[:, 1]
+
+            # score
             score = self.metric(
                 pd.DataFrame({"target": y_valid.to_numpy()}),
                 pd.Series(oof_preds[valid_idx], name="prediction"),
@@ -109,15 +110,18 @@ class BaseModel(metaclass=ABCMeta):
 
             gc.collect()
 
-            del X_train, X_valid, y_train, y_valid
-            # Close run for that fold
-            wandb.join()
+            del X_train, X_valid, y_train, y_valid, model
 
         oof_score = self.metric(
             pd.DataFrame({"target": train_y.to_numpy()}),
             pd.Series(oof_preds, name="prediction"),
         )
         logging.info(f"OOF Score: {oof_score}")
+
+        wandb.log({"OOF Score": oof_score})
+
+        # Close run for that fold
+        wandb.join()
 
         self.result = ModelResult(
             oof_preds=oof_preds,

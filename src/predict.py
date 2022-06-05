@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 import hydra
@@ -7,21 +8,25 @@ from omegaconf import DictConfig
 
 from data.dataset import load_test_dataset
 from models.infer import load_model, predict
-from utils.utils import reduce_mem_usage
 
 
 @hydra.main(config_path="../config/", config_name="predict.yaml")
 def _main(cfg: DictConfig):
-    test_x = load_test_dataset(cfg)
-    test_x = reduce_mem_usage(test_x)
     path = Path(get_original_cwd()) / cfg.output.path
-
     # model load
-    lgb_results = load_model(cfg.model.lightgbm)
+    results = load_model(cfg)
 
     # infer test
-    pred = predict(lgb_results, test_x)
-    submit = pd.DataFrame({"customer_ID": test_x.index, "prediction": pred})
+    preds_proba = []
+
+    for num in range(10):
+        test_sample = load_test_dataset(cfg, num)
+        logging.info(f"Test dataset {num} predicting...")
+        preds = predict(results, test_sample)
+        preds_proba.extend(preds.tolist())
+
+    submit = pd.read_csv(path / cfg.output.submit)
+    submit["prediction"] = preds_proba
     submit.to_csv(path / cfg.output.name, index=False)
 
 

@@ -3,85 +3,49 @@ import numpy as np
 import pandas as pd
 
 # %%
-test = pd.read_pickle(
-    "../input/amex-default-prediction/test_agg.pkl", compression="gzip"
-)
 
-# %%
-test_sample = pd.read_pickle(
-    "../input/amex-agg-data-f32/test_agg_f32_part_1.pkl", compression="gzip"
-)
-# %%
-test_sample
-# %%
-test.iloc[0: 100000].shape
-# %%
-test.iloc[100000: 100000 + 100000]
-# %%
-def make_trick(df: pd.DataFrame) -> pd.DataFrame:
+
+def split_test_dataset(num: int) -> None:
     """
-    Create nan feature
+    Split test dataset
     Args:
-        df: dataframe
-    Returns:
-        dataframe
+        config: config file
     """
+    test = pd.read_pickle(
+        f"../input/amex-agg-data-f32/test_agg_f32_part_{num}.pkl", compression="gzip"
+    )
 
-    for col in df.columns:
-        if df[col].dtype == "float16":
-            df[col] = df[col].astype("float32").round(decimals=2).astype("float16")
+    test_credit = pd.read_csv("../input/amex-default-prediction/test_credit.csv")
 
-    return df
-
-
-def reduce_mem_usage(df: pd.DataFrame, verbose: bool = True) -> pd.DataFrame:
-    numerics = ["int16", "int32", "int64", "float16", "float32", "float64"]
-    start_mem = df.memory_usage().sum() / 1024**2
-
-    for col in df.columns:
-        col_type = df[col].dtypes
-        if col_type in numerics:
-            c_min = df[col].min()
-            c_max = df[col].max()
-
-            if str(col_type)[:3] == "int":
-                if c_min > np.iinfo(np.int8).min and c_max < np.iinfo(np.int8).max:
-                    df[col] = df[col].astype(np.int8)
-                elif c_min > np.iinfo(np.int16).min and c_max < np.iinfo(np.int16).max:
-                    df[col] = df[col].astype(np.int16)
-                elif c_min > np.iinfo(np.int32).min and c_max < np.iinfo(np.int32).max:
-                    df[col] = df[col].astype(np.int32)
-                elif c_min > np.iinfo(np.int64).min and c_max < np.iinfo(np.int64).max:
-                    df[col] = df[col].astype(np.int64)
-            else:
-                if (
-                    c_min > np.finfo(np.float16).min
-                    and c_max < np.finfo(np.float16).max
-                ):
-                    df[col] = df[col].astype(np.float16)
-                elif (
-                    c_min > np.finfo(np.float32).min
-                    and c_max < np.finfo(np.float32).max
-                ):
-                    df[col] = df[col].astype(np.float32)
-                else:
-                    df[col] = df[col].astype(np.float64)
-
-    end_mem = df.memory_usage().sum() / 1024**2
-
-    if verbose:
-        print(
-            "Mem. usage decreased to {:5.2f} Mb ({:.1f}% reduction)".format(
-                end_mem, 100 * (start_mem - end_mem) / start_mem
-            )
-        )
-    return df
+    test_credit_sample = test_credit.iloc[num : (num + 1) * 100000]
+    test["CS"] = test_credit_sample["CS"]
+    test.to_pickle(
+        f"../input/amex-agg-data-f32/test_agg_f32_part_credit_{num}.pkl",
+        compression="gzip",
+    )
 
 
 # %%
-train = make_trick(train)
-train = reduce_mem_usage(train)
+for num in range(10):
+    split_test_dataset(num)
+# %%
+train = pd.read_pickle(
+    "../input/amex-agg-data-f32/train_agg_f32.pkl", compression="gzip"
+)
 
 # %%
-train["P_2_mean"].head()
+train_credit = pd.read_csv("../input/amex-default-prediction/train_credit.csv")
+
+# %%
+train
+# %%
+train_credit
+# %%
+train["CS"] = train_credit["CS"].copy()
+# %%
+train.to_pickle(
+    "../input/amex-agg-data-f32/train_agg_f32_credit.pkl",
+    compression="gzip",
+)
+
 # %%

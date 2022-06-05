@@ -15,3 +15,4 @@ scikit-learn==1.1.1
 seaborn==0.11.2
 tqdm==4.64.0
 wandb==0.12.17
+xgboost==1.6.1

@@ -1,19 +1,16 @@
-import logging
 import pickle
 from pathlib import Path
-from typing import List
 
 import numpy as np
+import pandas as pd
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 from tqdm import tqdm
 
-from data.dataset import load_test_dataset
-from features.build import make_trick
 from models.base import ModelResult
 
 
-def load_model(model_name: str) -> ModelResult:
+def load_model(config: DictConfig) -> ModelResult:
     """
     Load model
     Args:
@@ -21,7 +18,7 @@ def load_model(model_name: str) -> ModelResult:
     Returns:
         ModelResult object
     """
-    model_path = Path(get_original_cwd()) / model_name
+    model_path = Path(get_original_cwd()) / config.model.path / config.model.name
 
     with open(model_path, "rb") as output:
         model_result = pickle.load(output)
@@ -29,7 +26,7 @@ def load_model(model_name: str) -> ModelResult:
     return model_result
 
 
-def predict(result: ModelResult, config: DictConfig) -> List[np.ndarray]:
+def predict(result: ModelResult, test_x: pd.DataFrame) -> np.ndarray:
     """
     Given a model, predict probabilities for each class.
     Args:
@@ -38,15 +35,13 @@ def predict(result: ModelResult, config: DictConfig) -> List[np.ndarray]:
     Returns:
         predict probabilities for each class
     """
-    preds_proba = []
 
-    for num in tqdm(range(10)):
-        test_sample = load_test_dataset(config, num)
-        logging.info(f"Predicting...{test_sample.shape}")
-        test_sample = make_trick(test_sample)
+    folds = len(result.models)
+    preds_proba = np.zeros((test_x.shape[0],))
 
-        for model in result.models.values():
-            preds = model.predict_proba(test_sample)[:, 1]
-            preds_proba += list(preds)
+    for model in tqdm(result.models.values(), total=folds):
+        preds_proba += model.predict_proba(test_x)[:, 1] / folds
+
+    assert len(preds_proba) == len(test_x)
 
     return preds_proba
