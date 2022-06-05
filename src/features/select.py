@@ -34,7 +34,6 @@ def select_features(config: DictConfig) -> List[str]:
 
     importance_df = importance_df.sort_values("shap_importance", ascending=False)
     importance_df = importance_df.query("shap_importance != 0")
-    importance_df.to_csv("importance_df.csv", index=False)
     boosting_shap_col = importance_df.column_name.values.tolist()
     logging.info(f"Select {len(boosting_shap_col)} of {len(test_x.columns)}")
 

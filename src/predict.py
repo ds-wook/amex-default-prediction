@@ -21,6 +21,7 @@ def _main(cfg: DictConfig):
 
     for num in range(10):
         test_sample = load_test_dataset(cfg, num)
+        test_sample = test_sample[cfg.dataset.select_features]
         logging.info(f"Test dataset {num} predicting...")
         preds = predict(results, test_sample)
         preds_proba.extend(preds.tolist())
