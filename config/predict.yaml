@@ -4,7 +4,7 @@ hydra:
   output_subdir: null
 dataset:
   path: input/amex-agg-data-f32/
-  test: test_agg_f32_part
+  test: test_agg_f32_credit
   drop_features: customer_ID
   cat_features:
   - B_30_last
@@ -21,8 +21,8 @@ dataset:
   encoder: res/data/
 model:
   path: res/models/
-  name: 10fold_lightgbm_dart_trick_cross_entropy.pkl
+  name: 10fold_lightgbm_dart_trick_credit.pkl
 output:
   path: output
-  name: 10fold_lightgbm_dart_trick_cross_entropy.csv
+  name: 10fold_lightgbm_dart_trick_credit.csv
   submit: sample_submission.csv

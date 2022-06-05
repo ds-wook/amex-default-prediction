@@ -6,8 +6,8 @@ dataset:
   path: input/amex-agg-data-f32/
   is_train: true
   target: target
-  train: train_agg_f32.pkl
-  test: test_agg_f32_part
+  train: train_agg_f32_credit.pkl
+  test: test_agg_f32_credit
   drop_features: customer_ID
   cat_features:
   - B_30_last
@@ -25,7 +25,7 @@ dataset:
 experiment:
   project: amex-default-prediction
   entity: ds-wook
-  name: lightgbm_dart_6
+  name: lightgbm_dart_7
   tags:
   - LightGBM
 model:
@@ -35,8 +35,8 @@ model:
     reg_lambda: 0.07127674208132959
     boosting_type: dart
     learning_rate: 0.05
-    n_estimators: 2500
-    objective: cross_entropy
+    n_estimators: 2000
+    objective: binary
     max_depth: 16
     num_leaves: 128
     colsample_bytree: 0.4241631237880101
@@ -45,7 +45,7 @@ model:
     min_child_samples: 5
     max_bin: 449
   path: res/models/
-  name: 10fold_lightgbm_dart_trick_cross_entropy.pkl
+  name: 10fold_lightgbm_dart_trick_credit.pkl
   search: False
   seed: 42
   verbose: 500
