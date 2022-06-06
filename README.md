@@ -9,6 +9,7 @@ The model is based on [XGBoost](https://xgboost.readthedocs.io/en/latest/), [Lig
 |Model|CV|Public LB|
 |-----|--|------|
 |LightGBM(10-stratified kfold - gbdt)|0.789|0.791|
+|TabNet(10-stratified kfold)|0.788|0.790|
 |CatBoost(10-stratified categorical kfold)|0.789|0.793|
 |CatBoost(10-stratified categorical kfold)-trick|0.7927|0.793|
 |LightGBM(10-stratified categorical kfold - gbdt)|0.790|0.792|

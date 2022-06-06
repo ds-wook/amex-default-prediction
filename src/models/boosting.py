@@ -5,7 +5,7 @@ import wandb.catboost as wandb_cb
 import wandb.lightgbm as wandb_lgb
 
 from catboost import CatBoostClassifier, Pool
-from lightgbm import LGBMClassifier
+from lightgbm import LGBMClassifier, LGBMRegressor
 
 from evaluation.evaluate import lgb_amex_metric, CatBoostEvalMetricAmex
 from models.base import BaseModel
@@ -28,8 +28,14 @@ class LightGBMTrainer(BaseModel):
         load train model
         """
 
-        model = LGBMClassifier(
-            random_state=self.config.model.seed, **self.config.model.params
+        model = (
+            LGBMClassifier(
+                random_state=self.config.model.seed, **self.config.model.params
+            )
+            if self.config.model.type == "classifier"
+            else LGBMRegressor(
+                random_state=self.config.model.seed, **self.config.model.params
+            )
         )
 
         if self.config.model.params.boosting_type == "dart":
