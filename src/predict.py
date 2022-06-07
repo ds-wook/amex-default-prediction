@@ -7,6 +7,7 @@ from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 
 from data.dataset import load_test_dataset
+from features.build import create_categorical_test
 from models.infer import load_model, predict
 
 
@@ -21,6 +22,7 @@ def _main(cfg: DictConfig):
 
     for num in range(10):
         test_sample = load_test_dataset(cfg, num)
+        test_sample = create_categorical_test(test_sample, cfg)
         logging.info(f"Test dataset {num} predicting...")
         preds = predict(results, test_sample)
         preds_proba.extend(preds.tolist())

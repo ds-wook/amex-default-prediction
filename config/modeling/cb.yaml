@@ -53,6 +53,7 @@ experiment:
 model:
   fold: 10
   params:
+    boosting_type: Ordered
     learning_rate: 0.03
     l2_leaf_reg: 0.3753065117824262
     max_depth: 8

@@ -11,6 +11,7 @@ from models.boosting import CatBoostTrainer
 def _main(cfg: DictConfig):
     train_x, train_y = load_train_dataset(cfg)
     train_x = create_categorical_train(train_x, cfg)
+
     cb_trainer = CatBoostTrainer(config=cfg, metric=amex_metric)
     cb_trainer.train(train_x, train_y)
     cb_trainer.save_model()
