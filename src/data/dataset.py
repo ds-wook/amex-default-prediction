@@ -3,6 +3,7 @@ import warnings
 from pathlib import Path
 from typing import Tuple
 
+import numpy as np
 import pandas as pd
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
@@ -55,17 +56,15 @@ def load_test_dataset(config: DictConfig, num: int = 0) -> pd.DataFrame:
     return test_x
 
 
-def split_test_dataset(config: DictConfig) -> None:
+# https://stackoverflow.com/questions/2130016/splitting-a-list-into-n-parts-of-approximately-equal-length
+def split(a: np.ndarray, n: int) -> Tuple[np.ndarray]:
     """
-    Split test dataset
+    Split array into n parts
     Args:
-        config: config file
+        a: array
+        n: number of parts
+    Returns:
+        array of tuple
     """
-    path = Path(get_original_cwd()) / config.dataset.path
-    logging.info("Loading test dataset...")
-    test = pd.read_pickle(path / config.dataset.test, compression="gzip")
-
-    for i in range(10):
-        test.iloc[i * 100000 : (i + 1) * 100000].to_pickle(
-            path / f"part_test_{i}.pkl", compression="gzip"
-        )
+    k, m = divmod(len(a), n)
+    return (a[i * k + min(i, m) : (i + 1) * k + min(i + 1, m)] for i in range(n))

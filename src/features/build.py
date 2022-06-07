@@ -121,43 +121,41 @@ def create_features(
     return df
 
 
-def add_features(df: pd.DataFrame, config: DictConfig) -> pd.DataFrame:
-    """
-    Add features
+def build_features(df: pd.DataFrame) -> pd.DataFrame:
+    # FEATURE ENGINEERING FROM
+    # https://www.kaggle.com/code/huseyincot/amex-agg-data-how-it-created
 
-    Args:
-        df: Dataset
-        config: config file
-    Return:
-       feature engineered Dataset
-    """
-    df_num_agg = df.groupby("customer_ID")[config.dataset.num_features].agg(
+    all_cols = [c for c in list(df.columns) if c not in ["customer_ID", "S_2"]]
+    cat_features = [
+        "B_30",
+        "B_38",
+        "D_114",
+        "D_116",
+        "D_117",
+        "D_120",
+        "D_126",
+        "D_63",
+        "D_64",
+        "D_66",
+        "D_68",
+    ]
+    num_features = [col for col in all_cols if col not in cat_features]
+
+    df_num_agg = df.groupby("customer_ID")[num_features].agg(
         ["mean", "std", "min", "max", "last"]
     )
-    gc.collect()
-
     df_num_agg.columns = ["_".join(x) for x in df_num_agg.columns]
 
-    df_cat_agg = df.groupby("customer_ID")[config.dataset.cat_features].agg(
-        ["count", "last", "nunique"]
+    df_cat_agg = df.groupby("customer_ID")[cat_features].agg(
+        ["last", "nunique", "count"]
     )
-    gc.collect()
-
     df_cat_agg.columns = ["_".join(x) for x in df_cat_agg.columns]
 
-    if config.dataset.is_train:
-        df_target = (
-            df.groupby("customer_ID")
-            .tail(1)
-            .set_index("customer_ID", drop=True)
-            .sort_index()["target"]
-        )
-        gc.collect()
-        df = pd.concat([df_num_agg, df_cat_agg, df_target], axis=1)
-        del df_num_agg, df_cat_agg, df_target
-    else:
-        df = pd.concat([df_num_agg, df_cat_agg], axis=1)
-        del df_num_agg, df_cat_agg
+    df = pd.concat([df_num_agg, df_cat_agg], axis=1)
+    del df_num_agg, df_cat_agg
+    gc.collect()
+
+    print("shape after engineering", df.shape)
 
     return df
 

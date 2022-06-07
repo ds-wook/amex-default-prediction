@@ -14,7 +14,6 @@ def _main(cfg: DictConfig):
     train_x, train_y = load_train_dataset(cfg)
     train_x = reduce_mem_usage(train_x)
     test_x = load_test_dataset(cfg)
-    test_x = reduce_mem_usage(test_x)
 
     # calculate shap values
     features = select_features(train_x, train_y, test_x)

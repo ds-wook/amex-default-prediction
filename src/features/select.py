@@ -22,8 +22,8 @@ def select_features(
     importance_df.columns = ["column_name", "shap_importance"]
 
     importance_df = importance_df.sort_values("shap_importance", ascending=False)
-    importance_df = importance_df.query("shap_importance == 0")
+    importance_df = importance_df.query("shap_importance != 0")
     boosting_shap_col = importance_df.column_name.values.tolist()
-    logging.info(f"Delete {len(boosting_shap_col)} of {len(train.columns)}")
+    logging.info(f"Select {len(boosting_shap_col)} of {len(train.columns)}")
 
     return boosting_shap_col

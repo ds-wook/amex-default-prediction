@@ -3,11 +3,12 @@ hydra:
     dir: log/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
   output_subdir: null
 dataset:
-  path: input/amex-default-prediction/
+  path: input/amex-agg-data-f32/
   is_train: true
   target: target
-  train: train_agg.pkl
-  test: test_agg.pkl
+  train: train_agg_f32.pkl
+  test: test_agg_f32_part
+  drop_features: customer_ID
   cat_features:
   - B_30_last
   - B_38_last
@@ -20,6 +21,29 @@ dataset:
   - D_64_last
   - D_66_last
   - D_68_last
+  - B_30_nunique
+  - B_38_nunique
+  - D_114_nunique
+  - D_116_nunique
+  - D_117_nunique
+  - D_120_nunique
+  - D_126_nunique
+  - D_63_nunique
+  - D_64_nunique
+  - D_66_nunique
+  - D_68_nunique
+  - B_30_count
+  - B_38_count
+  - D_114_count
+  - D_116_count
+  - D_117_count
+  - D_120_count
+  - D_126_count
+  - D_63_count
+  - D_64_count
+  - D_66_count
+  - D_68_count
+  encoder: res/data/
 experiment:
   project: amex-default-prediction
   entity: ds-wook
@@ -27,15 +51,22 @@ experiment:
   tags:
   - CatBoost
 model:
-  fold: 5
+  fold: 10
   params:
-    learning_rate: 0.05
-    eval_metric: Logloss
-    loss_function: Logloss
+    learning_rate: 0.03
+    l2_leaf_reg: 0.3753065117824262
+    max_depth: 8
+    bagging_temperature: 1
+    min_data_in_leaf: 57
+    max_bin: 494
+    objective: Logloss
+    od_type: Iter
+    od_wait: 500
     iterations: 10000
-    one_hot_max_size: 4
-    used_ram_limit: 4gb
-  path: res/models/5fold_catboost.pkl
+    one_hot_max_size: 2
+  path: res/models/
+  name: 10fold_catboost_trick.pkl
+  early_stopping_rounds: 100
   search: False
   seed: 42
   verbose: 100

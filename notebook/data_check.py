@@ -29,3 +29,7 @@ train.to_pickle(
 # %%
 test_sample.shape
 # %%
+test = pd.read_feather("../input/amex-default-prediction/test_data.ftr")
+
+cid = test.pop("customer_ID")
+test["customer_ID"] = cid.str[-16:].apply(lambda x: int(x, 16))

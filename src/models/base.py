@@ -13,7 +13,7 @@ import wandb
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 from sklearn.model_selection import StratifiedKFold
-from wandb.sklearn import plot_feature_importances
+from wandb.sklearn import plot_classifier, plot_feature_importances
 
 warnings.filterwarnings("ignore")
 
@@ -83,6 +83,7 @@ class BaseModel(metaclass=ABCMeta):
                 name=self.config.experiment.name + f"_fold_{fold}",
                 reinit=True,
             )
+            wandb.run.name = self.config.experiment.name + f"_fold_{fold}"
             # model
             model = self._train(
                 X_train,
@@ -92,16 +93,16 @@ class BaseModel(metaclass=ABCMeta):
             )
             models[f"fold_{fold}"] = model
 
-            plot_feature_importances(model, X_train.columns.tolist())
-
             # validation
-            oof_preds[valid_idx] = model.predict_proba(
-                X_valid, num_iteration=model.best_iteration_
-            )[:, 1]
-            score = self.metric(
-                pd.DataFrame({"target": y_valid.to_numpy()}),
-                pd.Series(oof_preds[valid_idx], name="prediction"),
+            oof_preds[valid_idx] = (
+                model.predict_proba(X_valid)[:, 1]
+                if self.config.model.type == "classifier"
+                else model.predit(X_valid)
             )
+
+            # score
+            score = self.metric(y_valid.to_numpy(), oof_preds[valid_idx])
+
             scores[f"fold_{fold}"] = score
 
             if not self.search:
@@ -109,12 +110,23 @@ class BaseModel(metaclass=ABCMeta):
 
             gc.collect()
 
-            del X_train, X_valid, y_train, y_valid
+            plot_feature_importances(model, X_train.columns.tolist())
+            plot_classifier(
+                model,
+                X_train,
+                X_valid,
+                y_train,
+                y_valid,
+                np.where(oof_preds[valid_idx] > 0.5, 1, 0),
+                oof_preds[valid_idx],
+                labels=[0, 1],
+                is_binary=True,
+                model_name=self.config.experiment.tags,
+            )
+            del X_train, X_valid, y_train, y_valid, model
 
-        oof_score = self.metric(
-            pd.DataFrame({"target": train_y.to_numpy()}),
-            pd.Series(oof_preds, name="prediction"),
-        )
+        oof_score = self.metric(train_y.to_numpy(), oof_preds)
+
         logging.info(f"OOF Score: {oof_score}")
 
         wandb.log({"OOF Score": oof_score})
