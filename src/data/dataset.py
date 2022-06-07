@@ -2,7 +2,6 @@ import logging
 import warnings
 from pathlib import Path
 from typing import Tuple
-
 import numpy as np
 import pandas as pd
 from hydra.utils import get_original_cwd
@@ -54,6 +53,22 @@ def load_test_dataset(config: DictConfig, num: int = 0) -> pd.DataFrame:
     logging.info(f"test: {test_x.shape}")
 
     return test_x
+
+
+def split_test_dataset(config: DictConfig) -> None:
+    """
+    Split test dataset
+    Args:
+        config: config file
+    """
+    path = Path(get_original_cwd()) / config.dataset.path
+    logging.info("Loading test dataset...")
+    test = pd.read_pickle(path / config.dataset.test, compression="gzip")
+
+    for i in range(10):
+        test.iloc[i * 100000 : (i + 1) * 100000].to_pickle(
+            path / f"part_test_{i}.pkl", compression="gzip"
+        )
 
 
 # https://stackoverflow.com/questions/2130016/splitting-a-list-into-n-parts-of-approximately-equal-length

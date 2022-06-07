@@ -7,12 +7,12 @@ This repository is the code that placed ?th [American Express - Default Predicti
 |-----|--|------|
 |XGBoost(10-KFold - gbdt)|0.792|0.793|
 |LightGBM(10-stratified kfold - gbdt)|0.789|0.791|
-|CatBoost(10-stratified categorical kfold)|0.789|0.793|
-|CatBoost(10-stratified categorical kfold)-trick|0.7927|0.793|
-|LightGBM(10-stratified categorical kfold - gbdt)|0.790|0.792|
-|LightGBM(5-stratified categorical kfold - dart)|0.7921|0.794|
-|LightGBM(10-stratified categorical kfold - dart)|0.7926|0.795|
-|**LightGBM(10-stratified categorical kfold - dart)-trick**|**0.7931**|**0.796**|
+|CatBoost(10-stratified kfold)|0.789|0.793|
+|CatBoost(10-stratified kfold) - trick|0.7927|0.793|
+|CatBoost(10-stratified categorical kfold) - trick|0.7927|0.793|
+|LightGBM(10-stratified kfold - gbdt)|0.790|0.792|
+|LightGBM(10-stratified kfold - dart)|0.7926|0.795|
+|**LightGBM(10-stratified kfold - dart) - trick**|**0.7931**|**0.796**|
 ### Project Organization
 ```
 ├── LICENSE
