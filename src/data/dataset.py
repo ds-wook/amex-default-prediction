@@ -2,6 +2,7 @@ import logging
 import warnings
 from pathlib import Path
 from typing import Tuple
+
 import numpy as np
 import pandas as pd
 from hydra.utils import get_original_cwd
@@ -26,9 +27,8 @@ def load_train_dataset(config: DictConfig) -> Tuple[pd.DataFrame, pd.Series]:
     logging.info("Loading train dataset...")
 
     train = pd.read_pickle(path / config.dataset.train, compression="gzip")
-    train_x = train.drop(columns=[config.dataset.drop_features, config.dataset.target])
     train_y = train[config.dataset.target]
-
+    train_x = train.drop(columns=[config.dataset.drop_features, config.dataset.target])
     train_x = make_trick(train_x)
     train_x = reduce_mem_usage(train_x)
     logging.info(f"train: {train_x.shape}, target: {train_y.shape}")
@@ -47,27 +47,22 @@ def load_test_dataset(config: DictConfig, num: int = 0) -> pd.DataFrame:
     path = Path(get_original_cwd()) / config.dataset.path
     logging.info("Loading test dataset...")
     test = pd.read_pickle(path / f"{config.dataset.test}_{num}.pkl", compression="gzip")
-    test_x = test.drop(columns=[config.dataset.drop_features])
-    test_x = make_trick(test_x)
+    test_x = make_trick(test)
 
     logging.info(f"test: {test_x.shape}")
 
     return test_x
 
 
-def split_test_dataset(config: DictConfig) -> None:
+def split_test_dataset(test: pd.DataFrame, path: str) -> None:
     """
     Split test dataset
     Args:
         config: config file
     """
-    path = Path(get_original_cwd()) / config.dataset.path
-    logging.info("Loading test dataset...")
-    test = pd.read_pickle(path / config.dataset.test, compression="gzip")
-
     for i in range(10):
         test.iloc[i * 100000 : (i + 1) * 100000].to_pickle(
-            path / f"part_test_{i}.pkl", compression="gzip"
+            path + f"test_pay_features_part_{i}.pkl", compression="gzip"
         )
 
 

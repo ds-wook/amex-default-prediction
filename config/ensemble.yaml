@@ -7,10 +7,10 @@ hydra:
 output:
   name: output
   nn_preds: 5fold_nn_preds.csv
-  lgbm_preds: 10fold_lightgbm_dart_trick_cross_entropy.csv
+  lgbm_preds: 10fold_lightgbm_trick_selected.csv
   cb_preds: 10fold_catboost_preds_trick.csv
-  xgb_preds: 5fold_xgboost_preds.csv
-  gru_preds: 5fold_gru_preds.csv
+  xgb_preds: 5fold_xgboost_version2.csv
+  tabnet_preds: 10fold_tabnet_preds.csv
   ensemble_preds: ensemble_preds.csv
   lb_preds: lb_best_ensemble.csv
   preds: lb_blend_preds.csv

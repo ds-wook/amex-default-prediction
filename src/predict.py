@@ -23,6 +23,7 @@ def _main(cfg: DictConfig):
     for num in range(10):
         test_sample = load_test_dataset(cfg, num)
         test_sample = create_categorical_test(test_sample, cfg)
+        test_sample = test_sample[cfg.dataset.selected_features]
         logging.info(f"Test dataset {num} predicting...")
         preds = predict(results, test_sample)
         preds_proba.extend(preds.tolist())

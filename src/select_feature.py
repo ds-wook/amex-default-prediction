@@ -12,7 +12,6 @@ from utils.utils import reduce_mem_usage
 def _main(cfg: DictConfig):
     # load train test dataset
     train_x, train_y = load_train_dataset(cfg)
-    train_x = reduce_mem_usage(train_x)
     test_x = load_test_dataset(cfg)
 
     # calculate shap values

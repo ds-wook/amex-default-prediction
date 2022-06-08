@@ -1,9 +1,7 @@
 import gc
 import pickle
 from pathlib import Path
-from typing import Tuple, Union
 
-import numpy as np
 import pandas as pd
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
@@ -50,75 +48,6 @@ def create_categorical_test(test: pd.DataFrame, config: DictConfig) -> pd.DataFr
         gc.collect()
 
     return test
-
-
-def create_features(
-    df: pd.DataFrame, config: DictConfig
-) -> Union[pd.DataFrame, Tuple[pd.DataFrame, pd.DataFrame]]:
-    """
-    Create average features
-    Args:
-        df: dataframe
-        config: config file
-    Returns:
-        dataframe
-    """
-    cid = pd.Categorical(df.pop("customer_ID"), ordered=True)
-    last = cid != np.roll(cid, -1)  # mask for last statement of every customer
-
-    if config.dataset.is_train:
-        target = df.loc[last, config.dataset.target]
-        gc.collect()
-
-    df_avg = (
-        df[config.dataset.features_avg]
-        .groupby(cid)
-        .mean()
-        .rename(columns={f: f"{f}_avg" for f in config.dataset.features_avg})
-    )
-    gc.collect()
-
-    df_max = (
-        df.groupby(cid)
-        .max()[config.dataset.features_max]
-        .rename(columns={f: f"{f}_max" for f in config.dataset.features_max})
-    )
-    gc.collect()
-
-    df_min = (
-        df.groupby(cid)
-        .min()[config.dataset.features_min]
-        .rename(columns={f: f"{f}_min" for f in config.dataset.features_min})
-    )
-    gc.collect()
-
-    df_last = (
-        df.loc[last, config.dataset.features_last]
-        .rename(columns={f: f"{f}_last" for f in config.dataset.features_last})
-        .set_index(np.asarray(cid[last]))
-    )
-    gc.collect()
-
-    df_categorical = df_last[config.dataset.features_categorical].astype(object)
-    features_not_cat = [
-        f for f in df_last.columns if f not in config.dataset.features_categorical
-    ]
-
-    df_categorical = (
-        create_categorical_train(df_categorical, config)
-        if config.dataset.is_train
-        else create_categorical_test(df_categorical, config)
-    )
-
-    df = pd.concat(
-        [df_last[features_not_cat], df_categorical, df_avg, df_min, df_max], axis=1
-    )
-    del df_avg, df_max, df_min, df_last, df_categorical, cid, last, features_not_cat
-
-    if config.dataset.is_train:
-        return df, target
-
-    return df
 
 
 def build_features(df: pd.DataFrame) -> pd.DataFrame:
@@ -170,8 +99,34 @@ def make_trick(df: pd.DataFrame) -> pd.DataFrame:
     """
 
     for col in df.columns:
-        if df[col].dtype == "float16":
-            df[col] = df[col].astype("float32").round(decimals=2).astype("float16")
+        if "float" in df[col].dtype.name:
+            df[col] = df[col].round(decimals=2)
         gc.collect()
 
     return df
+
+
+def add_after_pay_features(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add features that are only available after payment.
+    Args:
+        df: DataFrame with customer_ID as index.
+    Returns:
+        DataFrame with customer_ID as index and additional features.
+    """
+    df = df.copy()
+    before_cols = ["B_11", "B_14", "B_17", "D_39", "D_131", "S_16", "S_23"]
+    after_cols = ["P_2", "P_3"]
+
+    # after pay features
+    after_pay_features = []
+    for b_col in before_cols:
+        for a_col in after_cols:
+            if b_col in df.columns:
+                df[f"{b_col}-{a_col}"] = df[b_col] - df[a_col]
+                after_pay_features.append(f"{b_col}_{a_col}")
+
+    df_after_agg = df.groupby("customer_ID")[after_pay_features].agg(["mean", "std"])
+    df_after_agg.columns = ["_".join(x) for x in df_after_agg.columns]
+
+    return df_after_agg
