@@ -1,6 +1,7 @@
 from typing import Tuple
 
 import numpy as np
+from xgboost import DMatrix
 
 
 class CatBoostEvalMetricAmex:
@@ -43,3 +44,9 @@ def amex_metric(y_true: np.array, y_pred: np.array) -> float:
 def lgb_amex_metric(y_true: np.ndarray, y_pred: np.ndarray) -> Tuple[str, float, bool]:
     """The competition metric with lightgbm's calling convention"""
     return "amex", amex_metric(y_true, y_pred), True
+
+
+def xgb_amex_metric(y_pred: np.ndarray, dtrain: DMatrix) -> Tuple[str, float]:
+    """The competition metric with xgboost's calling convention"""
+    y_true = dtrain.get_label()
+    return "amex", amex_metric(y_true, y_pred)

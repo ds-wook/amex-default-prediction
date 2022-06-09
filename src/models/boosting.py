@@ -3,11 +3,12 @@ import warnings
 import pandas as pd
 import wandb.catboost as wandb_cb
 import wandb.lightgbm as wandb_lgb
-
+import wandb.xgboost as wandb_xgb
 from catboost import CatBoostClassifier, Pool
-from lightgbm import LGBMClassifier, LGBMRegressor
+from lightgbm import LGBMClassifier
+from xgboost import XGBClassifier
 
-from evaluation.evaluate import lgb_amex_metric, CatBoostEvalMetricAmex
+from evaluation.evaluate import CatBoostEvalMetricAmex, lgb_amex_metric, xgb_amex_metric
 from models.base import BaseModel
 
 warnings.filterwarnings("ignore")
@@ -28,14 +29,8 @@ class LightGBMTrainer(BaseModel):
         load train model
         """
 
-        model = (
-            LGBMClassifier(
-                random_state=self.config.model.seed, **self.config.model.params
-            )
-            if self.config.model.type == "classifier"
-            else LGBMRegressor(
-                random_state=self.config.model.seed, **self.config.model.params
-            )
+        model = LGBMClassifier(
+            random_state=self.config.model.seed, **self.config.model.params
         )
 
         if self.config.model.params.boosting_type == "dart":
@@ -95,6 +90,38 @@ class CatBoostTrainer(BaseModel):
             early_stopping_rounds=self.config.model.early_stopping_rounds,
             verbose=self.config.model.verbose,
             callbacks=[wandb_cb.WandbCallback()],
+        )
+
+        return model
+
+
+class XGBoostTrainer(BaseModel):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def _train(
+        self,
+        X_train: pd.DataFrame,
+        y_train: pd.Series,
+        X_valid: pd.DataFrame,
+        y_valid: pd.Series,
+    ) -> XGBClassifier:
+        """
+        load train model
+        """
+
+        model = XGBClassifier(
+            random_state=self.config.model.seed, **self.config.model.params
+        )
+
+        model.fit(
+            X_train,
+            y_train,
+            eval_metric=xgb_amex_metric,
+            eval_set=[(X_train, y_train), (X_valid, y_valid)],
+            early_stopping_rounds=self.config.model.early_stopping_rounds,
+            verbose=self.config.model.verbose,
+            callbacks=[wandb_xgb.wandb_callback()],
         )
 
         return model

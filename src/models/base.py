@@ -94,34 +94,25 @@ class BaseModel(metaclass=ABCMeta):
             models[f"fold_{fold}"] = model
 
             # validation
-            oof_preds[valid_idx] = (
-                model.predict_proba(X_valid, raw_score=True)[:, 1]
-                if self.config.model.type == "classifier"
-                else model.predit(X_valid)
-            )
+            oof_preds[valid_idx] = model.predict_proba(X_valid)[:, 1]
 
             # score
             score = self.metric(y_valid.to_numpy(), oof_preds[valid_idx])
 
             scores[f"fold_{fold}"] = score
 
-            if not self.search:
-                logging.info(f"Fold {fold}: {score}")
-
-            gc.collect()
+            logging.info(f"Fold {fold}: {score}")
 
             plot_feature_importances(model, X_train.columns.tolist())
+
+            # Close run for that fold
+            wandb.finish()
 
             del X_train, X_valid, y_train, y_valid, model
 
         oof_score = self.metric(train_y.to_numpy(), oof_preds)
 
         logging.info(f"OOF Score: {oof_score}")
-
-        wandb.log({"OOF Score": oof_score})
-
-        # Close run for that fold
-        wandb.finish()
 
         self.result = ModelResult(
             oof_preds=oof_preds,
