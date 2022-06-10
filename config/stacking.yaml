@@ -6,7 +6,7 @@ hydra:
     chdir: True
 dataset:
   path: input/amex-default-prediction
-  train: train_labels.csv
+  train_label: train_labels.csv
   drop_features: customer_ID
   target: target
 input:
@@ -20,10 +20,10 @@ output:
   train: lightgbm_meta.csv
   test: lightgbm_preds.csv
   name: stacking_preds.csv
-  pred1: 10fold_lightgbm_dart.csv
-  pred2: 10fold_lightgbm_trick_selected.csv
-  pred3: 10fold_lightgbm_pay_features.csv
-  pred4: 10fold_lightgbm_pay_features_te.csv
+  preds1: 10fold_lightgbm_dart.csv
+  preds2: 10fold_lightgbm_trick_selected.csv
+  preds3: 10fold_lightgbm_pay_features.csv
+  preds4: 10fold_lightgbm_pay_features_te.csv
 experiment:
   project: amex-default-prediction
   entity: ds-wook

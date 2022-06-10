@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import List
 
 import numpy as np
 import pandas as pd
@@ -11,8 +10,8 @@ class StackingDataLoder:
     def __init__(
         self,
         config: DictConfig,
-        train_data: List[np.ndarray],
-        test_data: List[np.ndarray],
+        train_data: np.ndarray,
+        test_data: np.ndarray,
     ) -> None:
         self.config = config
         self.train_data = train_data
@@ -23,14 +22,15 @@ class StackingDataLoder:
         train_label = pd.read_csv(path / self.config.dataset.train_label)
         train_data = pd.DataFrame(
             self.train_data,
-            columns=[f"oof_preds_{i}" for i in range(len(self.train_data))],
+            columns=[f"oof_preds_{i + 1}" for i in range(self.train_data.shape[1])],
         )
-        train = pd.concat([train_data, train_label], axis=1)
+        train = pd.concat([train_label, train_data], axis=1)
 
         return train
 
     def make_test_dataset(self):
         test = pd.DataFrame(
-            self.test_data, columns=[f"preds_{i}" for i in range(len(self.test_data))]
+            self.test_data,
+            columns=[f"preds_{i + 1}" for i in range(self.test_data.shape[1])],
         )
         return test
