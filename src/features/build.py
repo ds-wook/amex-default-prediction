@@ -3,10 +3,47 @@ import pickle
 from pathlib import Path
 
 import pandas as pd
+from category_encoders.target_encoder import TargetEncoder
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 from sklearn.preprocessing import LabelEncoder
 from tqdm import tqdm
+
+
+def create_target_encoder_train(
+    train_x: pd.DataFrame, train_y: pd.Series, config: DictConfig
+) -> pd.DataFrame:
+    """
+    Target encoding
+    Args:
+        df: dataframe
+        cat_col: list of categorical columns
+    Returns:
+        dataframe
+    """
+    path = Path(get_original_cwd()) / config.dataset.encoder
+    te_encoder = TargetEncoder(config.dataset.cat_features)
+    train_x = te_encoder.fit_transform(train_x, train_y)
+
+    with open(path / "target_encoder.pkl", "wb") as f:
+        pickle.dump(te_encoder, f)
+
+    return train_x
+
+
+def create_target_encoder_test(test: pd.DataFrame, config: DictConfig) -> pd.DataFrame:
+    """
+    Target encoding
+    Args:
+        df: dataframe
+        cat_col: list of categorical columns
+    Returns:
+        dataframe
+    """
+    path = Path(get_original_cwd()) / config.dataset.encoder
+    te_encoder = pickle.load(open(path / "target_encoder.pkl", "rb"))
+    test = te_encoder.transform(test)
+    return test
 
 
 def create_categorical_train(train: pd.DataFrame, config: DictConfig) -> pd.DataFrame:
@@ -101,7 +138,6 @@ def make_trick(df: pd.DataFrame) -> pd.DataFrame:
     for col in df.columns:
         if "float" in df[col].dtype.name:
             df[col] = df[col].round(decimals=2)
-        gc.collect()
 
     return df
 

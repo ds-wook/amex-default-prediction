@@ -10,7 +10,7 @@ from tqdm import tqdm
 from models.base import ModelResult
 
 
-def load_model(config: DictConfig) -> ModelResult:
+def load_model(config: DictConfig, model_name: str) -> ModelResult:
     """
     Load model
     Args:
@@ -18,7 +18,7 @@ def load_model(config: DictConfig) -> ModelResult:
     Returns:
         ModelResult object
     """
-    model_path = Path(get_original_cwd()) / config.model.path / config.model.name
+    model_path = Path(get_original_cwd()) / config.model.path / model_name
 
     with open(model_path, "rb") as output:
         model_result = pickle.load(output)

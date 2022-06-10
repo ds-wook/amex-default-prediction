@@ -4,7 +4,7 @@ import pandas as pd
 import wandb.catboost as wandb_cb
 import wandb.lightgbm as wandb_lgb
 import wandb.xgboost as wandb_xgb
-from catboost import CatBoostClassifier, Pool
+from catboost import CatBoostClassifier
 from lightgbm import LGBMClassifier
 from xgboost import XGBClassifier
 
@@ -71,22 +71,17 @@ class CatBoostTrainer(BaseModel):
         """
         load train model
         """
-        train_data = Pool(
-            data=X_train, label=y_train, cat_features=self.config.dataset.cat_features
-        )
-        valid_data = Pool(
-            data=X_valid, label=y_valid, cat_features=self.config.dataset.cat_features
-        )
 
         model = CatBoostClassifier(
             random_state=self.config.model.seed,
-            cat_features=self.config.dataset.cat_features,
             eval_metric=CatBoostEvalMetricAmex(),
             **self.config.model.params,
         )
         model.fit(
-            train_data,
-            eval_set=valid_data,
+            X_train,
+            y_train,
+            eval_set=[(X_valid, y_valid)],
+            cat_features=self.config.dataset.cat_features,
             early_stopping_rounds=self.config.model.early_stopping_rounds,
             verbose=self.config.model.verbose,
             callbacks=[wandb_cb.WandbCallback()],

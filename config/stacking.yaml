@@ -1,0 +1,51 @@
+hydra:
+  run:
+    dir: log/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  output_subdir: null
+  job:
+    chdir: True
+dataset:
+  path: input/amex-default-prediction
+  train: train_labels.csv
+  drop_features: customer_ID
+  target: target
+input:
+  path: res/models
+  oof_pred1: 10fold_lightgbm_dart.pkl
+  oof_pred2: 10fold_lightgbm_trick_selected.pkl
+  oof_pred3: 10fold_lightgbm_pay_features.pkl
+  oof_pred4: 10fold_lightgbm_pay_features_te.pkl
+output:
+  path: output
+  train: lightgbm_meta.csv
+  test: lightgbm_preds.csv
+  name: stacking_preds.csv
+  pred1: 10fold_lightgbm_dart.csv
+  pred2: 10fold_lightgbm_trick_selected.csv
+  pred3: 10fold_lightgbm_pay_features.csv
+  pred4: 10fold_lightgbm_pay_features_te.csv
+experiment:
+  project: amex-default-prediction
+  entity: ds-wook
+  name: xgboost_stacking_1
+model:
+  fold: 10
+  params:
+    booster: dart
+    colsample_bytree: 0.4
+    gamma: 0.07
+    learning_rate: 0.03
+    max_depth: 2
+    min_child_weight: 5
+    n_estimators: 200
+    n_jobs: -1
+    objective: binary:logistic
+    reg_alpha: 0.3
+    reg_lambda: 0.8
+    subsample: 0.8
+  path: res/models/
+  name: 10fold_xgboost_stacking.pkl
+  early_stopping_rounds: 100
+  search: False
+  seed: 42
+  verbose: 100

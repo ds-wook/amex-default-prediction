@@ -1,7 +1,18 @@
 from typing import Tuple
 
 import numpy as np
+from pytorch_tabnet.metrics import Metric
 from xgboost import DMatrix
+
+
+class AmexMetric(Metric):
+    def __init__(self):
+        self._name = "amex-metric"
+        self._maximize = True
+
+    def __call__(self, y_true, y_score):
+        score = amex_metric(y_true, y_score[:, 1])
+        return score
 
 
 class CatBoostEvalMetricAmex:

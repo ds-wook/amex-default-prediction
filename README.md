@@ -12,8 +12,10 @@ This repository is the code that placed ?th [American Express - Default Predicti
 |CatBoost(10-stratified categorical kfold) - trick|0.790|0.791|
 |LightGBM(10-stratified kfold - gbdt)|0.790|0.792|
 |LightGBM(10-stratified kfold - dart)|0.7926|0.795|
-|**LightGBM(10-stratified kfold - dart) - trick**|**0.7931**|**0.796**|
-|**LightGBM(10-stratified kfold pay-features - dart) - trick**|**0.7952**|**0.79**|
+|LightGBM(10-stratified kfold - dart) - trick|0.7931|**0.796**|
+|LightGBM(10-stratified kfold pay-features - dart) - trick|0.7952|**0.796**|
+|**Stacking is All You Need**|**0.796**|**0.796**|
+
 ### Project Organization
 ```
 ├── LICENSE
@@ -56,6 +58,7 @@ This repository is the code that placed ?th [American Express - Default Predicti
 ### Reference
 + [DART: Dropouts meet Multiple Additive Regression Trees](https://arxiv.org/abs/1505.01866)
 + [rounding-trick](https://www.kaggle.com/code/jiweiliu/amex-catboost-rounding-trick)
-
++ [pay-features](https://www.kaggle.com/code/jiweiliu/rapids-cudf-feature-engineering-xgb)
++ [Ensemble model](https://www.sciencedirect.com/science/article/pii/S0957417421003407)
 --------
 Project based on the [cookiecutter data science project template](https://drivendata.github.io/cookiecutter-data-science/) & [microsoft recommenders](https://github.com/microsoft/recommenders/tree/main/recommenders).

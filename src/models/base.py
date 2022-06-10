@@ -110,14 +110,12 @@ class BaseModel(metaclass=ABCMeta):
 
             del X_train, X_valid, y_train, y_valid, model
 
+            # Close run for that fold
+            wandb.finish()
+
         oof_score = self.metric(train_y.to_numpy(), oof_preds)
 
         logging.info(f"OOF Score: {oof_score}")
-
-        wandb.log({"OOF Score": oof_score})
-
-        # Close run for that fold
-        wandb.join()
 
         self.result = ModelResult(
             oof_preds=oof_preds,
