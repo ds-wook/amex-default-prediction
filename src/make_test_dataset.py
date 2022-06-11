@@ -28,6 +28,6 @@ def main(args: argparse.ArgumentParser):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--path", type=str, default="input/amex-data-parquet/")
+    parser.add_argument("--path", type=str, default="input/amex-pay-features/")
     args = parser.parse_args()
     main(args)
