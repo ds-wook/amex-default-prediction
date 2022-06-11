@@ -11,7 +11,6 @@ from models.boosting import LightGBMTrainer
 def _main(cfg: DictConfig):
     train_x, train_y = load_train_dataset(cfg)
     train_x = create_categorical_train(train_x, cfg)
-    train_x = train_x[cfg.dataset.select_features]
 
     # train
     lgb_trainer = LightGBMTrainer(config=cfg, metric=amex_metric)

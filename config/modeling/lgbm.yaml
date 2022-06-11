@@ -3,10 +3,10 @@ hydra:
     dir: log/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
   output_subdir: null
 dataset:
-  path: input/amex-credit-data/
+  path: input/amex-pay-features/
   is_train: true
   target: target
-  train: train_agg_credit.pkl
+  train: train_pay_features.pkl
   test: test_agg_credit
   drop_features: customer_ID
   cat_features:
@@ -21,6 +21,28 @@ dataset:
   - D_64_last
   - D_66_last
   - D_68_last
+  - B_30_nunique
+  - B_38_nunique
+  - D_114_nunique
+  - D_116_nunique
+  - D_117_nunique
+  - D_120_nunique
+  - D_126_nunique
+  - D_63_nunique
+  - D_64_nunique
+  - D_66_nunique
+  - D_68_nunique
+  - B_30_count
+  - B_38_count
+  - D_114_count
+  - D_116_count
+  - D_117_count
+  - D_120_count
+  - D_126_count
+  - D_63_count
+  - D_64_count
+  - D_66_count
+  - D_68_count
   select_features: [
     'CP', 'CS', 'B_5_last', 'D_39_last', 'B_2_last', 'B_3_std', 'D_49_last', 'D_46_last', 'B_4_std', 'D_50_max', 'B_18_mean', 'D_112_std', 'B_3_last', 'B_29_std', 'D_59_max', 'D_43_last', 'B_7_std', 'D_120_last', 'B_4_last', 'B_11_last', 'D_64_last', 'S_26_max', 'D_55_mean', 'D_42_mean', 'D_39_max', 'R_5_last', 'S_9_mean', 'B_40_std', 'S_12_std', 'D_62_mean', 'R_3_mean', 'D_50_last', 'S_15_mean', 'D_66_last', 'S_11_mean', 'S_5_last', 'P_2_last', 'S_11_max', 'D_42_max', 'D_121_min', 'D_44_std', 'D_39_std', 'B_29_mean', 'D_60_last', 'S_9_last', 'B_14_last', 'B_2_min', 'D_129_mean', 'D_66_count', 'B_29_last', 'B_7_min', 'B_29_min', 'D_63_last', 'S_26_std', 'B_16_max', 'D_54_last', 'P_3_max', 'S_5_std', 'D_56_max', 'D_48_min', 'D_50_mean', 'D_123_mean', 'B_9_last', 'D_114_last', 'R_27_min', 'D_46_mean', 'R_1_max', 'R_11_mean', 'R_11_last', 'B_17_last', 'D_121_max', 'D_118_min', 'S_26_mean', 'D_47_mean', 'S_12_mean', 'D_62_min', 'B_1_last', 'B_21_max', 'S_22_std', 'D_42_min', 'D_144_std', 'S_25_std', 'D_53_last', 'B_40_last', 'S_8_last', 'D_129_last', 'B_40_max', 'S_9_std', 'D_117_last', 'D_105_max', 'S_7_last', 'B_29_max', 'D_121_mean', 'D_48_std', 'S_8_max', 'D_59_std', 'D_43_mean', 'B_10_std', 'B_5_min', 'D_76_last', 'S_9_min', 'D_47_max', 'D_44_last', 'D_102_max', 'D_119_min', 'R_27_last', 'P_2_min', 'B_7_last', 'S_3_mean', 'D_46_min', 'B_33_mean', 'D_56_min', 'D_41_std', 'D_58_max', 'D_123_std', 'B_18_min', 'B_18_std', 'D_76_max', 'R_1_std', 'S_3_max', 'R_3_last', 'B_5_std', 'D_84_std', 'S_23_std', 'B_17_std', 'B_4_min', 'B_24_last', 'D_132_max', 'B_37_std', 'R_26_max', 'S_8_mean', 'P_2_mean', 'S_3_min', 'D_65_max', 'S_5_mean', 'S_5_max', 'S_12_min', 'R_14_std', 'B_4_max', 'B_13_mean', 'D_52_mean', 'D_121_last', 'D_72_mean', 'D_132_mean', 'R_6_max', 'D_42_last', 'R_9_std', 'D_58_last', 'D_46_max', 'D_71_last', 'D_118_mean', 'D_75_std', 'D_79_std', 'D_124_min', 'D_76_mean', 'B_9_mean', 'R_9_mean', 'D_132_min', 'S_7_std', 'D_133_max', 'R_26_last', 'D_49_mean', 'P_3_mean', 'R_2_std', 'R_26_mean', 'D_102_std', 'B_2_mean', 'D_122_mean', 'S_15_min', 'P_3_std', 'D_56_last', 'P_2_std', 'D_142_std', 'D_47_min', 'D_77_mean', 'D_61_max', 'D_45_std', 'R_3_max', 'R_10_std', 'D_55_std', 'D_142_mean', 'D_82_last', 'B_28_std', 'D_140_last', 'D_54_min', 'B_4_mean', 'R_6_last', 'B_23_std', 'R_27_mean', 'D_49_std', 'D_123_max', 'S_3_std', 'P_3_last', 'S_24_std', 'S_23_mean', 'D_124_mean', 'B_28_last', 'D_91_mean', 'D_43_std', 'D_122_max', 'D_48_max', 'D_61_std', 'R_8_std', 'D_119_max', 'B_3_max', 'D_113_mean', 'D_110_max', 'B_1_std', 'D_65_mean', 'B_21_std', 'D_65_std', 'D_82_std', 'S_13_last', 'S_6_mean', 'D_122_last', 'S_26_last', 'D_46_std', 'S_16_mean', 'D_50_std', 'D_43_max', 'D_124_last', 'B_23_last', 'P_2_max', 'S_22_mean', 'P_3_min', 'S_12_last', 'R_10_last', 'D_47_last', 'D_60_max', 'R_17_std', 'D_118_last', 'D_49_min', 'D_45_mean', 'B_14_std', 'D_79_last', 'D_50_min', 'S_11_last', 'D_119_last', 'D_59_last', 'D_141_mean', 'B_17_mean', 'D_145_mean', 'B_39_max', 'D_124_max', 'B_25_std', 'D_48_last', 'D_74_std', 'D_48_mean', 'D_59_min', 'S_3_last', 'B_20_last', 'B_6_std', 'S_24_last', 'R_14_max', 'R_16_last', 'S_13_max', 'D_136_std', 'S_15_std', 'D_70_std', 'D_82_max', 'D_128_mean', 'D_106_max', 'S_24_max', 'B_32_last', 'D_76_min', 'D_45_max', 'R_11_std', 'D_60_std', 'R_19_last', 'D_39_mean', 'S_22_min', 'B_6_last', 'D_70_mean', 'B_18_max', 'B_12_std', 'D_58_std', 'B_17_max', 'D_55_max', 'D_52_min', 'B_16_min', 'B_10_last', 'D_122_min', 'S_25_max', 'R_1_mean', 'D_60_mean', 'D_142_last', 'D_119_mean', 'B_24_std', 'B_28_mean', 'D_55_min', 'D_140_mean', 'D_128_max', 'S_6_last', 'B_9_max', 'D_72_last', 'D_84_last', 'B_11_std', 'D_134_min', 'R_12_std', 'B_2_std', 'B_16_last', 'B_15_last', 'B_32_std', 'R_19_std', 'D_104_std', 'S_25_last', 'D_112_mean', 'D_53_max', 'S_20_mean', 'D_80_last', 'S_24_min', 'B_28_min', 'D_126_count', 'D_125_std', 'S_16_std', 'D_92_std', 'B_17_min', 'D_129_max', 'B_12_mean', 'R_27_max', 'D_72_std', 'D_134_max', 'D_91_min', 'B_25_last', 'D_45_last', 'S_12_max', 'D_56_mean', 'B_5_max', 'D_137_std', 'D_139_std', 'S_13_std', 'D_83_last', 'D_132_std', 'D_72_max', 'B_10_mean', 'D_115_std', 'D_69_last', 'B_13_min', 'S_15_max', 'D_130_std', 'S_8_std', 'D_78_mean', 'D_41_min', 'S_6_std', 'D_105_min', 'D_141_std', 'S_8_min', 'D_93_std', 'D_69_max', 'B_11_mean', 'B_7_max', 'B_37_last', 'D_53_std', 'D_75_last', 'B_41_std', 'D_69_mean', 'B_1_max', 'S_15_last', 'D_54_mean', 'D_74_max', 'D_96_std', 'S_11_std', 'S_25_mean', 'D_134_std', 'D_86_std', 'B_1_mean', 'D_74_last', 'R_6_std', 'D_61_min', 'B_16_std', 'D_41_last', 'D_82_mean', 'B_39_last', 'B_39_mean', 'D_61_mean', 'B_8_std', 'D_131_last', 'S_7_mean', 'D_68_count', 'R_4_last', 'R_9_min', 'B_39_min', 'D_61_last', 'D_41_max', 'B_2_max', 'D_74_mean', 'B_12_last', 'S_23_last', 'D_132_last', 'D_145_std', 'D_105_std', 'D_133_std', 'D_89_std', 'D_112_max', 'B_19_min', 'D_45_min', 'R_14_mean', 'D_51_std', 'B_14_max', 'B_14_mean', 'D_55_last', 'D_143_std', 'D_52_last', 'B_22_std', 'S_23_max', 'B_38_last', 'B_23_max', 'D_135_mean', 'B_28_max', 'R_15_std', 'S_19_std', 'B_12_min', 'R_4_std', 'B_22_last', 'S_5_min', 'D_83_std', 'D_110_std', 'B_13_last', 'D_107_mean', 'D_135_std', 'D_43_min', 'D_41_mean', 'B_6_mean', 'B_20_std', 'S_7_max', 'D_136_min', 'D_129_std', 'D_127_std', 'D_51_mean', 'D_92_mean', 'B_26_std', 'D_115_mean', 'B_10_min', 'B_15_max', 'D_113_last', 'S_23_min', 'D_142_min', 'R_3_std', 'R_21_std', 'D_58_min', 'R_3_min', 'S_16_max', 'D_138_mean', 'D_79_max', 'D_110_last', 'B_13_max', 'D_54_std', 'R_22_std', 'B_16_mean', 'D_141_max', 'D_69_min', 'B_27_std', 'D_78_std', 'B_41_last', 'S_20_std', 'D_94_std', 'D_134_mean', 'S_18_mean', 'D_62_last', 'D_44_mean', 'R_12_last', 'D_81_last', 'D_105_mean', 'B_21_mean', 'D_64_count', 'D_71_max', 'D_118_max', 'D_125_mean', 'D_119_std', 'S_11_min', 'R_26_std', 'B_25_max', 'B_15_std', 'D_126_nunique', 'R_5_mean', 'D_80_max', 'P_4_max', 'S_24_mean', 'S_18_std', 'B_11_max', 'D_106_last', 'D_135_last', 'B_36_std', 'B_19_std', 'D_111_last', 'D_103_std', 'S_27_std', 'S_22_last', 'D_133_last', 'R_7_std', 'B_24_max', 'B_5_mean', 'R_25_last', 'B_11_min', 'R_10_mean', 'D_110_min', 'B_6_max', 'B_10_max', 'B_9_std', 'D_138_last', 'R_5_std', 'D_127_mean', 'B_40_min', 'D_75_mean', 'D_75_min', 'R_16_std', 'D_69_std', 'R_27_std', 'B_1_min', 'D_94_last', 'D_80_std', 'D_113_max', 'S_17_mean', 'D_52_std', 'D_109_std', 'R_22_last', 'D_107_std', 'D_81_max', 'D_110_mean', 'D_135_min', 'D_122_std', 'S_9_max', 'D_133_mean', 'S_17_std', 'B_40_mean', 'D_77_std', 'D_51_max', 'R_7_last', 'D_47_std', 'D_83_mean'
   ]
@@ -28,7 +50,7 @@ dataset:
 experiment:
   project: amex-default-prediction
   entity: ds-wook
-  name: lightgbm_dart_9
+  name: lightgbm_dart_14
   tags: LightGBM-DART
 model:
   fold: 10
@@ -36,8 +58,8 @@ model:
     reg_alpha: 5.998770177220496e-05
     reg_lambda: 0.07127674208132959
     boosting_type: dart
-    learning_rate: 0.05
-    n_estimators: 2500
+    learning_rate: 0.03
+    n_estimators: 3000
     objective: binary
     max_depth: 16
     num_leaves: 128
@@ -47,7 +69,7 @@ model:
     min_child_samples: 5
     max_bin: 449
   path: res/models/
-  name: 10fold_lightgbm_credit_select.pkl
+  name: 10fold_lightgbm_pay_features_last.pkl
   early_stopping_rounds: 200
   type: classifier
   search: False

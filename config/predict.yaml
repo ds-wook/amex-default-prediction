@@ -27,8 +27,8 @@ dataset:
   encoder: res/data/
 model:
   path: res/models/
-  name: 10fold_lightgbm_credit_select.pkl
+  name: 10fold_lightgbm_pay_features_last.pkl
 output:
   path: output
-  name: 10fold_lightgbm_credit_select.csv
+  name: 10fold_lightgbm_pay_features_last.csv
   submit: sample_submission.csv

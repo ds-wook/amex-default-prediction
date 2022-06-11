@@ -1,4 +1,3 @@
-import gc
 import logging
 import pickle
 import warnings
