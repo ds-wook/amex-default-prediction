@@ -6,7 +6,7 @@ from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 
 
-class StackingDataLoder:
+class AmexStackingDataset:
     def __init__(
         self,
         config: DictConfig,
@@ -22,7 +22,7 @@ class StackingDataLoder:
         train_label = pd.read_csv(path / self.config.dataset.train_label)
         train_data = pd.DataFrame(
             self.train_data,
-            columns=[f"oof_preds_{i + 1}" for i in range(self.train_data.shape[1])],
+            columns=[f"preds_{i + 1}" for i in range(self.train_data.shape[1])],
         )
         train = pd.concat([train_label, train_data], axis=1)
 

@@ -4,13 +4,13 @@ import gc
 import pandas as pd
 from tqdm import tqdm
 
-from data.dataset import split
+from data.dataset import split_dataset
 from features.build import add_after_pay_features, build_features
 
 
 def main(args: argparse.ArgumentParser):
     test = pd.read_parquet(args.path + "test.parquet")
-    split_ids = split(test.customer_ID.unique(), 10)
+    split_ids = split_dataset(test.customer_ID.unique(), 10)
 
     for (i, ids) in tqdm(enumerate(split_ids)):
         test_sample = test[test.customer_ID.isin(ids)]

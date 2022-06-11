@@ -54,20 +54,8 @@ def load_test_dataset(config: DictConfig, num: int = 0) -> pd.DataFrame:
     return test_x
 
 
-def split_test_dataset(test: pd.DataFrame, path: str) -> None:
-    """
-    Split test dataset
-    Args:
-        config: config file
-    """
-    for i in range(10):
-        test.iloc[i * 100000 : (i + 1) * 100000].to_pickle(
-            path + f"test_pay_features_part_{i}.pkl", compression="gzip"
-        )
-
-
 # https://stackoverflow.com/questions/2130016/splitting-a-list-into-n-parts-of-approximately-equal-length
-def split(a: np.ndarray, n: int) -> Tuple[np.ndarray]:
+def split_dataset(a: np.ndarray, n: int) -> Tuple[np.ndarray]:
     """
     Split array into n parts
     Args:

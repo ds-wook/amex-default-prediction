@@ -15,7 +15,7 @@ from models.infer import load_model, predict
 def _main(cfg: DictConfig):
     path = Path(get_original_cwd()) / cfg.output.path
     # model load
-    results = load_model(cfg)
+    results = load_model(cfg, cfg.model.name)
 
     # infer test
     preds_proba = []

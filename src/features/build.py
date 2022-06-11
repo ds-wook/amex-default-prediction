@@ -196,10 +196,14 @@ def add_after_pay_features(df: pd.DataFrame) -> pd.DataFrame:
     for b_col in before_cols:
         for a_col in after_cols:
             if b_col in df.columns:
+                df[f"{b_col}+{a_col}"] = df[b_col] + df[a_col]
                 df[f"{b_col}-{a_col}"] = df[b_col] - df[a_col]
                 df[f"{b_col}x{a_col}"] = df[b_col] * df[a_col]
+                df[f"{b_col}/{a_col}"] = df[b_col] / df[a_col]
+                after_pay_features.append(f"{b_col}+{a_col}")
                 after_pay_features.append(f"{b_col}-{a_col}")
                 after_pay_features.append(f"{b_col}x{a_col}")
+                after_pay_features.append(f"{b_col}/{a_col}")
 
     df_after_agg = df.groupby("customer_ID")[after_pay_features].agg(["mean", "std"])
     df_after_agg.columns = ["_".join(x) for x in df_after_agg.columns]
