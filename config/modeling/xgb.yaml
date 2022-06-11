@@ -3,11 +3,11 @@ hydra:
     dir: log/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
   output_subdir: null
 dataset:
-  path: input/amex-agg-data-f32/
+  path: input/amex-pay-features/
   is_train: true
   target: target
-  train: train_agg_f32.pkl
-  test: test_agg_f32_part
+  train: train_pay_features.pkl
+  test: test_pay_features
   drop_features: customer_ID
   cat_features:
   - B_30_last
@@ -32,7 +32,7 @@ model:
     booster: dart
     colsample_bytree: 0.44442679104045424
     gamma: 0.07361716094628554
-    learning_rate: 0.0020428215357261676
+    learning_rate: 0.05
     max_depth: 2
     min_child_weight: 5
     n_estimators: 2500
@@ -42,7 +42,7 @@ model:
     reg_lambda: 0.8398892426801621
     subsample: 0.8708229999183839
   path: res/models/
-  name: 10fold_xgboost_gbdt.pkl
+  name: 10fold_xgboost_dart.pkl
   early_stopping_rounds: 200
   search: False
   seed: 42

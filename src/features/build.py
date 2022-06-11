@@ -3,11 +3,48 @@ import pickle
 from pathlib import Path
 
 import pandas as pd
+from category_encoders.cat_boost import CatBoostEncoder
 from category_encoders.target_encoder import TargetEncoder
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 from sklearn.preprocessing import LabelEncoder
 from tqdm import tqdm
+
+
+def create_cb_encoder_train(
+    train_x: pd.DataFrame, train_y: pd.Series, config: DictConfig
+) -> pd.DataFrame:
+    """
+    Target encoding
+    Args:
+        df: dataframe
+        cat_col: list of categorical columns
+    Returns:
+        dataframe
+    """
+    path = Path(get_original_cwd()) / config.dataset.encoder
+    cb_encoder = CatBoostEncoder(config.dataset.cat_features)
+    train_x = cb_encoder.fit_transform(train_x, train_y)
+
+    with open(path / "catboost_encoder.pkl", "wb") as f:
+        pickle.dump(cb_encoder, f)
+
+    return train_x
+
+
+def create_target_encoder_test(test: pd.DataFrame, config: DictConfig) -> pd.DataFrame:
+    """
+    Target encoding
+    Args:
+        df: dataframe
+        cat_col: list of categorical columns
+    Returns:
+        dataframe
+    """
+    path = Path(get_original_cwd()) / config.dataset.encoder
+    cb_encoder = pickle.load(open(path / "catboost_encoder.pkl", "rb"))
+    test = cb_encoder.transform(test)
+    return test
 
 
 def create_target_encoder_train(
@@ -31,7 +68,7 @@ def create_target_encoder_train(
     return train_x
 
 
-def create_target_encoder_test(test: pd.DataFrame, config: DictConfig) -> pd.DataFrame:
+def create_cb_encoder_test(test: pd.DataFrame, config: DictConfig) -> pd.DataFrame:
     """
     Target encoding
     Args:

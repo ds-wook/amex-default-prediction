@@ -12,6 +12,7 @@ def select_features(
 ) -> List[str]:
     model = LGBMClassifier(random_state=42, learning_rate=0.1)
     logging.info(f"{model.__class__.__name__} Train Start!")
+    model.fit(train, label)
 
     explainer = TreeExplainer(model)
 
