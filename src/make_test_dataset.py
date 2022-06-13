@@ -17,8 +17,10 @@ def main(args: argparse.ArgumentParser):
         test_pay_agg = add_after_pay_features(test_sample)
         test_agg = build_features(test_sample)
         test_agg = pd.concat([test_agg, test_pay_agg], axis=1)
+        print(test_agg.shape)
         test_agg.to_pickle(
-            args.path + f"test_pay_features_part_{i}.pkl", compression="gzip"
+            f"input/amex-pay-features/test_pay_features_part_{i}.pkl",
+            compression="gzip",
         )
         gc.collect()
         del test_agg, test_pay_agg
@@ -28,6 +30,6 @@ def main(args: argparse.ArgumentParser):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--path", type=str, default="input/amex-pay-features/")
+    parser.add_argument("--path", type=str, default="input/amex-data-parquet/")
     args = parser.parse_args()
     main(args)
