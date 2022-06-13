@@ -5,7 +5,7 @@ import warnings
 from abc import ABCMeta, abstractclassmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, Optional
 
 import numpy as np
 import pandas as pd
@@ -37,8 +37,8 @@ class BaseModel(metaclass=ABCMeta):
         self,
         X_train: pd.DataFrame,
         y_train: pd.Series,
-        X_valid: pd.DataFrame,
-        y_valid: pd.Series,
+        X_valid: Optional[pd.DataFrame] = None,
+        y_valid: Optional[pd.Series] = None,
     ):
         """
         Trains the model.

@@ -9,7 +9,7 @@ from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 
 from features.build import make_trick
-from utils.utils import reduce_mem_usage
+from utils import reduce_mem_usage
 
 warnings.filterwarnings("ignore")
 

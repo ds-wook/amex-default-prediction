@@ -1,5 +1,5 @@
 import warnings
-from typing import Iterable, Optional, Union
+from typing import Iterable, Optional, Tuple, Union
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -25,8 +25,8 @@ class LightGBMTrainer(BaseModel):
         self,
         X_train: pd.DataFrame,
         y_train: pd.Series,
-        X_valid: pd.DataFrame,
-        y_valid: pd.Series,
+        X_valid: Optional[pd.DataFrame] = None,
+        y_valid: Optional[pd.Series] = None,
     ) -> LGBMClassifier:
         """
         load train model
@@ -68,8 +68,8 @@ class CatBoostTrainer(BaseModel):
         self,
         X_train: pd.DataFrame,
         y_train: pd.Series,
-        X_valid: pd.DataFrame,
-        y_valid: pd.Series,
+        X_valid: Optional[pd.DataFrame] = None,
+        y_valid: Optional[pd.Series] = None,
     ) -> CatBoostClassifier:
         """
         load train model
@@ -106,8 +106,8 @@ class XGBoostTrainer(BaseModel):
         self,
         X_train: pd.DataFrame,
         y_train: pd.Series,
-        X_valid: pd.DataFrame,
-        y_valid: pd.Series,
+        X_valid: Optional[pd.DataFrame] = None,
+        y_valid: Optional[pd.Series] = None,
     ) -> XGBClassifier:
         """
         load train model
@@ -138,7 +138,7 @@ def get_splits_gain(
     node_name: Optional[str] = None,
     split_gain: Optional[float] = None,
     reclimit: int = 50000,
-) -> Union[Iterable, Iterable]:
+) -> Union[Iterable[Tuple[int, float]], Iterable[Tuple[int, float]]]:
     if tree is None:
         raise Exception("No tree present to analyze!")
     for k, v in tree.items():
