@@ -1,3 +1,4 @@
+from ctypes import Union
 import gc
 import pickle
 from pathlib import Path
@@ -98,7 +99,7 @@ def create_categorical_train(train: pd.DataFrame, config: DictConfig) -> pd.Data
 
     for cat_feature in tqdm(config.dataset.cat_features):
         train[cat_feature] = le_encoder.fit_transform(train[cat_feature])
-
+        train[cat_feature].fillna(-1, inplace=True)
         with open(path / f"{cat_feature}.pkl", "wb") as f:
             pickle.dump(le_encoder, f)
 
@@ -119,9 +120,18 @@ def create_categorical_test(test: pd.DataFrame, config: DictConfig) -> pd.DataFr
     for cat_feature in tqdm(config.dataset.cat_features):
         le_encoder = pickle.load(open(path / f"{cat_feature}.pkl", "rb"))
         test[cat_feature] = le_encoder.transform(test[cat_feature])
+        test[cat_feature].fillna(-1, inplace=True)
         gc.collect()
 
     return test
+
+
+def last_2(series: pd.Series) -> Union[int, float]:
+    return series.values[-2] if len(series.values) >= 2 else -127
+
+
+def last_3(series: pd.Series) -> Union[int, float]:
+    return series.values[-3] if len(series.values) >= 3 else -127
 
 
 def build_features(df: pd.DataFrame) -> pd.DataFrame:
@@ -145,12 +155,12 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     num_features = [col for col in all_cols if col not in cat_features]
 
     df_num_agg = df.groupby("customer_ID")[num_features].agg(
-        ["mean", "std", "min", "max", "last"]
+        ["mean", "std", "min", "max", "last", last_2, last_3]
     )
     df_num_agg.columns = ["_".join(x) for x in df_num_agg.columns]
 
     df_cat_agg = df.groupby("customer_ID")[cat_features].agg(
-        ["last", "nunique", "count"]
+        ["last", "nunique", "count", last_2, last_3]
     )
     df_cat_agg.columns = ["_".join(x) for x in df_cat_agg.columns]
 
@@ -197,10 +207,8 @@ def add_after_pay_features(df: pd.DataFrame) -> pd.DataFrame:
         for a_col in after_cols:
             if b_col in df.columns:
                 df[f"{b_col}-{a_col}"] = df[b_col] - df[a_col]
-                df[f"{b_col}x{a_col}"] = df[b_col] * df[a_col]
                 df[f"{b_col}/{a_col}"] = df[b_col] / df[a_col]
                 after_pay_features.append(f"{b_col}-{a_col}")
-                after_pay_features.append(f"{b_col}x{a_col}")
                 after_pay_features.append(f"{b_col}/{a_col}")
 
     df_after_agg = df.groupby("customer_ID")[after_pay_features].agg(["mean", "std"])
