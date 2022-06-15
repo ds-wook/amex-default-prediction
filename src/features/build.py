@@ -1,7 +1,7 @@
-from typing import Union
 import gc
 import pickle
 from pathlib import Path
+from typing import Union
 
 import pandas as pd
 from category_encoders.cat_boost import CatBoostEncoder
@@ -99,7 +99,6 @@ def create_categorical_train(train: pd.DataFrame, config: DictConfig) -> pd.Data
 
     for cat_feature in tqdm(config.dataset.cat_features):
         train[cat_feature] = le_encoder.fit_transform(train[cat_feature])
-        train[cat_feature].fillna(-1, inplace=True)
         with open(path / f"{cat_feature}.pkl", "wb") as f:
             pickle.dump(le_encoder, f)
 
@@ -120,7 +119,6 @@ def create_categorical_test(test: pd.DataFrame, config: DictConfig) -> pd.DataFr
     for cat_feature in tqdm(config.dataset.cat_features):
         le_encoder = pickle.load(open(path / f"{cat_feature}.pkl", "rb"))
         test[cat_feature] = le_encoder.transform(test[cat_feature])
-        test[cat_feature].fillna(-1, inplace=True)
         gc.collect()
 
     return test
@@ -168,8 +166,6 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     del df_num_agg, df_cat_agg
     gc.collect()
 
-    print("shape after engineering", df.shape)
-
     return df
 
 
@@ -178,13 +174,13 @@ def make_trick(df: pd.DataFrame) -> pd.DataFrame:
     Create nan feature
     Args:
         df: dataframe
-    Returns:
+    Returns:stacking neural network
         dataframe
     """
 
     for col in df.columns:
         if "float" in df[col].dtype.name:
-            df[col] = df[col].round(decimals=2)
+            df[col] = df[col].astype("float32").round(decimals=2).astype("float16")
 
     return df
 
@@ -207,11 +203,13 @@ def add_after_pay_features(df: pd.DataFrame) -> pd.DataFrame:
         for a_col in after_cols:
             if b_col in df.columns:
                 df[f"{b_col}-{a_col}"] = df[b_col] - df[a_col]
-                df[f"{b_col}/{a_col}"] = df[b_col] / df[a_col]
+                df[f"{b_col}x{a_col}"] = df[b_col] * df[a_col]
                 after_pay_features.append(f"{b_col}-{a_col}")
-                after_pay_features.append(f"{b_col}/{a_col}")
+                after_pay_features.append(f"{b_col}x{a_col}")
 
-    df_after_agg = df.groupby("customer_ID")[after_pay_features].agg(["mean", "std"])
+    df_after_agg = df.groupby("customer_ID")[after_pay_features].agg(
+        ["mean", "std", "last", last_2, last_3]
+    )
     df_after_agg.columns = ["_".join(x) for x in df_after_agg.columns]
 
     return df_after_agg

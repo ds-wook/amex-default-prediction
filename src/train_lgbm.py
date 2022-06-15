@@ -9,12 +9,17 @@ from models.boosting import LightGBMTrainer
 
 @hydra.main(config_path="../config/modeling/", config_name="lgbm.yaml")
 def _main(cfg: DictConfig):
+    # create dataset
     train_x, train_y = load_train_dataset(cfg)
     train_x = create_categorical_train(train_x, cfg)
     train_x = train_x[cfg.dataset.selected_features]
+    train_x.fillna(-127, inplace=True)
 
+    # train model
     lgb_trainer = LightGBMTrainer(config=cfg, metric=amex_metric)
     lgb_trainer.train(train_x, train_y)
+
+    # save model
     lgb_trainer.save_model()
 
 

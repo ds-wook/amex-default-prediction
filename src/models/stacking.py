@@ -1,9 +1,13 @@
 from pathlib import Path
+from typing import Optional
 
 import numpy as np
 import pandas as pd
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
+from sklearn.linear_model import LogisticRegression
+
+from models.base import BaseModel
 
 
 class AmexStackingDataset:
@@ -34,3 +38,24 @@ class AmexStackingDataset:
             columns=[f"preds_{i + 1}" for i in range(self.test_data.shape[1])],
         )
         return test
+
+
+class StackingLogisticRegression(BaseModel):
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
+
+    def _train_train(
+        self,
+        X_train: pd.DataFrame,
+        y_train: pd.Series,
+        X_valid: Optional[pd.DataFrame] = None,
+        y_valid: Optional[pd.Series] = None,
+    ) -> LogisticRegression:
+        """
+        Train a logistic regression model
+        """
+        model = LogisticRegression()
+
+        model.fit(X_train, y_train)
+
+        return model
