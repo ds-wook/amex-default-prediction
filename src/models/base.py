@@ -78,9 +78,9 @@ class BaseModel(metaclass=ABCMeta):
             X_train, y_train = train_x.iloc[train_idx], train_y.iloc[train_idx]
             X_valid, y_valid = train_x.iloc[valid_idx], train_y.iloc[valid_idx]
             wandb.init(
-                entity=self.config.wandb.entity,
-                project=self.config.wandb.project,
-                name=self.config.wandb.name + f"_fold_{fold}",
+                entity=self.config.logging.entity,
+                project=self.config.logging.project,
+                name=self.config.logging.name + f"_fold_{fold}",
             )
 
             # model

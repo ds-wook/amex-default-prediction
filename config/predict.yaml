@@ -6,7 +6,7 @@ hydra:
 defaults:
   - dataset: dataset
   - features: features
-  - log: logging
+  - logging: logging
   - models: lgbm
 
 output:
