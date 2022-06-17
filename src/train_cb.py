@@ -7,7 +7,7 @@ from features.build import create_categorical_train
 from models.boosting import CatBoostTrainer
 
 
-@hydra.main(config_path="../config/modeling/", config_name="cb.yaml")
+@hydra.main(config_path="../config/", config_name="train")
 def _main(cfg: DictConfig):
     # create dataset
     train_x, train_y = load_train_dataset(cfg)

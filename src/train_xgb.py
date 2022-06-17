@@ -7,7 +7,7 @@ from features.build import create_categorical_train
 from models.boosting import XGBoostTrainer
 
 
-@hydra.main(config_path="../config/modeling/", config_name="xgb.yaml")
+@hydra.main(config_path="../config/", config_name="train")
 def _main(cfg: DictConfig):
     train_x, train_y = load_train_dataset(cfg)
     train_x = create_categorical_train(train_x, cfg)

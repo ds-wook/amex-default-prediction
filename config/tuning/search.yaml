@@ -1,24 +1,3 @@
-hydra:
-  run:
-    dir: log/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
-  output_subdir: null
-dataset:
-  path: input/amex-default-prediction/
-  target: target
-  train: train_data.ftr
-  test: test_data.ftr
-  cat_features:
-  - B_30
-  - B_38
-  - D_114
-  - D_116
-  - D_117
-  - D_120
-  - D_126
-  - D_63
-  - D_64
-  - D_66
-  - D_68
 experiment:
   project: amex-default-prediction
   entity: ds-wook

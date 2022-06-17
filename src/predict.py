@@ -11,7 +11,7 @@ from features.build import create_categorical_test
 from models.infer import load_model, predict
 
 
-@hydra.main(config_path="../config/", config_name="predict.yaml")
+@hydra.main(config_path="../config/", config_name="predict")
 def _main(cfg: DictConfig):
     path = Path(get_original_cwd()) / cfg.output.path
     # model load
@@ -23,7 +23,7 @@ def _main(cfg: DictConfig):
     for num in range(10):
         test_sample = load_test_dataset(cfg, num)
         test_sample = create_categorical_test(test_sample, cfg)
-        test_sample = test_sample[cfg.dataset.selected_features]
+        test_sample = test_sample[cfg.features.selected_features]
         test_sample.fillna(-127, inplace=True)
 
         logging.info(f"Test dataset {num} predicting...")
