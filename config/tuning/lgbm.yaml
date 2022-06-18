@@ -1,0 +1,38 @@
+model:
+  early_stopping_rounds: 100
+  verbose: False
+  seed: 42
+  params:
+    boosting_type: dart
+    n_jobs: -1
+    objective: binary
+    n_estimators:
+    - 2500
+    - 5000
+    learning_rate:
+    - 0.03
+    - 0.1
+    num_leaves:
+    - 4
+    - 64
+    min_child_samples:
+    - 16
+    - 64
+    max_bin:
+    - 512
+    - 1024
+    max_depth:
+    - 4
+    - 16 
+    subsample:
+    - 0.1
+    - 1.0 
+    colsample_bytree:
+    - 0.1
+    - 1.0 
+    reg_alpha:
+    - 0.01
+    - 0.1 
+    reg_lambda:
+    - 0.01
+    - 0.1
