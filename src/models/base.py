@@ -1,10 +1,11 @@
+import gc
 import logging
 import pickle
 import warnings
 from abc import ABCMeta, abstractclassmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, Optional
 
 import numpy as np
 import pandas as pd
@@ -36,8 +37,8 @@ class BaseModel(metaclass=ABCMeta):
         self,
         X_train: pd.DataFrame,
         y_train: pd.Series,
-        X_valid: pd.DataFrame,
-        y_valid: pd.Series,
+        X_valid: Optional[pd.DataFrame] = None,
+        y_valid: Optional[pd.Series] = None,
     ):
         """
         Trains the model.
@@ -49,7 +50,7 @@ class BaseModel(metaclass=ABCMeta):
         Save model
         """
         model_path = (
-            Path(get_original_cwd()) / self.config.model.path / self.config.model.name
+            Path(get_original_cwd()) / self.config.models.path / self.config.models.name
         )
 
         with open(model_path, "wb") as output:
@@ -66,7 +67,7 @@ class BaseModel(metaclass=ABCMeta):
         """
         models = dict()
         scores = dict()
-        folds = self.config.model.fold
+        folds = self.config.models.fold
 
         str_kf = StratifiedKFold(n_splits=folds, shuffle=True, random_state=42)
         splits = str_kf.split(train_x, train_y)
@@ -77,12 +78,11 @@ class BaseModel(metaclass=ABCMeta):
             X_train, y_train = train_x.iloc[train_idx], train_y.iloc[train_idx]
             X_valid, y_valid = train_x.iloc[valid_idx], train_y.iloc[valid_idx]
             wandb.init(
-                entity=self.config.experiment.entity,
-                project=self.config.experiment.project,
-                name=self.config.experiment.name + f"_fold_{fold}",
-                reinit=True,
+                entity=self.config.logging.entity,
+                project=self.config.logging.project,
+                name=self.config.logging.name + f"_fold_{fold}",
             )
-            wandb.run.name = self.config.experiment.name + f"_fold_{fold}"
+
             # model
             model = self._train(
                 X_train,
@@ -100,14 +100,17 @@ class BaseModel(metaclass=ABCMeta):
 
             scores[f"fold_{fold}"] = score
 
-            logging.info(f"Fold {fold}: {score}")
+            if not self.search:
+                logging.info(f"Fold {fold}: {score}")
+
+            gc.collect()
 
             plot_feature_importances(model, X_train.columns.tolist())
 
+            del X_train, X_valid, y_train, y_valid, model
+            gc.collect()
             # Close run for that fold
             wandb.finish()
-
-            del X_train, X_valid, y_train, y_valid, model
 
         oof_score = self.metric(train_y.to_numpy(), oof_preds)
 

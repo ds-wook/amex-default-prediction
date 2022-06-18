@@ -1,7 +1,9 @@
 import gc
 import pickle
 from pathlib import Path
+from typing import List, Union
 
+import numpy as np
 import pandas as pd
 from category_encoders.cat_boost import CatBoostEncoder
 from category_encoders.target_encoder import TargetEncoder
@@ -98,7 +100,6 @@ def create_categorical_train(train: pd.DataFrame, config: DictConfig) -> pd.Data
 
     for cat_feature in tqdm(config.dataset.cat_features):
         train[cat_feature] = le_encoder.fit_transform(train[cat_feature])
-
         with open(path / f"{cat_feature}.pkl", "wb") as f:
             pickle.dump(le_encoder, f)
 
@@ -124,6 +125,14 @@ def create_categorical_test(test: pd.DataFrame, config: DictConfig) -> pd.DataFr
     return test
 
 
+def last_2(series: pd.Series) -> Union[int, float]:
+    return series.values[-2] if len(series.values) >= 2 else -127
+
+
+def last_3(series: pd.Series) -> Union[int, float]:
+    return series.values[-3] if len(series.values) >= 3 else -127
+
+
 def build_features(df: pd.DataFrame) -> pd.DataFrame:
     # FEATURE ENGINEERING FROM
     # https://www.kaggle.com/code/huseyincot/amex-agg-data-how-it-created
@@ -145,20 +154,18 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     num_features = [col for col in all_cols if col not in cat_features]
 
     df_num_agg = df.groupby("customer_ID")[num_features].agg(
-        ["mean", "std", "min", "max", "last"]
+        ["mean", "std", "min", "max", "last", last_2, last_3]
     )
     df_num_agg.columns = ["_".join(x) for x in df_num_agg.columns]
 
     df_cat_agg = df.groupby("customer_ID")[cat_features].agg(
-        ["last", "nunique", "count"]
+        ["last", "nunique", "count", last_2, last_3]
     )
     df_cat_agg.columns = ["_".join(x) for x in df_cat_agg.columns]
 
     df = pd.concat([df_num_agg, df_cat_agg], axis=1)
     del df_num_agg, df_cat_agg
     gc.collect()
-
-    print("shape after engineering", df.shape)
 
     return df
 
@@ -168,13 +175,13 @@ def make_trick(df: pd.DataFrame) -> pd.DataFrame:
     Create nan feature
     Args:
         df: dataframe
-    Returns:
+    Returns:stacking neural network
         dataframe
     """
 
     for col in df.columns:
         if "float" in df[col].dtype.name:
-            df[col] = df[col].round(decimals=2)
+            df[col] = df[col].astype("float32").round(decimals=2).astype("float16")
 
     return df
 
@@ -197,13 +204,55 @@ def add_after_pay_features(df: pd.DataFrame) -> pd.DataFrame:
         for a_col in after_cols:
             if b_col in df.columns:
                 df[f"{b_col}-{a_col}"] = df[b_col] - df[a_col]
-                df[f"{b_col}/{a_col}"] = df[b_col] / df[a_col]
+                df[f"{b_col}x{a_col}"] = df[b_col] * df[a_col]
                 after_pay_features.append(f"{b_col}-{a_col}")
-                after_pay_features.append(f"{b_col}/{a_col}")
+                after_pay_features.append(f"{b_col}x{a_col}")
 
     df_after_agg = df.groupby("customer_ID")[after_pay_features].agg(
-        ["mean", "std", "last"]
+        ["mean", "std", "last", last_2, last_3]
     )
     df_after_agg.columns = ["_".join(x) for x in df_after_agg.columns]
 
     return df_after_agg
+
+
+def feature_filter(data: pd.DataFrame, threshold: float = 0.1) -> List[str]:
+    features = data.columns
+    filtered_features = []
+    for feature in features:
+        if data[feature].isnull().sum() < threshold:
+            filtered_features.append(feature)
+    return filtered_features
+
+
+def feature_correlation(
+    data: pd.DataFrame, target: pd.Series, threshold: float = 0.1
+) -> List[str]:
+    data = pd.concat([data, target], axis=1)
+    correlations = data.corr()["target"].drop("target")
+
+    # Filter the features with correlation to the target less than threshold
+    filtered_features = correlations[abs(correlations) < threshold].index.tolist()
+
+    # save memory
+    del data
+    gc.collect()
+
+    return filtered_features
+
+
+def fill_missing_values(
+    data: pd.DataFrame, imputation_method: str = "median"
+) -> pd.DataFrame:
+    data_copy = data.copy()
+    for column in data_copy.columns:
+        if data_copy[column].dtype == np.dtype("O"):
+            data_copy[column] = data_copy[column].fillna(
+                data_copy[column].mode().iloc[0]
+            )
+        else:
+            if imputation_method == "median":
+                data_copy[column] = data_copy[column].fillna(data_copy[column].median())
+            elif imputation_method == "mean":
+                data_copy[column] = data_copy[column].fillna(data_copy[column].mean())
+    return data_copy

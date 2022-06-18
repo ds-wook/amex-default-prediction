@@ -3,12 +3,13 @@ import warnings
 from pathlib import Path
 from typing import Tuple
 
+import numpy as np
 import pandas as pd
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 
 from features.build import make_trick
-from utils.utils import reduce_mem_usage
+from utils import reduce_mem_usage
 
 warnings.filterwarnings("ignore")
 
@@ -26,12 +27,8 @@ def load_train_dataset(config: DictConfig) -> Tuple[pd.DataFrame, pd.Series]:
     logging.info("Loading train dataset...")
 
     train = pd.read_pickle(path / config.dataset.train, compression="gzip")
-    train["customer_ID"] = (
-        train["customer_ID"].apply(lambda x: int(x[-16:], 16)).astype("int64")
-    )
-    train_x = train.drop(columns=[config.dataset.drop_features, config.dataset.target])
     train_y = train[config.dataset.target]
-
+    train_x = train.drop(columns=[config.dataset.drop_features, config.dataset.target])
     train_x = make_trick(train_x)
     train_x = reduce_mem_usage(train_x)
     logging.info(f"train: {train_x.shape}, target: {train_y.shape}")
@@ -50,28 +47,22 @@ def load_test_dataset(config: DictConfig, num: int = 0) -> pd.DataFrame:
     path = Path(get_original_cwd()) / config.dataset.path
     logging.info("Loading test dataset...")
     test = pd.read_pickle(path / f"{config.dataset.test}_{num}.pkl", compression="gzip")
-    test["customer_ID"] = (
-        test["customer_ID"].apply(lambda x: int(x[-16:], 16)).astype("int64")
-    )
-    test_x = test.drop(columns=[config.dataset.drop_features])
-    test_x = make_trick(test_x)
+    test_x = make_trick(test)
 
     logging.info(f"test: {test_x.shape}")
 
     return test_x
 
 
-def split_test_dataset(config: DictConfig) -> None:
+# https://stackoverflow.com/questions/2130016/splitting-a-list-into-n-parts-of-approximately-equal-length
+def split_dataset(a: np.ndarray, n: int) -> Tuple[np.ndarray]:
     """
-    Split test dataset
+    Split array into n parts
     Args:
-        config: config file
+        a: array
+        n: number of parts
+    Returns:
+        array of tuple
     """
-    path = Path(get_original_cwd()) / config.dataset.path
-    logging.info("Loading test dataset...")
-    test = pd.read_pickle(path / config.dataset.test, compression="gzip")
-
-    for i in range(10):
-        test.iloc[i * 100000 : (i + 1) * 100000].to_pickle(
-            path / f"part_test_{i}.pkl", compression="gzip"
-        )
+    k, m = divmod(len(a), n)
+    return (a[i * k + min(i, m) : (i + 1) * k + min(i + 1, m)] for i in range(n))

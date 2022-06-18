@@ -2,9 +2,9 @@ fold: 10
 params:
   reg_alpha: 5.998770177220496e-05
   reg_lambda: 0.07127674208132959
-  boosting_type: dart
+  boosting_type: gbdt
   learning_rate: 0.02
-  n_estimators: 3000
+  n_estimators: 10000
   objective: binary
   max_depth: 16
   num_leaves: 128
@@ -14,8 +14,8 @@ params:
   min_child_samples: 5
   max_bin: 449
 path: res/models/
-name: 10fold_lightgbm_pay_features_cross_last_dart.pkl
+name: 10fold_lightgbm_pay_features_cross_last_gbdt.pkl
 early_stopping_rounds: 500
 search: False
-seed: 94
+seed: 42
 verbose: 250
