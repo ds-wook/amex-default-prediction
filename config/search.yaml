@@ -1,0 +1,26 @@
+hydra:
+  run:
+    dir: log/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  output_subdir: null
+
+defaults:
+  - dataset: dataset
+  - features: features
+  - logging: wandb
+  - tuning: lgbm
+
+search:
+  trials: 100
+  direction: maximize
+  params: best_params.yaml
+  study_name: Optuna Search
+  sampler:
+    type: tpe
+    n_startup_trials: 15
+    multivariate: true
+    group: true
+    constant_liar: true
+  pruner:
+    type: hyperband
+    min_resource: 3
+    reduction_factor: 5

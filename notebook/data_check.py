@@ -37,12 +37,17 @@ test_sample.shape
 
 # %%
 
-ensemble = pd.read_csv("../output/ensemble_test.csv")
-tabnet = pd.read_csv("../output/10fold_tabnet.csv")
-
+ensemble = pd.read_csv("../output/pay_features_blend.csv")
+xgb = pd.read_csv("../output/5fold_xgboost_preds.csv")
+lgbm = pd.read_csv("../output/10fold_lightgbm_pay_features_te.csv")
 # %%
-ensemble["prediction"] = (
-    ensemble["prediction"] * 0.9 + tabnet["prediction"] * 0.1
+blend = pd.merge(ensemble, xgb, on="customer_ID", how="left")
+blend.head()
+# %%
+blend["prediction"] = (
+    blend["prediction_x"] * 0.8
+    + blend["prediction_y"] * 0.05
+    + lgbm["prediction"] * 0.15
 )
-ensemble.to_csv("../output/ensemble_blend_preds.csv", index=False)
+blend[["customer_ID", "prediction"]].to_csv("../output/ensemble_blend_preds.csv", index=False)
 # %%

@@ -1,0 +1,19 @@
+fold: 10
+params:
+  boosting_type: Ordered
+  learning_rate: 0.03
+  nan_mode: Min
+  l2_leaf_reg: 0.3
+  max_depth: 4
+  min_data_in_leaf: 57
+  max_bin: 494
+  objective: Logloss
+  od_type: Iter
+  od_wait: 500
+  iterations: 10000
+path: res/models/
+name: 10fold_catboost_pay_feature_cross_last.pkl
+early_stopping_rounds: 1000
+search: False
+seed: 42
+verbose: 100

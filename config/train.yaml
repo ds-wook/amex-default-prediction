@@ -8,9 +8,3 @@ defaults:
   - features: features
   - logging: wandb
   - models: lgbm
-
-output:
-  path: output
-  name: 10fold_lightgbm_pay_features_cross_last_gbdt.csv
-  submit: sample_submission.csv
-  features: features.yaml
