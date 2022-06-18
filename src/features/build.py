@@ -1,8 +1,9 @@
 import gc
 import pickle
 from pathlib import Path
-from typing import Union
+from typing import List, Union
 
+import numpy as np
 import pandas as pd
 from category_encoders.cat_boost import CatBoostEncoder
 from category_encoders.target_encoder import TargetEncoder
@@ -213,3 +214,29 @@ def add_after_pay_features(df: pd.DataFrame) -> pd.DataFrame:
     df_after_agg.columns = ["_".join(x) for x in df_after_agg.columns]
 
     return df_after_agg
+
+
+def feature_correlation(
+    data: pd.DataFrame, target: pd.Series, threshold: float = 0.1
+) -> List[str]:
+    correlations = data.corr()[target].drop(target)
+    # Filter the features with correlation to the target less than threshold
+    filtered_features = correlations[abs(correlations) < threshold].index.tolist()
+    return filtered_features
+
+
+def fill_missing_values(
+    data: pd.DataFrame, imputation_method: str = "median"
+) -> pd.DataFrame:
+    data_copy = data.copy()
+    for column in data_copy.columns:
+        if data_copy[column].dtype == np.dtype("O"):
+            data_copy[column] = data_copy[column].fillna(
+                data_copy[column].mode().iloc[0]
+            )
+        else:
+            if imputation_method == "median":
+                data_copy[column] = data_copy[column].fillna(data_copy[column].median())
+            elif imputation_method == "mean":
+                data_copy[column] = data_copy[column].fillna(data_copy[column].mean())
+    return data_copy
