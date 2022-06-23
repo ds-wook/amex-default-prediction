@@ -1,21 +1,19 @@
-fold: 10
+fold: 5
 params:
-  reg_alpha: 5.998770177220496e-05
-  reg_lambda: 0.07127674208132959
-  boosting_type: dart
-  learning_rate: 0.02
-  n_estimators: 3000
+  boosting: dart
+  learning_rate: 0.01
   objective: binary
-  max_depth: 16
-  num_leaves: 128
-  colsample_bytree: 0.4241631237880101
-  subsample: 0.8876057928391585
-  subsample_freq: 5
-  min_child_samples: 5
-  max_bin: 449
+  num_leaves: 100
+  seed: 42
+  feature_fraction: 0.2
+  bagging_freq: 10
+  bagging_fraction: 0.5
+  n_jobs: -1
+  lambda_l2: 2
+  min_data_in_leaf: 40
 path: res/models/
-name: 10fold_lightgbm_pay_features_cross_last_dart.pkl
-early_stopping_rounds: 500
+name: 5fold_lightgbm_dart_pay_selected_features.pkl
+early_stopping_rounds: 100
+num_boost_round: 10500
 search: False
-seed: 94
 verbose: 250

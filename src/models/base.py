@@ -81,6 +81,7 @@ class BaseModel(metaclass=ABCMeta):
                 entity=self.config.logging.entity,
                 project=self.config.logging.project,
                 name=self.config.logging.name + f"_fold_{fold}",
+                allow_val_change=True,
             )
 
             # model
@@ -93,7 +94,11 @@ class BaseModel(metaclass=ABCMeta):
             models[f"fold_{fold}"] = model
 
             # validation
-            oof_preds[valid_idx] = model.predict_proba(X_valid)[:, 1]
+            oof_preds[valid_idx] = (
+                model.predict(X_valid)
+                if "lightgbm" in self.config.logging.name
+                else model.predict_proba(X_valid)[:, 1]
+            )
 
             # score
             score = self.metric(y_valid.to_numpy(), oof_preds[valid_idx])
@@ -105,7 +110,8 @@ class BaseModel(metaclass=ABCMeta):
 
             gc.collect()
 
-            plot_feature_importances(model, X_train.columns.tolist())
+            if "lightgbm" not in self.config.logging.name:
+                plot_feature_importances(model, X_train.columns.tolist())
 
             del X_train, X_valid, y_train, y_valid, model
             gc.collect()

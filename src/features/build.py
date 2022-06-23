@@ -154,12 +154,12 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     num_features = [col for col in all_cols if col not in cat_features]
 
     df_num_agg = df.groupby("customer_ID")[num_features].agg(
-        ["mean", "std", "min", "max", "last", last_2, last_3]
+        ["mean", "std", "min", "max", "last"]
     )
     df_num_agg.columns = ["_".join(x) for x in df_num_agg.columns]
 
     df_cat_agg = df.groupby("customer_ID")[cat_features].agg(
-        ["last", "nunique", "count", last_2, last_3]
+        ["last", "nunique", "count"]
     )
     df_cat_agg.columns = ["_".join(x) for x in df_cat_agg.columns]
 
@@ -178,10 +178,13 @@ def make_trick(df: pd.DataFrame) -> pd.DataFrame:
     Returns:stacking neural network
         dataframe
     """
+    num_cols = df.dtypes[
+        (df.dtypes == "float32") | (df.dtypes == "float64")
+    ].index.to_list()
+    num_cols = [col for col in num_cols if "last" in col]
 
-    for col in df.columns:
-        if "float" in df[col].dtype.name:
-            df[col] = df[col].astype("float32").round(decimals=2).astype("float16")
+    for col in num_cols:
+        df[col + "_round2"] = df[col].round(2)
 
     return df
 
@@ -204,24 +207,36 @@ def add_after_pay_features(df: pd.DataFrame) -> pd.DataFrame:
         for a_col in after_cols:
             if b_col in df.columns:
                 df[f"{b_col}-{a_col}"] = df[b_col] - df[a_col]
-                df[f"{b_col}x{a_col}"] = df[b_col] * df[a_col]
                 after_pay_features.append(f"{b_col}-{a_col}")
-                after_pay_features.append(f"{b_col}x{a_col}")
 
-    df_after_agg = df.groupby("customer_ID")[after_pay_features].agg(
-        ["mean", "std", "last", last_2, last_3]
-    )
+    df_after_agg = df.groupby("customer_ID")[after_pay_features].agg(["mean", "std"])
     df_after_agg.columns = ["_".join(x) for x in df_after_agg.columns]
 
     return df_after_agg
 
 
+def feature_filter(data: pd.DataFrame, threshold: float = 0.1) -> List[str]:
+    features = data.columns
+    filtered_features = []
+    for feature in features:
+        if data[feature].isnull().sum() < threshold:
+            filtered_features.append(feature)
+    return filtered_features
+
+
 def feature_correlation(
     data: pd.DataFrame, target: pd.Series, threshold: float = 0.1
 ) -> List[str]:
-    correlations = data.corr()[target].drop(target)
+    data = pd.concat([data, target], axis=1)
+    correlations = data.corr()["target"].drop("target")
+
     # Filter the features with correlation to the target less than threshold
     filtered_features = correlations[abs(correlations) < threshold].index.tolist()
+
+    # save memory
+    del data
+    gc.collect()
+
     return filtered_features
 
 

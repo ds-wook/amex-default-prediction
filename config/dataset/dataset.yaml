@@ -2,18 +2,13 @@ path: input/amex-pay-features/
 is_train: true
 target: target
 train: train_pay_features.pkl
-test: test_pay_features_part
+test: train_pay_features
 drop_features: customer_ID
 cat_features:
-- D_144_last
-- D_117_last
+- D_114_last
+- D_117_last 
 - D_120_last
-- D_66_last
 - D_63_last
 - D_64_last
-- D_64_last_2
-- D_66_last_2
-- D_114_last_3
-- D_117_last_3
-- D_66_last_3
+- D_66_last
 encoder: res/data/
