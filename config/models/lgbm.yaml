@@ -12,8 +12,8 @@ params:
   lambda_l2: 2
   min_data_in_leaf: 40
 path: res/models/
-name: 5fold_lightgbm_dart_pay_selected_features.pkl
+name: 5fold_lightgbm_dart_pay_features_target_encoding.pkl
 early_stopping_rounds: 100
-num_boost_round: 10500
+num_boost_round: 6500
 search: False
 verbose: 250

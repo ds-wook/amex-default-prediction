@@ -8,7 +8,7 @@ import pandas as pd
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 
-from features.build import make_trick
+from features.build import add_trick_features
 from utils import reduce_mem_usage
 
 warnings.filterwarnings("ignore")
@@ -29,7 +29,7 @@ def load_train_dataset(config: DictConfig) -> Tuple[pd.DataFrame, pd.Series]:
     train = pd.read_pickle(path / config.dataset.train, compression="gzip")
     train_y = train[config.dataset.target]
     train_x = train.drop(columns=[config.dataset.drop_features, config.dataset.target])
-    train_x = make_trick(train_x)
+    train_x = add_trick_features(train_x)
     train_x = reduce_mem_usage(train_x)
     logging.info(f"train: {train_x.shape}, target: {train_y.shape}")
 
@@ -47,7 +47,7 @@ def load_test_dataset(config: DictConfig, num: int = 0) -> pd.DataFrame:
     path = Path(get_original_cwd()) / config.dataset.path
     logging.info("Loading test dataset...")
     test = pd.read_pickle(path / f"{config.dataset.test}_{num}.pkl", compression="gzip")
-    test_x = make_trick(test)
+    test_x = add_trick_features(test)
 
     logging.info(f"test: {test_x.shape}")
 

@@ -136,7 +136,6 @@ def last_3(series: pd.Series) -> Union[int, float]:
 def build_features(df: pd.DataFrame) -> pd.DataFrame:
     # FEATURE ENGINEERING FROM
     # https://www.kaggle.com/code/huseyincot/amex-agg-data-how-it-created
-
     all_cols = [c for c in list(df.columns) if c not in ["customer_ID", "S_2"]]
     cat_features = [
         "B_30",
@@ -170,7 +169,7 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def make_trick(df: pd.DataFrame) -> pd.DataFrame:
+def add_trick_features(df: pd.DataFrame) -> pd.DataFrame:
     """
     Create nan feature
     Args:

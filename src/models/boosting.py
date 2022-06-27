@@ -93,7 +93,7 @@ class LightGBMTrainer(BaseModel):
             X_valid, y_valid, categorical_feature=self.config.dataset.cat_features
         )
 
-        es = DartEarlyStopping("valid_1", "amex", stopping_round=500)
+        # es = DartEarlyStopping("valid_1", "amex", stopping_round=500)
 
         model = lgb.train(
             params=dict(self.config.models.params),
@@ -101,7 +101,7 @@ class LightGBMTrainer(BaseModel):
             valid_sets=[train_set, valid_set],
             verbose_eval=self.config.models.verbose,
             num_boost_round=self.config.models.num_boost_round,
-            callbacks=[wandb_lgb.wandb_callback(), es],
+            callbacks=[wandb_lgb.wandb_callback()],
             early_stopping_rounds=self.config.models.early_stopping_rounds,
             feval=lgb_amex_metric,
         )

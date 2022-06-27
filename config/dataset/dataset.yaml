@@ -1,14 +1,18 @@
-path: input/amex-pay-features/
-is_train: true
+path: input/amex-trick-features/
 target: target
 train: train_pay_features.pkl
-test: train_pay_features
+test: test_pay_features
 drop_features: customer_ID
-cat_features:
+cat_features: 
+- B_30_last
+- B_38_last
 - D_114_last
-- D_117_last 
+- D_116_last
+- D_117_last
 - D_120_last
+- D_126_last
 - D_63_last
 - D_64_last
 - D_66_last
+- D_68_last
 encoder: res/data/
