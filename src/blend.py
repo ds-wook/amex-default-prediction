@@ -65,21 +65,20 @@ def _main(cfg: DictConfig):
     submission = pd.read_csv(path / cfg.output.name / cfg.output.submission)
     train_labels = pd.read_csv(path / cfg.input.name / cfg.input.train_labels)
     target = train_labels["target"]
-    lgbm_oofs = load_model(cfg, cfg.model.lgbm_oof)
-    tabnet_oofs = np.load(path / cfg.model.path / cfg.model.tabnet_oof)
+    lgbm_oofs1 = load_model(cfg, cfg.models.lgbm_oof)
+    lgbm_oofs2 = load_model(cfg, cfg.models.tabnet_oof)
+    lgbm_preds1 = pd.read_csv(path / cfg.output.name / cfg.output.lgbm_preds)
+    lgbm_preds2 = pd.read_csv(path / cfg.output.name / cfg.output.tabnet_preds)
 
-    lgbm_preds = pd.read_csv(path / cfg.output.name / cfg.output.lgbm_preds)
-    tabnet_preds = pd.read_csv(path / cfg.output.name / cfg.output.tabnet_preds)
+    oofs = [lgbm_oofs1.oof_preds, lgbm_oofs2.oof_preds]
 
-    oofs = [lgbm_oofs.oof_preds, tabnet_oofs]
-
-    preds = [lgbm_preds.prediction.to_numpy(), tabnet_preds.prediction.to_numpy()]
+    preds = [lgbm_preds1.prediction.to_numpy(), lgbm_preds2.prediction.to_numpy()]
 
     best_weights = get_best_weights(oofs, target.to_numpy())
 
     oof_preds = np.average(oofs, weights=best_weights, axis=0)
-    print(amex_metric(target.to_numpy(), lgbm_oofs.oof_preds))
-    print(amex_metric(target.to_numpy(), tabnet_oofs))
+    print(amex_metric(target.to_numpy(), lgbm_oofs1.oof_preds))
+    print(amex_metric(target.to_numpy(), lgbm_oofs2.oof_preds))
     print(f"OOF Score: {amex_metric(target.to_numpy(), oof_preds)}")
 
     blending_preds = np.average(preds, weights=best_weights, axis=0)

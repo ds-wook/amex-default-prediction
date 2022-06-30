@@ -9,11 +9,13 @@ from omegaconf import DictConfig
 from data.dataset import load_test_dataset
 from features.build import create_categorical_test
 from models.infer import load_model, predict
+from utils import seed_everything
 
 
 @hydra.main(config_path="../config/", config_name="predict")
 def _main(cfg: DictConfig):
     path = Path(get_original_cwd()) / cfg.output.path
+
     # model load
     results = load_model(cfg, cfg.models.name)
 
@@ -21,6 +23,7 @@ def _main(cfg: DictConfig):
     preds_proba = []
 
     for num in range(10):
+        seed_everything(cfg.models.params.seed)
         test_sample = load_test_dataset(cfg, num)
         test_sample = create_categorical_test(test_sample, cfg)
 

@@ -87,10 +87,16 @@ class LightGBMTrainer(BaseModel):
         load train model
         """
         train_set = lgb.Dataset(
-            X_train, y_train, categorical_feature=self.config.dataset.cat_features
+            X_train,
+            y_train,
+            categorical_feature=self.config.dataset.cat_features,
+            free_raw_data=False,
         )
         valid_set = lgb.Dataset(
-            X_valid, y_valid, categorical_feature=self.config.dataset.cat_features
+            X_valid,
+            y_valid,
+            categorical_feature=self.config.dataset.cat_features,
+            free_raw_data=False,
         )
 
         # es = DartEarlyStopping("valid_1", "amex", stopping_round=500)
@@ -106,9 +112,24 @@ class LightGBMTrainer(BaseModel):
             feval=lgb_amex_metric,
         )
 
+        params = self.config.models.params.copy()
+        params["boosting"] = "gbdt"
+        params["learning_rate"] *= 0.1
+
+        final_model = lgb.train(
+            init_model=model,
+            params=dict(params),
+            train_set=train_set,
+            valid_sets=[train_set, valid_set],
+            verbose_eval=self.config.models.verbose,
+            num_boost_round=self.config.models.num_boost_round,
+            early_stopping_rounds=self.config.models.early_stopping_rounds,
+            feval=lgb_amex_metric,
+        )
+
         wandb_lgb.log_summary(model)
 
-        return model
+        return final_model
 
 
 class CatBoostTrainer(BaseModel):

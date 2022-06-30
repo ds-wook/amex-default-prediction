@@ -7,18 +7,15 @@ hydra:
 input:
   name: input/amex-default-prediction
   train_labels: train_labels.csv
-model:
+models:
   path: res/models/
-  lgbm_oof: 10fold_lightgbm_pay_features.pkl
-  tabnet_oof: train_oof_stacking_tabnet.npy
+  lgbm_oof: 5fold_lightgbm_dart_seed42.pkl
+  tabnet_oof: 5fold_lightgbm_trick.pkl
 output:
   name: output
   submission: sample_submission.csv
-  nn_preds: 5fold_nn_preds.csv
-  lgbm_preds: 10fold_lightgbm_pay_features.csv
-  cb_preds: 10fold_catboost_preds_trick.csv
-  xgb_preds: 5fold_xgboost_version2.csv
-  tabnet_preds: stacking_tabnet.csv
+  lgbm_preds: 5fold_lightgbm_dart_seed42.csv
+  tabnet_preds: 5fold_lightgbm_trick.csv
   ensemble_preds: ensemble_preds.csv
   lb_preds: lb_best_ensemble.csv
   preds: gradient_ensemble.csv

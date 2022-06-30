@@ -48,7 +48,6 @@ def load_test_dataset(config: DictConfig, num: int = 0) -> pd.DataFrame:
     logging.info("Loading test dataset...")
     test = pd.read_pickle(path / f"{config.dataset.test}_{num}.pkl", compression="gzip")
     test_x = add_trick_features(test)
-
     logging.info(f"test: {test_x.shape}")
 
     return test_x

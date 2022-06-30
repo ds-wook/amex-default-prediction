@@ -1,17 +1,33 @@
 # %%
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import seaborn as sns
 
 # %%
 path = "../input/amex-data-parquet/"
 train = pd.read_parquet(path + "train.parquet")
 train.head()
 # %%
-train.shape
+train["B_30"].head()
 # %%
-train.groupby("customer_ID").tail(1)
-# %%
-train.drop_duplicates(subset=["customer_ID"], keep="last").isna().sum()
+train["B_2"].head()
 
 # %%
-train.drop_duplicates(subset=["customer_ID"], keep="last")[train.drop_duplicates(subset=["customer_ID"], keep="last")]
+
+sns.lineplot(x="S_2", y="B_2", data=train)
+plt.xticks(rotation=45)
+plt.show()
+
+# %%
+
+train["B_2_Bin"] = train["B_2"].map(
+    lambda x: 0 if 0.7 < x < 0.9 else np.nan if np.isnan(x) else 1
+)
+train["B_2_Bin"].head()
+# %%
+
+train["B_2_Bin"].isna().sum()
+# %%
+train["B_2"].isna().sum()
+# %%

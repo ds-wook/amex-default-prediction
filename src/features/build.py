@@ -126,11 +126,11 @@ def create_categorical_test(test: pd.DataFrame, config: DictConfig) -> pd.DataFr
 
 
 def last_2(series: pd.Series) -> Union[int, float]:
-    return series.values[-2] if len(series.values) >= 2 else -127
+    return series.values[-2] if len(series.values) >= 2 else np.nan
 
 
 def last_3(series: pd.Series) -> Union[int, float]:
-    return series.values[-3] if len(series.values) >= 3 else -127
+    return series.values[-3] if len(series.values) >= 3 else np.nan
 
 
 def build_features(df: pd.DataFrame) -> pd.DataFrame:
@@ -208,7 +208,9 @@ def add_after_pay_features(df: pd.DataFrame) -> pd.DataFrame:
                 df[f"{b_col}-{a_col}"] = df[b_col] - df[a_col]
                 after_pay_features.append(f"{b_col}-{a_col}")
 
-    df_after_agg = df.groupby("customer_ID")[after_pay_features].agg(["mean", "std"])
+    df_after_agg = df.groupby("customer_ID")[after_pay_features].agg(
+        ["mean", "std", "last"]
+    )
     df_after_agg.columns = ["_".join(x) for x in df_after_agg.columns]
 
     return df_after_agg

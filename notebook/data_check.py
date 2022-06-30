@@ -1,18 +1,18 @@
 # %%
 import numpy as np
 import pandas as pd
+from sklearn import ensemble
 
 # %%
-ensemble_preds = pd.read_csv("../output/ensemble_blend_preds.csv")
-ensemble_preds.head()
+lgbm_preds = pd.read_csv("../output/gradient_ensemble.csv")
+
+lgbm_preds.head()
 # %%
-lightgbm_dart = pd.read_csv("../output/test_lgbm_baseline_5fold_seed42.csv")
-lightgbm_dart.head()
+ensemble = pd.read_csv("../output/ensemble_blend_preds.csv")
+ensemble.head()
 # %%
-ensemble_preds["prediction"] = (
-    ensemble_preds["prediction"] * 0.7 + lightgbm_dart["prediction"] * 0.3
-)
-ensemble_preds.head()
+ensemble["prediction"] = (lgbm_preds["prediction"] * 0.4 + ensemble["prediction"] * 0.6)
+ensemble.head()
 # %%
-ensemble_preds.to_csv("../output/ensemble_blend_preds.csv", index=False)
+ensemble.to_csv("../output/ensemble_blend_preds2.csv", index=False)
 # %%
