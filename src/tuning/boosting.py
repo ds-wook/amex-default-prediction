@@ -4,8 +4,8 @@ from omegaconf import DictConfig
 from optuna.trial import Trial
 from sklearn.model_selection import train_test_split
 
-from evaluation.evaluate import lgb_amex_metric
-from tuning.base import BaseTuner
+from amex.evaluation.evaluate import lgb_amex_metric
+from amex.tuning.base import BaseTuner
 
 
 class LightGBMTuner(BaseTuner):

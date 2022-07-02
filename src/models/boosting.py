@@ -99,21 +99,21 @@ class LightGBMTrainer(BaseModel):
             free_raw_data=False,
         )
 
-        # es = DartEarlyStopping("valid_1", "amex", stopping_round=500)
+        es = DartEarlyStopping(
+            "valid_1", "amex", stopping_round=self.config.model.early_stopping_rounds
+        )
 
         model = lgb.train(
-            params=dict(self.config.models.params),
+            params=dict(self.config.model.params),
             train_set=train_set,
             valid_sets=[train_set, valid_set],
-            verbose_eval=self.config.models.verbose,
-            num_boost_round=self.config.models.num_boost_round,
+            verbose_eval=self.config.model.verbose,
+            num_boost_round=self.config.model.num_boost_round,
             callbacks=[wandb_lgb.wandb_callback()],
-            early_stopping_rounds=self.config.models.early_stopping_rounds,
             feval=lgb_amex_metric,
         )
 
-        params = self.config.models.params.copy()
-        params["boosting"] = "gbdt"
+        params = self.config.model.params.copy()
         params["learning_rate"] *= 0.1
 
         final_model = lgb.train(
@@ -121,9 +121,9 @@ class LightGBMTrainer(BaseModel):
             params=dict(params),
             train_set=train_set,
             valid_sets=[train_set, valid_set],
-            verbose_eval=self.config.models.verbose,
-            num_boost_round=self.config.models.num_boost_round,
-            early_stopping_rounds=self.config.models.early_stopping_rounds,
+            verbose_eval=self.config.model.verbose,
+            num_boost_round=self.config.model.num_boost_round,
+            callbacks=[es],
             feval=lgb_amex_metric,
         )
 
@@ -154,16 +154,16 @@ class CatBoostTrainer(BaseModel):
         )
 
         model = CatBoostClassifier(
-            random_state=self.config.models.seed,
+            random_state=self.config.model.seed,
             cat_features=self.config.dataset.cat_features,
             eval_metric=CatBoostEvalMetricAmex(),
-            **self.config.models.params,
+            **self.config.model.params,
         )
         model.fit(
             train_data,
             eval_set=valid_data,
-            early_stopping_rounds=self.config.models.early_stopping_rounds,
-            verbose=self.config.models.verbose,
+            early_stopping_rounds=self.config.model.early_stopping_rounds,
+            verbose=self.config.model.verbose,
             callbacks=[wandb_cb.WandbCallback()],
         )
 
@@ -186,7 +186,7 @@ class XGBoostTrainer(BaseModel):
         """
 
         model = XGBClassifier(
-            random_state=self.config.models.seed, **self.config.models.params
+            random_state=self.config.model.seed, **self.config.model.params
         )
 
         model.fit(
@@ -194,8 +194,8 @@ class XGBoostTrainer(BaseModel):
             y_train,
             eval_metric=xgb_amex_metric,
             eval_set=[(X_train, y_train), (X_valid, y_valid)],
-            early_stopping_rounds=self.config.models.early_stopping_rounds,
-            verbose=self.config.models.verbose,
+            early_stopping_rounds=self.config.model.early_stopping_rounds,
+            verbose=self.config.model.verbose,
             callbacks=[wandb_xgb.wandb_callback()],
         )
 
@@ -213,6 +213,6 @@ class HistGradientBoostingTrainer(BaseModel):
         X_valid: Optional[pd.DataFrame] = None,
         y_valid: Optional[pd.Series] = None,
     ) -> HistGradientBoostingClassifier:
-        model = HistGradientBoostingClassifier(**self.config.models.params)
+        model = HistGradientBoostingClassifier(**self.config.model.params)
         model.fit(X_train, y_train)
         return model

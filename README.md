@@ -14,10 +14,7 @@ This repository is the code that placed ?th [American Express - Default Predicti
 |CatBoost(10-stratified categorical kfold) - trick|0.790|0.791|
 |LightGBM(10-stratified kfold - gbdt)|0.790|0.792|
 |LightGBM(10-stratified kfold - dart)|0.7926|0.795|
-|LightGBM(10-stratified kfold - dart) - trick|0.7931|**0.796**|
-|LightGBM(10-stratified kfold pay-features - dart) - trick|0.7952|**0.796**|
-|LightGBM(10-stratified kfold pay-features - cross - dart) - trick|0.7955|**0.796**|
-|LightGBM(10-stratified kfold pay-features - all - dart) - trick|0.7955|**0.796**|
+|LightGBM(10-stratified kfold pay-features - all - dart) - trick|**0.7961**|**0.797**|
 |LightGBM(5-stratified kfold - dart) - trick|**0.7960**|**0.797**|
 
 ### Project Organization

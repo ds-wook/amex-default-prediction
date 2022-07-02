@@ -1,7 +1,7 @@
-path: input/amex-agg-data-f32/
+path: input/amex-trick-features/
 target: target
-train: train_agg_part.pkl
-test: test_agg_part
+train: train_pay_features.pkl
+test: test_pay_features
 drop_features: customer_ID
 cat_features: 
 - B_30_last
