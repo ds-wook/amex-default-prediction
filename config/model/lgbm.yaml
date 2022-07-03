@@ -13,7 +13,7 @@ params:
   lambda_l2: 5
   min_data_in_leaf: 40
 path: res/models/
-name: 10fold_lightgbm_pay_feature_trick.pkl
+name: 5fold_lightgbm_pay_feature_trick.pkl
 early_stopping_rounds: 500
 num_boost_round: 10500
 search: False
