@@ -10,7 +10,6 @@ from category_encoders.target_encoder import TargetEncoder
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 from sklearn.preprocessing import LabelEncoder
-
 from tqdm import tqdm
 
 
@@ -155,7 +154,7 @@ def add_time_features(df: pd.DataFrame) -> pd.DataFrame:
     )
     time_features = time_features.split(", ")
 
-    for col in tqdm(time_features):
+    for col in time_features:
         df[f"{col}_diff"] = df.groupby("customer_ID")[col].diff()
 
     return df
@@ -203,7 +202,7 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     )
     df_cat_agg.columns = ["_".join(x) for x in df_cat_agg.columns]
 
-    df_time_agg = df.groupby("customer_ID")[time_features].agg(["last", last_2, last_3])
+    df_time_agg = df.groupby("customer_ID")[time_features].agg(["last"])
     df_time_agg.columns = ["_".join(x) for x in df_time_agg.columns]
 
     df = pd.concat([df_num_agg, df_cat_agg, df_time_agg], axis=1)
