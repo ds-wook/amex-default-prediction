@@ -4,22 +4,23 @@ import gc
 import pandas as pd
 
 from data.dataset import split_dataset
-from features.build import add_after_pay_features, build_features
+from features.build import build_features, add_time_features
 
 
 def main(args: argparse.ArgumentParser):
     train = pd.read_parquet(args.path + "train.parquet")
     split_ids = split_dataset(train.customer_ID.unique(), 5)
-    path = "input/amex-trick-features/"
+    path = "input/amex-time-features/"
 
     for (i, ids) in enumerate(split_ids):
         train_sample = train[train.customer_ID.isin(ids)]
-        train_pay_agg = add_after_pay_features(train_sample)
+        train_sample = add_time_features(train_sample)
         train_agg = build_features(train_sample)
-        train_agg = pd.concat([train_agg, train_pay_agg], axis=1)
+
         print(i, train_agg.shape)
+
         train_agg.to_pickle(path + args.name + f"_{i}.pkl", compression="gzip")
-        del train_agg, train_pay_agg
+        del train_agg
         gc.collect()
 
     train_sample0 = pd.read_pickle(path + args.name + "_0.pkl", compression="gzip")
@@ -44,6 +45,6 @@ def main(args: argparse.ArgumentParser):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--path", type=str, default="input/amex-data-parquet/")
-    parser.add_argument("--name", type=str, default="train_pay_features")
+    parser.add_argument("--name", type=str, default="train_time_features")
     args = parser.parse_args()
     main(args)

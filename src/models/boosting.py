@@ -99,11 +99,7 @@ class LightGBMTrainer(BaseModel):
             free_raw_data=False,
         )
 
-        es = DartEarlyStopping(
-            "valid_1", "amex", stopping_round=self.config.model.early_stopping_rounds
-        )
-
-        model = lgb.train(
+        pre_model = lgb.train(
             params=dict(self.config.model.params),
             train_set=train_set,
             valid_sets=[train_set, valid_set],
@@ -114,22 +110,23 @@ class LightGBMTrainer(BaseModel):
         )
 
         params = self.config.model.params.copy()
+        params["boosting"] = "gbdt"
         params["learning_rate"] *= 0.1
 
-        final_model = lgb.train(
-            init_model=model,
+        model = lgb.train(
+            init_model=pre_model,
             params=dict(params),
             train_set=train_set,
             valid_sets=[train_set, valid_set],
             verbose_eval=self.config.model.verbose,
             num_boost_round=self.config.model.num_boost_round,
-            callbacks=[es],
+            early_stopping_rounds=self.config.model.early_stopping_rounds,
             feval=lgb_amex_metric,
         )
 
-        wandb_lgb.log_summary(model)
+        wandb_lgb.log_summary(pre_model)
 
-        return final_model
+        return model
 
 
 class CatBoostTrainer(BaseModel):
