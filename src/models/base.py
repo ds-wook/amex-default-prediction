@@ -71,7 +71,7 @@ class BaseModel(metaclass=ABCMeta):
 
         str_kf = StratifiedKFold(n_splits=folds, shuffle=True, random_state=42)
         splits = str_kf.split(train_x, train_y)
-        oof_preds = np.zeros((train_x.shape[0],))
+        oof_preds = np.zeros(len(train_x))
 
         for fold, (train_idx, valid_idx) in enumerate(splits, 1):
             # split train and validation data

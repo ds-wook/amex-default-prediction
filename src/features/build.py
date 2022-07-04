@@ -10,6 +10,7 @@ from category_encoders.target_encoder import TargetEncoder
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 from sklearn.preprocessing import LabelEncoder
+from torch import t
 from tqdm import tqdm
 
 
@@ -144,7 +145,7 @@ def add_time_features(df: pd.DataFrame) -> pd.DataFrame:
         "D_58, S_15, S_20, B_14, S_24, D_54, D_69, D_62, D_87, D_131, R_26, R_25, "
         "D_91, B_31, R_4, D_108, B_5, B_28, B_19, D_144, D_41, B_10, D_43, D_44, B_32, "
         "D_130, S_11, B_2, D_119, D_89, R_6, S_5, B_26, R_11, B_36, D_64, D_42, B_37, "
-        "R_3, B_8, R_2, D_123, D_145, S_8, B_41, R_22, B_42, D_ 117, D_48, D_124, "
+        "R_3, B_8, R_2, D_123, D_145, S_8, B_41, R_22, B_42, D_117, D_48, D_124, "
         "D_55, D_94, B_4, R_1, R_28, D_110, D_72, D_92, S_16, D_139, D_135, D_136, "
         "B_12, R_13, D_116, D_125, D_39, B_15, D_86, B_33, D_80, B_6, R_20, D_105, "
         "P_3, S_3, D_112, B_1, R_17, D_113, D_121, D_50, S_26, B_18, R_12, S_19, "
@@ -154,8 +155,9 @@ def add_time_features(df: pd.DataFrame) -> pd.DataFrame:
     )
     time_features = time_features.split(", ")
 
-    for col in time_features:
+    for col in tqdm(time_features):
         df[f"{col}_diff"] = df.groupby("customer_ID")[col].diff()
+
     return df
 
 
@@ -178,7 +180,7 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
         "D_58, S_15, S_20, B_14, S_24, D_54, D_69, D_62, D_87, D_131, R_26, R_25, "
         "D_91, B_31, R_4, D_108, B_5, B_28, B_19, D_144, D_41, B_10, D_43, D_44, B_32, "
         "D_130, S_11, B_2, D_119, D_89, R_6, S_5, B_26, R_11, B_36, D_64, D_42, B_37, "
-        "R_3, B_8, R_2, D_123, D_145, S_8, B_41, R_22, B_42, D_ 117, D_48, D_124, "
+        "R_3, B_8, R_2, D_123, D_145, S_8, B_41, R_22, B_42, D_117, D_48, D_124, "
         "D_55, D_94, B_4, R_1, R_28, D_110, D_72, D_92, S_16, D_139, D_135, D_136, "
         "B_12, R_13, D_116, D_125, D_39, B_15, D_86, B_33, D_80, B_6, R_20, D_105, "
         "P_3, S_3, D_112, B_1, R_17, D_113, D_121, D_50, S_26, B_18, R_12, S_19, "
