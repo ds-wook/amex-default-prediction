@@ -1,4 +1,4 @@
-path: input/amex-time-features/
+path: input/amex-trick-features/
 target: target
 train: train_time_features.pkl
 test: test_time_features

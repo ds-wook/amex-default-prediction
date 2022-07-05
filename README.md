@@ -56,6 +56,7 @@ This repository is the code that placed ?th [American Express - Default Predicti
 ### Reference
 + [DART: Dropouts meet Multiple Additive Regression Trees](https://arxiv.org/abs/1505.01866)
 + [rounding-trick](https://www.kaggle.com/code/jiweiliu/amex-catboost-rounding-trick)
++ [time-features](https://www.kaggle.com/code/cdeotte/time-series-eda)
 + [pay-features](https://www.kaggle.com/code/jiweiliu/rapids-cudf-feature-engineering-xgb)
 + [Ensemble model](https://www.sciencedirect.com/science/article/pii/S0957417421003407)
 + [feature-engineering](https://www.kaggle.com/code/susnato/amex-data-preprocesing-feature-engineering)
