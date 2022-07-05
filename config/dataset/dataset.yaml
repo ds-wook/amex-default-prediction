@@ -5,13 +5,9 @@ test: test_time_features
 drop_features: customer_ID
 cat_features: 
 - D_114_last
-- D_116_last
 - D_117_last
 - D_120_last
-- D_126_last
 - D_63_last
 - D_64_last
 - D_66_last
-- B_30_last
-- B_38_last
 encoder: res/data/

@@ -17,14 +17,15 @@ def _main(cfg: DictConfig):
     path = Path(get_original_cwd()) / cfg.output.path
 
     # model load
-    results = load_model(cfg, cfg.models.name)
+    results = load_model(cfg, cfg.model.name)
 
     # infer test
     preds_proba = []
 
     for num in range(10):
-        seed_everything(cfg.models.params.seed)
+        seed_everything(cfg.model.params.seed)
         test_sample = load_test_dataset(cfg, num)
+        test_sample = test_sample[cfg.features.selected_features]
         test_sample = add_trick_features(test_sample)
         test_sample = create_categorical_test(test_sample, cfg)
 

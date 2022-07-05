@@ -135,26 +135,12 @@ def last_3(series: pd.Series) -> Union[int, float]:
 
 def add_time_features(df: pd.DataFrame) -> pd.DataFrame:
     time_features = (
-        "S_17, D_104, B_30, D_68, R_14, S_13, D_138, D_74, D_142, D_66, D_45, D_143, "
-        "D_103, D_51, R_5, D_132, P_2, D_47, S_7, D_61, B_20, R_21, B_38, D_137, R_16, "
-        "D_71, D_78, R_10, S_22, D_128, D_122, B_17, D_84, D_134, D_114, D_88, D_107, "
-        "D_63, D_52, S_6, B_40, D_127, B_24, R_23, D_49, D_56, D_65, D_118, D_81, "
-        "D_75, D_106, D_129, D_59, S_18, B_21, D_102, D_53, B_9, D_133, D_96, B_25, "
-        "B_7, S_27, D_141, R_8, D_109, S_12, D_120, D_46, S_25, B_27, D_93, B_16, "
-        "D_58, S_15, S_20, B_14, S_24, D_54, D_69, D_62, D_87, D_131, R_26, R_25, "
-        "D_91, B_31, R_4, D_108, B_5, B_28, B_19, D_144, D_41, B_10, D_43, D_44, B_32, "
-        "D_130, S_11, B_2, D_119, D_89, R_6, S_5, B_26, R_11, B_36, D_64, D_42, B_37, "
-        "R_3, B_8, R_2, D_123, D_145, S_8, B_41, R_22, B_42, D_117, D_48, D_124, "
-        "D_55, D_94, B_4, R_1, R_28, D_110, D_72, D_92, S_16, D_139, D_135, D_136, "
-        "B_12, R_13, D_116, D_125, D_39, B_15, D_86, B_33, D_80, B_6, R_20, D_105, "
-        "P_3, S_3, D_112, B_1, R_17, D_113, D_121, D_50, S_26, B_18, R_12, S_19, "
-        "D_126, B_23, D_76, S_9, S_23, D_82, D_60, R_7, R_27, D_111, R_18, D_70, "
-        "R_19, D_77, D_83, B_13, D_115, B_22, R_24, P_4, R_9, R_15, D_79, B_3, B_39, "
-        "B_11, D_73, D_140"
+        "D_39,D_41,D_47,D_45,D_46,D_48,D_54,D_59,D_61,D_62,D_75,D_96,D_105,D_112,D_124,"
+        "S_3,S_7,S_19,S_23,S_26,P_2,P_3,B_2,B_3,B_4,B_5,B_7,B_9,B_20,R_1,R_3,R_13,R_18"
     )
-    time_features = time_features.split(", ")
+    time_features = time_features.split(",")
 
-    for col in time_features:
+    for col in tqdm(time_features):
         df[f"{col}_diff"] = df.groupby("customer_ID")[col].diff()
 
     return df
@@ -170,24 +156,10 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     cat_features = cat_features.split(", ")
 
     time_features = (
-        "S_17, D_104, B_30, D_68, R_14, S_13, D_138, D_74, D_142, D_66, D_45, D_143, "
-        "D_103, D_51, R_5, D_132, P_2, D_47, S_7, D_61, B_20, R_21, B_38, D_137, R_16, "
-        "D_71, D_78, R_10, S_22, D_128, D_122, B_17, D_84, D_134, D_114, D_88, D_107, "
-        "D_63, D_52, S_6, B_40, D_127, B_24, R_23, D_49, D_56, D_65, D_118, D_81, "
-        "D_75, D_106, D_129, D_59, S_18, B_21, D_102, D_53, B_9, D_133, D_96, B_25, "
-        "B_7, S_27, D_141, R_8, D_109, S_12, D_120, D_46, S_25, B_27, D_93, B_16, "
-        "D_58, S_15, S_20, B_14, S_24, D_54, D_69, D_62, D_87, D_131, R_26, R_25, "
-        "D_91, B_31, R_4, D_108, B_5, B_28, B_19, D_144, D_41, B_10, D_43, D_44, B_32, "
-        "D_130, S_11, B_2, D_119, D_89, R_6, S_5, B_26, R_11, B_36, D_64, D_42, B_37, "
-        "R_3, B_8, R_2, D_123, D_145, S_8, B_41, R_22, B_42, D_117, D_48, D_124, "
-        "D_55, D_94, B_4, R_1, R_28, D_110, D_72, D_92, S_16, D_139, D_135, D_136, "
-        "B_12, R_13, D_116, D_125, D_39, B_15, D_86, B_33, D_80, B_6, R_20, D_105, "
-        "P_3, S_3, D_112, B_1, R_17, D_113, D_121, D_50, S_26, B_18, R_12, S_19, "
-        "D_126, B_23, D_76, S_9, S_23, D_82, D_60, R_7, R_27, D_111, R_18, D_70, "
-        "R_19, D_77, D_83, B_13, D_115, B_22, R_24, P_4, R_9, R_15, D_79, B_3, B_39, "
-        "B_11, D_73, D_140"
+        "D_39,D_41,D_47,D_45,D_46,D_48,D_54,D_59,D_61,D_62,D_75,D_96,D_105,D_112,D_124,"
+        "S_3,S_7,S_19,S_23,S_26,P_2,P_3,B_2,B_3,B_4,B_5,B_7,B_9,B_20,R_1,R_3,R_13,R_18"
     )
-    time_features = time_features.split(", ")
+    time_features = time_features.split(",")
     time_features = [f"{col}_diff" for col in time_features]
 
     num_features = [col for col in all_cols if col not in cat_features + time_features]
@@ -202,7 +174,7 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     )
     df_cat_agg.columns = ["_".join(x) for x in df_cat_agg.columns]
 
-    df_time_agg = df.groupby("customer_ID")[time_features].agg(["last"])
+    df_time_agg = df.groupby("customer_ID")[time_features].agg(["last", last_2, last_3])
     df_time_agg.columns = ["_".join(x) for x in df_time_agg.columns]
 
     df = pd.concat([df_num_agg, df_cat_agg, df_time_agg], axis=1)

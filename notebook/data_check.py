@@ -6,13 +6,13 @@ import pandas as pd
 
 
 # %%
-train = pd.read_pickle("../input/amex-time-features/train_time_features.pkl", compression="gzip")
-
+train = pd.read_parquet("../input/amex-data-parquet/train.parquet")
 
 train.shape
 # %%
 
-train.head()
 # %%
-train["D_59_diff_last"].head()
+len(time_features)
+# %%
+set(train.columns.to_list()) - set(time_features)
 # %%
