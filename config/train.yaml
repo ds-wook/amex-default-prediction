@@ -6,5 +6,5 @@ hydra:
 defaults:
   - dataset: dataset
   - features: features
-  - logging: wandb
-  - models: lgbm
+  - logger: wandb
+  - model: lgbm

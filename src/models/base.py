@@ -50,7 +50,7 @@ class BaseModel(metaclass=ABCMeta):
         Save model
         """
         model_path = (
-            Path(get_original_cwd()) / self.config.models.path / self.config.models.name
+            Path(get_original_cwd()) / self.config.model.path / self.config.model.name
         )
 
         with open(model_path, "wb") as output:
@@ -67,20 +67,21 @@ class BaseModel(metaclass=ABCMeta):
         """
         models = dict()
         scores = dict()
-        folds = self.config.models.fold
+        folds = self.config.model.fold
 
         str_kf = StratifiedKFold(n_splits=folds, shuffle=True, random_state=42)
         splits = str_kf.split(train_x, train_y)
-        oof_preds = np.zeros((train_x.shape[0],))
+        oof_preds = np.zeros(len(train_x))
 
         for fold, (train_idx, valid_idx) in enumerate(splits, 1):
             # split train and validation data
             X_train, y_train = train_x.iloc[train_idx], train_y.iloc[train_idx]
             X_valid, y_valid = train_x.iloc[valid_idx], train_y.iloc[valid_idx]
             wandb.init(
-                entity=self.config.logging.entity,
-                project=self.config.logging.project,
-                name=self.config.logging.name + f"_fold_{fold}",
+                entity=self.config.logger.entity,
+                project=self.config.logger.project,
+                name=self.config.logger.name + f"_fold_{fold}",
+                allow_val_change=True,
             )
 
             # model
@@ -93,7 +94,11 @@ class BaseModel(metaclass=ABCMeta):
             models[f"fold_{fold}"] = model
 
             # validation
-            oof_preds[valid_idx] = model.predict_proba(X_valid)[:, 1]
+            oof_preds[valid_idx] = (
+                model.predict(X_valid, num_iteration=model.best_iteration)
+                if "lightgbm" in self.config.logger.name
+                else model.predict_proba(X_valid)[:, 1]
+            )
 
             # score
             score = self.metric(y_valid.to_numpy(), oof_preds[valid_idx])
@@ -105,7 +110,8 @@ class BaseModel(metaclass=ABCMeta):
 
             gc.collect()
 
-            plot_feature_importances(model, X_train.columns.tolist())
+            if "lightgbm" not in self.config.logger.name:
+                plot_feature_importances(model, X_train.columns.tolist())
 
             del X_train, X_valid, y_train, y_valid, model
             gc.collect()

@@ -1,25 +1,75 @@
+import pickle
 import warnings
-from typing import Iterable, Optional, Tuple, Union
+from typing import Optional
 
-import matplotlib.pyplot as plt
+import lightgbm as lgb
 import pandas as pd
-import seaborn as sns
 import wandb.catboost as wandb_cb
 import wandb.lightgbm as wandb_lgb
 import wandb.xgboost as wandb_xgb
 from catboost import CatBoostClassifier, Pool
-from lightgbm import LGBMClassifier
+from lightgbm import Booster
 from sklearn.ensemble import HistGradientBoostingClassifier
 from xgboost import XGBClassifier
 
-from amex.evaluation.evaluate import (
-    CatBoostEvalMetricAmex,
-    lgb_amex_metric,
-    xgb_amex_metric,
-)
-from amex.models.base import BaseModel
+from evaluation.evaluate import CatBoostEvalMetricAmex, lgb_amex_metric, xgb_amex_metric
+from models.base import BaseModel
 
 warnings.filterwarnings("ignore")
+
+
+class DartEarlyStopping:
+    def __init__(self, data_name: str, monitor_metric: str, stopping_round: int):
+        self.data_name = data_name
+        self.monitor_metric = monitor_metric
+        self.stopping_round = stopping_round
+        self.best_score = None
+        self.best_model = None
+        self.best_score_list = []
+        self.best_iter = 0
+
+    def _is_higher_score(self, metric_score: float, is_higher_better: float) -> bool:
+        if self.best_score is None:
+            return True
+        return (
+            (self.best_score < metric_score)
+            if is_higher_better
+            else (self.best_score > metric_score)
+        )
+
+    def _deepcopy(self, x):
+        return pickle.loads(pickle.dumps(x))
+
+    def __call__(self, env):
+        evals = env.evaluation_result_list
+        for data, metric, score, is_higher_better in evals:
+            if data != self.data_name or metric != self.monitor_metric:
+                continue
+            if not self._is_higher_score(score, is_higher_better):
+                if env.iteration - self.best_iter > self.stopping_round:
+                    eval_result_str = "\t".join(
+                        [
+                            lgb.callback._format_eval_result(x)
+                            for x in self.best_score_list
+                        ]
+                    )
+                    lgb.basic._log_info(
+                        f"Early stopping, best iteration is:\n[{self.best_iter+1}]\t{eval_result_str}"
+                    )
+                    lgb.basic._log_info(
+                        'You can get best model by "DartEarlyStopping.best_model"'
+                    )
+                    raise lgb.callback.EarlyStopException(
+                        self.best_iter, self.best_score_list
+                    )
+                return
+
+            self.best_model = self._deepcopy(env.model)
+            self.best_iter = env.iteration
+            self.best_score_list = evals
+            self.best_score = score
+            return
+        raise ValueError("monitoring metric not found")
 
 
 class LightGBMTrainer(BaseModel):
@@ -32,35 +82,49 @@ class LightGBMTrainer(BaseModel):
         y_train: pd.Series,
         X_valid: Optional[pd.DataFrame] = None,
         y_valid: Optional[pd.Series] = None,
-    ) -> LGBMClassifier:
+    ) -> Booster:
         """
         load train model
         """
-
-        model = LGBMClassifier(
-            random_state=self.config.models.seed, **self.config.models.params
+        train_set = lgb.Dataset(
+            X_train,
+            y_train,
+            categorical_feature=self.config.dataset.cat_features,
+            free_raw_data=False,
+        )
+        valid_set = lgb.Dataset(
+            X_valid,
+            y_valid,
+            categorical_feature=self.config.dataset.cat_features,
+            free_raw_data=False,
         )
 
-        if self.config.models.params.boosting_type == "dart":
-            model.fit(
-                X_train,
-                y_train,
-                eval_set=[(X_train, y_train), (X_valid, y_valid)],
-                eval_metric=lgb_amex_metric,
-                verbose=self.config.models.verbose,
-                callbacks=[wandb_lgb.wandb_callback()],
-            )
+        pre_model = lgb.train(
+            params=dict(self.config.model.params),
+            train_set=train_set,
+            valid_sets=[train_set, valid_set],
+            verbose_eval=self.config.model.verbose,
+            num_boost_round=self.config.model.num_boost_round,
+            callbacks=[wandb_lgb.wandb_callback()],
+            feval=lgb_amex_metric,
+        )
 
-        else:
-            model.fit(
-                X_train,
-                y_train,
-                eval_set=[(X_train, y_train), (X_valid, y_valid)],
-                eval_metric=lgb_amex_metric,
-                early_stopping_rounds=self.config.models.early_stopping_rounds,
-                verbose=self.config.models.verbose,
-                callbacks=[wandb_lgb.wandb_callback()],
-            )
+        params = self.config.model.params.copy()
+        params["boosting"] = "gbdt"
+        params["learning_rate"] *= 0.1
+
+        model = lgb.train(
+            init_model=pre_model,
+            params=dict(params),
+            train_set=train_set,
+            valid_sets=[train_set, valid_set],
+            verbose_eval=self.config.model.verbose,
+            num_boost_round=self.config.model.num_boost_round,
+            early_stopping_rounds=self.config.model.early_stopping_rounds,
+            feval=lgb_amex_metric,
+        )
+
+        wandb_lgb.log_summary(pre_model)
 
         return model
 
@@ -87,16 +151,16 @@ class CatBoostTrainer(BaseModel):
         )
 
         model = CatBoostClassifier(
-            random_state=self.config.models.seed,
+            random_state=self.config.model.seed,
             cat_features=self.config.dataset.cat_features,
             eval_metric=CatBoostEvalMetricAmex(),
-            **self.config.models.params,
+            **self.config.model.params,
         )
         model.fit(
             train_data,
             eval_set=valid_data,
-            early_stopping_rounds=self.config.models.early_stopping_rounds,
-            verbose=self.config.models.verbose,
+            early_stopping_rounds=self.config.model.early_stopping_rounds,
+            verbose=self.config.model.verbose,
             callbacks=[wandb_cb.WandbCallback()],
         )
 
@@ -119,7 +183,7 @@ class XGBoostTrainer(BaseModel):
         """
 
         model = XGBClassifier(
-            random_state=self.config.models.seed, **self.config.models.params
+            random_state=self.config.model.seed, **self.config.model.params
         )
 
         model.fit(
@@ -127,8 +191,8 @@ class XGBoostTrainer(BaseModel):
             y_train,
             eval_metric=xgb_amex_metric,
             eval_set=[(X_train, y_train), (X_valid, y_valid)],
-            early_stopping_rounds=self.config.models.early_stopping_rounds,
-            verbose=self.config.models.verbose,
+            early_stopping_rounds=self.config.model.early_stopping_rounds,
+            verbose=self.config.model.verbose,
             callbacks=[wandb_xgb.wandb_callback()],
         )
 
@@ -146,100 +210,6 @@ class HistGradientBoostingTrainer(BaseModel):
         X_valid: Optional[pd.DataFrame] = None,
         y_valid: Optional[pd.Series] = None,
     ) -> HistGradientBoostingClassifier:
-        model = HistGradientBoostingClassifier(**self.config.models.params)
+        model = HistGradientBoostingClassifier(**self.config.model.params)
         model.fit(X_train, y_train)
         return model
-
-
-def get_splits_gain(
-    tree_num: int = 0,
-    parent: int = -1,
-    tree: Optional[LGBMClassifier] = None,
-    lev: int = 0,
-    node_name: Optional[str] = None,
-    split_gain: Optional[float] = None,
-    reclimit: int = 50000,
-) -> Union[Iterable[Tuple[int, float]], Iterable[Tuple[int, float]]]:
-    if tree is None:
-        raise Exception("No tree present to analyze!")
-    for k, v in tree.items():
-        if type(v) != dict and k in ["split_feature"]:
-            old_parent = parent
-            parent = v
-            tag = k
-            yield tree_num, tag, old_parent, parent, lev, node_name, split_gain
-        elif isinstance(v, dict):
-            if v.get("split_gain") is None:
-                continue
-            else:
-                tree = v
-                lev_inc = lev + 1
-                node_name = k
-                split_gain = v["split_gain"]
-                for result in get_splits_gain(
-                    tree_num, parent, tree, lev_inc, node_name, split_gain
-                ):
-                    yield result
-        else:
-            continue
-
-
-def plot_feat_interaction(model: LGBMClassifier) -> None:
-    dumped_model = model.booster_.dump_model()
-    tree_info = []
-    for j in range(0, len(dumped_model["tree_info"])):
-        for i in get_splits_gain(tree_num=j, tree=dumped_model["tree_info"][j]):
-            tree_info.append(list(i))
-    tree_info_df = pd.DataFrame(
-        tree_info,
-        columns=[
-            "TreeNo",
-            "Type",
-            "ParentFeature",
-            "SplitOnfeature",
-            "Level",
-            "TreePos",
-            "Gain",
-        ],
-    )
-    lgbm_feat_dict = dict(enumerate(dumped_model["feature_names"]))
-    lgbm_feat_dict[-1] = "base"
-    tree_info_df["ParentFeature"].replace(lgbm_feat_dict, inplace=True)
-    tree_info_df["SplitOnfeature"].replace(lgbm_feat_dict, inplace=True)
-    tree_info_df["Interactions"] = (
-        tree_info_df["ParentFeature"].map(str)
-        + " - "
-        + tree_info_df["SplitOnfeature"].map(str)
-    )
-    tree_info_df = round(tree_info_df, 2)
-    lgb_inter_calc = (
-        tree_info_df.groupby("Interactions")["Gain"]
-        .agg(["count", "sum", "min", "max", "mean", "std"])
-        .sort_values(by="sum", ascending=False)
-        .reset_index("Interactions")
-        .fillna(0)
-    )
-    lgb_inter_calc = round(lgb_inter_calc, 2)
-    lgb_inter_calc_nobase = lgb_inter_calc[
-        lgb_inter_calc["Interactions"].str.contains("base") is False
-    ]
-    data = (
-        lgb_inter_calc_nobase.sort_values("sum", ascending=False)
-        .iloc[0:75]
-        .reset_index(drop=True)
-    )
-    plt.figure(figsize=(20, 14))
-    ax = plt.subplot(121)
-    sns.barplot(
-        x="sum", y="Interactions", data=data.sort_values("sum", ascending=False), ax=ax
-    )
-    ax.set_title("Total Gain for Feature Interaction", fontweight="bold", fontsize=14)
-    ax = plt.subplot(122)
-    sns.barplot(
-        x="count",
-        y="Interactions",
-        data=data.sort_values("sum", ascending=False),
-        ax=ax,
-    )
-    ax.set_title("No. of times Feature interacted", fontweight="bold", fontsize=14)
-    plt.tight_layout()

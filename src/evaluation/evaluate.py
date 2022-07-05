@@ -19,30 +19,30 @@ class CatBoostEvalMetricAmex:
         return amex_metric(np.array(target), np.array(preds)), 0
 
 
-def amex_metric(y_true: np.array, y_pred: np.array) -> float:
-    indices = np.argsort(y_pred)[::-1]
-    target = y_true[indices]
+def amex_metric(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    labels = np.transpose(np.array([y_true, y_pred]))
+    labels = labels[labels[:, 1].argsort()[::-1]]
+    weights = np.where(labels[:, 0] == 0, 20, 1)
+    cut_vals = labels[np.cumsum(weights) <= int(0.04 * np.sum(weights))]
+    top_four = np.sum(cut_vals[:, 0]) / np.sum(labels[:, 0])
+    gini = [0, 0]
 
-    weight = 20.0 - target * 19.0
-    cum_norm_weight = (weight / weight.sum()).cumsum()
-    four_pct_mask = cum_norm_weight <= 0.04
-    d = np.sum(target[four_pct_mask]) / np.sum(target)
+    for i in [1, 0]:
+        labels = np.transpose(np.array([y_true, y_pred]))
+        labels = labels[labels[:, i].argsort()[::-1]]
+        weight = np.where(labels[:, 0] == 0, 20, 1)
+        weight_random = np.cumsum(weight / np.sum(weight))
+        total_pos = np.sum(labels[:, 0] * weight)
+        cum_pos_found = np.cumsum(labels[:, 0] * weight)
+        lorentz = cum_pos_found / total_pos
+        gini[i] = np.sum((lorentz - weight_random) * weight)
 
-    weighted_target = target * weight
-    lorentz = (weighted_target / weighted_target.sum()).cumsum()
-    gini = ((lorentz - cum_norm_weight) * weight).sum()
-
-    n_pos = np.sum(target)
-    n_neg = target.shape[0] - n_pos
-    gini_max = 10 * n_neg * (n_pos + 20 * n_neg - 19) / (n_pos + 20 * n_neg)
-
-    g = gini / gini_max
-
-    return 0.5 * (g + d)
+    return 0.5 * (gini[1] / gini[0] + top_four)
 
 
-def lgb_amex_metric(y_true: np.ndarray, y_pred: np.ndarray) -> Tuple[str, float, bool]:
+def lgb_amex_metric(y_pred: np.ndarray, y_true: np.ndarray) -> Tuple[str, float, bool]:
     """The competition metric with lightgbm's calling convention"""
+    y_true = y_true.get_label()
     return "amex", amex_metric(y_true, y_pred), True
 
 

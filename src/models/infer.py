@@ -7,7 +7,7 @@ from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 from tqdm import tqdm
 
-from amex.models.base import ModelResult
+from models.base import ModelResult
 
 
 def load_model(config: DictConfig, model_name: str) -> ModelResult:
@@ -18,12 +18,33 @@ def load_model(config: DictConfig, model_name: str) -> ModelResult:
     Returns:
         ModelResult object
     """
-    model_path = Path(get_original_cwd()) / config.models.path / model_name
+    model_path = Path(get_original_cwd()) / config.model.path / model_name
 
     with open(model_path, "rb") as output:
         model_result = pickle.load(output)
 
     return model_result
+
+
+def predict_proba(result: ModelResult, test_x: pd.DataFrame) -> np.ndarray:
+    """
+    Given a model, predict probabilities for each class.
+    Args:
+        model_results: ModelResult object
+        test_x: test dataframe
+    Returns:
+        predict probabilities for each class
+    """
+
+    folds = len(result.models)
+    preds_proba = np.zeros((test_x.shape[0],))
+
+    for model in tqdm(result.models.values(), total=folds):
+        preds_proba += model.predict_proba(test_x)[:, 1] / folds
+
+    assert len(preds_proba) == len(test_x)
+
+    return preds_proba
 
 
 def predict(result: ModelResult, test_x: pd.DataFrame) -> np.ndarray:
@@ -40,7 +61,7 @@ def predict(result: ModelResult, test_x: pd.DataFrame) -> np.ndarray:
     preds_proba = np.zeros((test_x.shape[0],))
 
     for model in tqdm(result.models.values(), total=folds):
-        preds_proba += model.predict_proba(test_x)[:, 1] / folds
+        preds_proba += model.predict(test_x) / folds
 
     assert len(preds_proba) == len(test_x)
 

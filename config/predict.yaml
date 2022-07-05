@@ -6,11 +6,11 @@ hydra:
 defaults:
   - dataset: dataset
   - features: features
-  - logging: wandb
-  - models: lgbm
+  - logger: wandb
+  - model: lgbm
 
 output:
   path: output
-  name: 10fold_lightgbm_pay_features_cross_last_gbdt.csv
+  name: 5fold_lightgbm_time_features_trick2.csv
   submit: sample_submission.csv
   features: features.yaml

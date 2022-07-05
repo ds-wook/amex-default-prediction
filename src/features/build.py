@@ -160,9 +160,16 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
         "S_3,S_7,S_19,S_23,S_26,P_2,P_3,B_2,B_3,B_4,B_5,B_7,B_9,B_20,R_1,R_3,R_13,R_18"
     )
     time_features = time_features.split(",")
-    time_features = [f"{col}_diff" for col in time_features]
 
-    num_features = [col for col in all_cols if col not in cat_features + time_features]
+    df = df.drop(columns=time_features)
+
+    time_diff_features = [f"{col}_diff" for col in time_features]
+
+    num_features = [
+        col
+        for col in all_cols
+        if col not in cat_features + time_features + time_diff_features
+    ]
 
     df_num_agg = df.groupby("customer_ID")[num_features].agg(
         ["mean", "std", "min", "max", "last"]
@@ -174,7 +181,7 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     )
     df_cat_agg.columns = ["_".join(x) for x in df_cat_agg.columns]
 
-    df_time_agg = df.groupby("customer_ID")[time_features].agg(["last", last_2, last_3])
+    df_time_agg = df.groupby("customer_ID")[time_diff_features].agg(["last", last_2, last_3])
     df_time_agg.columns = ["_".join(x) for x in df_time_agg.columns]
 
     df = pd.concat([df_num_agg, df_cat_agg, df_time_agg], axis=1)
