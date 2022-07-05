@@ -4,19 +4,21 @@ import gc
 import pandas as pd
 
 from data.dataset import split_dataset
-from features.build import build_features, add_time_features
+from features.build import build_features, add_time_features, add_after_pay_features
 
 
 def main(args: argparse.ArgumentParser):
     train = pd.read_parquet(args.path + "train.parquet")
     split_ids = split_dataset(train.customer_ID.unique(), 5)
-    path = "input/amex-time-features/"
+    path = "input/amex-trick-features/"
 
     for (i, ids) in enumerate(split_ids):
         train_sample = train[train.customer_ID.isin(ids)]
         train_sample = add_time_features(train_sample)
+        train_pay_agg = add_after_pay_features(train_sample)
         train_agg = build_features(train_sample)
-
+        train_agg = pd.concat([train_agg, train_pay_agg], axis=1)
+        del train_pay_agg
         print(i, train_agg.shape)
 
         train_agg.to_pickle(path + args.name + f"_{i}.pkl", compression="gzip")

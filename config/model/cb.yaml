@@ -1,7 +1,7 @@
-fold: 10
+fold: 5
 params:
   boosting_type: Ordered
-  learning_rate: 0.03
+  learning_rate: 0.01
   nan_mode: Min
   l2_leaf_reg: 0.3
   max_depth: 4
@@ -10,10 +10,10 @@ params:
   objective: Logloss
   od_type: Iter
   od_wait: 500
-  iterations: 10000
+  iterations: 11000
 path: res/models/
-name: 10fold_catboost_pay_feature_cross_last.pkl
-early_stopping_rounds: 1000
+name: 5fold_catboost_total_features.pkl
+early_stopping_rounds: 2000
 search: False
 seed: 42
-verbose: 100
+verbose: 500

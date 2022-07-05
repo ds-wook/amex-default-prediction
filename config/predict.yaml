@@ -11,6 +11,6 @@ defaults:
 
 output:
   path: output
-  name: 5fold_lightgbm_time_feature_trick.csv
+  name: 5fold_lightgbm_total_features_trick.csv
   submit: sample_submission.csv
   features: features.yaml

@@ -95,7 +95,7 @@ class BaseModel(metaclass=ABCMeta):
 
             # validation
             oof_preds[valid_idx] = (
-                model.predict(X_valid)
+                model.predict(X_valid, num_iteration=model.best_iteration)
                 if "lightgbm" in self.config.logger.name
                 else model.predict_proba(X_valid)[:, 1]
             )

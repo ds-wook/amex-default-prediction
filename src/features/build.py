@@ -174,7 +174,9 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     )
     df_cat_agg.columns = ["_".join(x) for x in df_cat_agg.columns]
 
-    df_time_agg = df.groupby("customer_ID")[time_features].agg(["last", last_2, last_3])
+    df_time_agg = df.groupby("customer_ID")[time_features].agg(
+        ["last", "mean", "std", last_2, last_3]
+    )
     df_time_agg.columns = ["_".join(x) for x in df_time_agg.columns]
 
     df = pd.concat([df_num_agg, df_cat_agg, df_time_agg], axis=1)
