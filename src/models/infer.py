@@ -7,7 +7,7 @@ from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 from tqdm import tqdm
 
-from models.base import ModelResult
+from amex.models.base import ModelResult
 
 
 def load_model(config: DictConfig, model_name: str) -> ModelResult:

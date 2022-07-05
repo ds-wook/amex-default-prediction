@@ -12,8 +12,12 @@ from lightgbm import LGBMClassifier
 from sklearn.ensemble import HistGradientBoostingClassifier
 from xgboost import XGBClassifier
 
-from evaluation.evaluate import CatBoostEvalMetricAmex, lgb_amex_metric, xgb_amex_metric
-from models.base import BaseModel
+from amex.evaluation.evaluate import (
+    CatBoostEvalMetricAmex,
+    lgb_amex_metric,
+    xgb_amex_metric,
+)
+from amex.models.base import BaseModel
 
 warnings.filterwarnings("ignore")
 

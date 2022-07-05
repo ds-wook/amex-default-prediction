@@ -1,10 +1,10 @@
 import hydra
 from omegaconf import DictConfig
 
-from data.dataset import load_train_dataset
-from evaluation.evaluate import amex_metric
-from features.build import create_categorical_train
-from models.boosting import LightGBMTrainer
+from amex.data.dataset import load_train_dataset
+from amex.evaluation.evaluate import amex_metric
+from amex.features.build import create_categorical_train
+from amex.models.boosting import LightGBMTrainer
 
 
 @hydra.main(config_path="../config/", config_name="train")

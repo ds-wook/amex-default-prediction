@@ -7,7 +7,7 @@ from lightgbm import LGBMClassifier
 from omegaconf import DictConfig
 from shap import TreeExplainer
 
-from data.dataset import load_test_dataset, load_train_dataset
+from amex.data.dataset import load_test_dataset, load_train_dataset
 
 
 def select_features(config: DictConfig) -> List[str]:
