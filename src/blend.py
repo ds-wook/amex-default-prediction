@@ -65,8 +65,8 @@ def _main(cfg: DictConfig):
     submission = pd.read_csv(path / cfg.output.name / cfg.output.submission)
     train_labels = pd.read_csv(path / cfg.input.name / cfg.input.train_labels)
     target = train_labels["target"]
-    lgbm_oofs1 = load_model(cfg, cfg.models.lgbm_oof)
-    lgbm_oofs2 = load_model(cfg, cfg.models.tabnet_oof)
+    lgbm_oofs1 = load_model(cfg, cfg.model.lgbm_oof)
+    lgbm_oofs2 = load_model(cfg, cfg.model.tabnet_oof)
     lgbm_preds1 = pd.read_csv(path / cfg.output.name / cfg.output.lgbm_preds)
     lgbm_preds2 = pd.read_csv(path / cfg.output.name / cfg.output.tabnet_preds)
 

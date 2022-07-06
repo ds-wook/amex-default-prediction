@@ -81,7 +81,6 @@ class BaseModel(metaclass=ABCMeta):
                 entity=self.config.logger.entity,
                 project=self.config.logger.project,
                 name=self.config.logger.name + f"_fold_{fold}",
-                allow_val_change=True,
             )
 
             # model
@@ -95,7 +94,7 @@ class BaseModel(metaclass=ABCMeta):
 
             # validation
             oof_preds[valid_idx] = (
-                model.predict(X_valid, num_iteration=model.best_iteration)
+                model.predict(X_valid)
                 if "lightgbm" in self.config.logger.name
                 else model.predict_proba(X_valid)[:, 1]
             )
@@ -105,6 +104,7 @@ class BaseModel(metaclass=ABCMeta):
 
             scores[f"fold_{fold}"] = score
 
+            wandb.log({f"fold_{fold} score": score})
             if not self.search:
                 logging.info(f"Fold {fold}: {score}")
 
@@ -119,7 +119,7 @@ class BaseModel(metaclass=ABCMeta):
             wandb.finish()
 
         oof_score = self.metric(train_y.to_numpy(), oof_preds)
-
+        wandb.log({"oof_score": oof_score})
         logging.info(f"OOF Score: {oof_score}")
 
         self.result = ModelResult(

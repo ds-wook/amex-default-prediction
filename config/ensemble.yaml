@@ -7,9 +7,9 @@ hydra:
 input:
   name: input/amex-default-prediction
   train_labels: train_labels.csv
-models:
+model:
   path: res/models/
-  lgbm_oof: 5fold_lightgbm_dart_seed42.pkl
+  lgbm_oof: 5fold_lightgbm_time_feature_trick.pkl
   tabnet_oof: 5fold_lightgbm_trick.pkl
 output:
   name: output
