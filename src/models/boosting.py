@@ -99,7 +99,7 @@ class LightGBMTrainer(BaseModel):
             free_raw_data=False,
         )
 
-        pre_model = lgb.train(
+        model = lgb.train(
             params=dict(self.config.model.params),
             train_set=train_set,
             valid_sets=[train_set, valid_set],
@@ -109,22 +109,7 @@ class LightGBMTrainer(BaseModel):
             feval=lgb_amex_metric,
         )
 
-        params = self.config.model.params.copy()
-        params["boosting"] = "gbdt"
-        params["learning_rate"] *= 0.1
-
-        model = lgb.train(
-            init_model=pre_model,
-            params=dict(params),
-            train_set=train_set,
-            valid_sets=[train_set, valid_set],
-            verbose_eval=self.config.model.verbose,
-            num_boost_round=self.config.model.num_boost_round,
-            early_stopping_rounds=self.config.model.early_stopping_rounds,
-            feval=lgb_amex_metric,
-        )
-
-        wandb_lgb.log_summary(pre_model)
+        wandb_lgb.log_summary(model)
 
         return model
 

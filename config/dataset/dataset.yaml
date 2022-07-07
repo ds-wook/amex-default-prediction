@@ -1,10 +1,12 @@
-path: input/amex-time-features/
+path: input/amex-lag-features/
 is_train: true
 target: target
-train: train_time_features.pkl
-test: test_time_features_part
+train: train_lag_features.pkl
+test: test_lag_features_part
 drop_features: customer_ID
 cat_features:
+- B_30_last
+- B_38_last
 - D_114_last
 - D_116_last
 - D_117_last
@@ -14,6 +16,4 @@ cat_features:
 - D_64_last
 - D_66_last
 - D_68_last
-- B_30_last
-- B_38_last
 encoder: res/data/

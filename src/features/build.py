@@ -153,6 +153,7 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     cat_features = (
         "B_30, B_38, D_114, D_116, D_117, D_120, D_126, D_63, D_64, D_66, D_68"
     )
+
     cat_features = cat_features.split(", ")
 
     time_features = (
@@ -160,28 +161,35 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
         "S_3,S_7,S_19,S_23,S_26,P_2,P_3,B_2,B_3,B_4,B_5,B_7,B_9,B_20,R_1,R_3,R_13,R_18"
     )
     time_features = time_features.split(",")
-
-    df = df.drop(columns=time_features)
-
     time_diff_features = [f"{col}_diff" for col in time_features]
 
     num_features = [
-        col
-        for col in all_cols
-        if col not in cat_features + time_features + time_diff_features
+        col for col in all_cols if col not in cat_features + time_diff_features
     ]
 
     df_num_agg = df.groupby("customer_ID")[num_features].agg(
-        ["mean", "std", "min", "max", "last"]
+        ["first", "mean", "std", "min", "max", "last"]
     )
     df_num_agg.columns = ["_".join(x) for x in df_num_agg.columns]
+
+    # Lag Features
+    for col in time_features:
+        if "last" in col and col.replace("last", "first") in df_num_agg:
+            df_num_agg[col + "_lag_sub"] = (
+                df_num_agg[col] - df_num_agg[col.replace("last", "first")]
+            )
+            df_num_agg[col + "_lag_div"] = (
+                df_num_agg[col] / df_num_agg[col.replace("last", "first")]
+            )
 
     df_cat_agg = df.groupby("customer_ID")[cat_features].agg(
         ["last", "nunique", "count"]
     )
     df_cat_agg.columns = ["_".join(x) for x in df_cat_agg.columns]
 
-    df_time_agg = df.groupby("customer_ID")[time_diff_features].agg(["last", last_2, last_3])
+    df_time_agg = df.groupby("customer_ID")[time_diff_features].agg(
+        ["last", last_2, last_3]
+    )
     df_time_agg.columns = ["_".join(x) for x in df_time_agg.columns]
 
     df = pd.concat([df_num_agg, df_cat_agg, df_time_agg], axis=1)
