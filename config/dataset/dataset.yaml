@@ -1,7 +1,7 @@
-path: input/amex-time-features/
+path: input/amex-lag-features/
 target: target
-train: train_time_features.pkl
-test: test_time_features
+train: train_lag_features.pkl
+test: test_lag_features
 drop_features: customer_ID
 cat_features: 
 - D_114_last

@@ -7,9 +7,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Dict, Optional
 
+import lightgbm as lgb
 import numpy as np
 import pandas as pd
 import wandb
+import xgboost as xgb
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 from sklearn.model_selection import StratifiedKFold
@@ -95,7 +97,7 @@ class BaseModel(metaclass=ABCMeta):
             # validation
             oof_preds[valid_idx] = (
                 model.predict(X_valid)
-                if "lightgbm" in self.config.logger.name
+                if isinstance(model, (lgb.Booster, xgb.Booster))
                 else model.predict_proba(X_valid)[:, 1]
             )
 
@@ -105,12 +107,11 @@ class BaseModel(metaclass=ABCMeta):
             scores[f"fold_{fold}"] = score
 
             wandb.log({f"fold_{fold} score": score})
+
             if not self.search:
                 logging.info(f"Fold {fold}: {score}")
 
-            gc.collect()
-
-            if "lightgbm" not in self.config.logger.name:
+            if not isinstance(model, (lgb.Booster, xgb.Booster)):
                 plot_feature_importances(model, X_train.columns.tolist())
 
             del X_train, X_valid, y_train, y_valid, model
@@ -119,8 +120,8 @@ class BaseModel(metaclass=ABCMeta):
             wandb.finish()
 
         oof_score = self.metric(train_y.to_numpy(), oof_preds)
-        wandb.log({"oof_score": oof_score})
         logging.info(f"OOF Score: {oof_score}")
+        logging.info(f"CV Score: {np.mean(list(scores.values()))}")
 
         self.result = ModelResult(
             oof_preds=oof_preds,
