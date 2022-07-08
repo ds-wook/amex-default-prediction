@@ -1,4 +1,4 @@
-path: input/amex-time-features/
+path: input/amex-trick-features/
 target: target
 train: train_time_features.pkl
 test: test_time_features
@@ -15,4 +15,11 @@ cat_features:
 - D_64_last
 - D_66_last
 - D_68_last
+selected_cat_features:
+- D_114_last
+- D_117_last
+- D_120_last
+- D_63_last
+- D_64_last
+- D_66_last
 encoder: res/data/

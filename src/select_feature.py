@@ -18,9 +18,7 @@ def _main(cfg: DictConfig):
     test_x = create_categorical_test(test_x, cfg)
 
     # calculate shap values
-    features = select_features(
-        train_x.iloc[:10000], train_y.iloc[:10000], test_x.iloc[:10000]
-    )
+    features = select_features(train_x, train_y, test_x)
 
     # save selected features
     path = Path(get_original_cwd()) / cfg.features.path

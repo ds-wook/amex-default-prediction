@@ -13,10 +13,10 @@ def _main(cfg: DictConfig):
     seed_everything(cfg.model.params.seed)
     # create dataset
     train_x, train_y = load_train_dataset(cfg)
-    # train_x = train_x[cfg.features.selected_features]
+    train_x = create_categorical_train(train_x, cfg)
+    train_x = train_x[cfg.features.selected_features]
     train_x = add_trick_features(train_x)
     train_x = reduce_mem_usage(train_x)
-    train_x = create_categorical_train(train_x, cfg)
 
     # train model
     lgb_trainer = LightGBMTrainer(config=cfg, metric=amex_metric)

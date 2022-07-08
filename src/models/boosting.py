@@ -87,10 +87,14 @@ class LightGBMTrainer(BaseModel):
         load train model
         """
         train_set = lgb.Dataset(
-            X_train, y_train, categorical_feature=self.config.dataset.cat_features
+            X_train,
+            y_train,
+            categorical_feature=self.config.dataset.selected_cat_features,
         )
         valid_set = lgb.Dataset(
-            X_valid, y_valid, categorical_feature=self.config.dataset.cat_features
+            X_valid,
+            y_valid,
+            categorical_feature=self.config.dataset.selected_cat_features,
         )
 
         model = lgb.train(

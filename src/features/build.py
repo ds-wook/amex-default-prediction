@@ -59,7 +59,7 @@ def last_3(series: pd.Series) -> Union[int, float]:
     return series.values[-3] if len(series.values) >= 3 else np.nan
 
 
-def add_time_features(df: pd.DataFrame) -> pd.DataFrame:
+def add_time_diff_features(df: pd.DataFrame) -> pd.DataFrame:
     time_features = (
         "D_39,D_41,D_47,D_45,D_46,D_48,D_54,D_59,D_61,D_62,D_75,D_96,D_105,D_112,D_124,"
         "S_3,S_7,S_19,S_23,S_26,P_2,P_3,B_2,B_3,B_4,B_5,B_7,B_9,B_20,R_1,R_3,R_13,R_18"
@@ -68,6 +68,19 @@ def add_time_features(df: pd.DataFrame) -> pd.DataFrame:
 
     for col in tqdm(time_features):
         df[f"{col}_diff"] = df.groupby("customer_ID")[col].diff()
+
+    return df
+
+
+def add_time_rate_features(df: pd.DataFrame) -> pd.DataFrame:
+    time_features = (
+        "D_39,D_41,D_47,D_45,D_46,D_48,D_54,D_59,D_61,D_62,D_75,D_96,D_105,D_112,D_124,"
+        "S_3,S_7,S_19,S_23,S_26,P_2,P_3,B_2,B_3,B_4,B_5,B_7,B_9,B_20,R_1,R_3,R_13,R_18"
+    )
+    time_features = time_features.split(",")
+
+    for col in tqdm(time_features):
+        df[f"{col}_rate"] = df.groupby("customer_ID")[col].pct_change()
 
     return df
 
@@ -133,37 +146,34 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     )
     time_features = time_features.split(",")
     time_diff_features = [f"{col}_diff" for col in time_features]
+    time_rate_features = [f"{col}_rate" for col in time_features]
 
-    num_features = [col for col in all_cols if col not in cat_features + time_features]
+    num_features = [
+        col
+        for col in all_cols
+        if col not in cat_features + time_diff_features + time_rate_features
+    ]
 
     df_num_agg = df.groupby("customer_ID")[num_features].agg(
         ["first", "mean", "std", "min", "max", "last"]
     )
     df_num_agg.columns = ["_".join(x) for x in df_num_agg.columns]
 
-    # Lag Features
-    for col in time_features:
-        if "last" in col and col.replace("last", "first") in df_num_agg:
-            df_num_agg[col + "_lag_sub"] = (
-                df_num_agg[col] - df_num_agg[col.replace("last", "first")]
-            )
-            df_num_agg[col + "_lag_div"] = (
-                df_num_agg[col] / df_num_agg[col.replace("last", "first")]
-            )
-
     df_cat_agg = df.groupby("customer_ID")[cat_features].agg(
-        ["last", "nunique", "count"]
+        ["first", "last", "nunique", "count"]
     )
     df_cat_agg.columns = ["_".join(x) for x in df_cat_agg.columns]
 
-    df_time_agg = df.groupby("customer_ID")[time_diff_features].agg(
-        ["last", last_2, last_3]
-    )
+    df_time_agg = df.groupby("customer_ID")[time_diff_features].agg(["first", "last"])
     df_time_agg.columns = ["_".join(x) for x in df_time_agg.columns]
 
-    df = pd.concat([df_num_agg, df_cat_agg, df_time_agg], axis=1)
+    df_time_rate_agg = df.groupby("customer_ID")[time_rate_features].agg(
+        ("first", "last")
+    )
+    df_time_rate_agg.columns = ["_".join(x) for x in df_time_rate_agg.columns]
+    df = pd.concat([df_num_agg, df_cat_agg, df_time_agg, df_time_rate_agg], axis=1)
 
-    del df_num_agg, df_cat_agg, df_time_agg
+    del df_num_agg, df_cat_agg, df_time_agg, df_time_rate_agg
     gc.collect()
 
     return df
