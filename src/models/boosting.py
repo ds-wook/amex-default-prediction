@@ -9,7 +9,6 @@ import wandb.lightgbm as wandb_lgb
 import wandb.xgboost as wandb_xgb
 from catboost import CatBoostClassifier, Pool
 from lightgbm import Booster
-from sklearn.ensemble import HistGradientBoostingClassifier
 from xgboost import XGBClassifier
 
 from evaluation.evaluate import CatBoostEvalMetricAmex, lgb_amex_metric, xgb_amex_metric
@@ -89,12 +88,12 @@ class LightGBMTrainer(BaseModel):
         train_set = lgb.Dataset(
             X_train,
             y_train,
-            categorical_feature=self.config.dataset.selected_cat_features,
+            categorical_feature=self.config.dataset.cat_features,
         )
         valid_set = lgb.Dataset(
             X_valid,
             y_valid,
-            categorical_feature=self.config.dataset.selected_cat_features,
+            categorical_feature=self.config.dataset.cat_features,
         )
 
         model = lgb.train(
@@ -179,20 +178,4 @@ class XGBoostTrainer(BaseModel):
             callbacks=[wandb_xgb.wandb_callback()],
         )
 
-        return model
-
-
-class HistGradientBoostingTrainer(BaseModel):
-    def __init__(self, **kwargs) -> None:
-        super().__init__(**kwargs)
-
-    def _train(
-        self,
-        X_train: pd.DataFrame,
-        y_train: pd.DataFrame,
-        X_valid: Optional[pd.DataFrame] = None,
-        y_valid: Optional[pd.Series] = None,
-    ) -> HistGradientBoostingClassifier:
-        model = HistGradientBoostingClassifier(**self.config.model.params)
-        model.fit(X_train, y_train)
         return model

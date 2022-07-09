@@ -4,7 +4,7 @@ import gc
 import pandas as pd
 
 from data.dataset import split_dataset
-from features.build import build_features, add_time_diff_features, add_time_rate_features
+from features.build import build_features
 
 
 def main(args: argparse.ArgumentParser):
@@ -14,12 +14,11 @@ def main(args: argparse.ArgumentParser):
 
     for (i, ids) in enumerate(split_ids):
         test_sample = test[test.customer_ID.isin(ids)]
-        test_sample = add_time_diff_features(test_sample)
-        test_sample = add_time_rate_features(test_sample)
+
         test_agg = build_features(test_sample)
         print(i, test_agg.shape)
         test_agg.to_pickle(path + args.name + f"_{i}.pkl", compression="gzip")
-        del test_sample, test_agg
+        del test_agg
         gc.collect()
 
     del test
@@ -29,6 +28,6 @@ def main(args: argparse.ArgumentParser):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--path", type=str, default="input/amex-data-parquet/")
-    parser.add_argument("--name", type=str, default="test_time_features")
+    parser.add_argument("--name", type=str, default="test_diff_features")
     args = parser.parse_args()
     main(args)
