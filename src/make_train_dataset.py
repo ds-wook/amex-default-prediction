@@ -4,17 +4,18 @@ import gc
 import pandas as pd
 
 from data.dataset import split_dataset
-from features.build import build_features, add_time_features
+from features.build import add_diff_features, add_time_features, build_features
 
 
 def main(args: argparse.ArgumentParser):
     train = pd.read_parquet(args.path + "train.parquet")
     split_ids = split_dataset(train.customer_ID.unique(), 5)
-    path = "input/amex-lag-features/"
+    path = "input/amex-diff-features/"
 
     for (i, ids) in enumerate(split_ids):
         train_sample = train[train.customer_ID.isin(ids)]
         train_agg = add_time_features(train_sample)
+        train_agg = add_diff_features(train_sample)
         train_agg = build_features(train_sample)
 
         print(i, train_agg.shape)
@@ -45,6 +46,6 @@ def main(args: argparse.ArgumentParser):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--path", type=str, default="input/amex-data-parquet/")
-    parser.add_argument("--name", type=str, default="train_lag_features")
+    parser.add_argument("--name", type=str, default="train_diff_features")
     args = parser.parse_args()
     main(args)

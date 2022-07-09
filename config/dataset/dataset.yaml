@@ -2,7 +2,7 @@ path: input/amex-lag-features/
 is_train: true
 target: target
 train: train_lag_features.pkl
-test: test_lag_features_part
+test: test_lag_features
 drop_features: customer_ID
 cat_features:
 - B_30_last
