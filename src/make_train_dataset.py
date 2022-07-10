@@ -4,7 +4,7 @@ import gc
 import pandas as pd
 
 from data.dataset import split_dataset
-from features.build import add_diff_features, add_time_features, build_features
+from features.build import add_diff_features, build_features
 
 
 def main(args: argparse.ArgumentParser):
@@ -14,7 +14,6 @@ def main(args: argparse.ArgumentParser):
 
     for (i, ids) in enumerate(split_ids):
         train_sample = train[train.customer_ID.isin(ids)]
-        train_agg = add_time_features(train_sample)
         train_agg = add_diff_features(train_sample)
         train_agg = build_features(train_sample)
 
