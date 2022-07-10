@@ -1,7 +1,7 @@
 import gc
 import pickle
 from pathlib import Path
-from typing import List, Union
+from typing import Union
 
 import numpy as np
 import pandas as pd
@@ -67,52 +67,50 @@ def add_time_features(df: pd.DataFrame) -> pd.DataFrame:
     time_features = time_features.split(",")
 
     for col in tqdm(time_features):
-        df[f"{col}_diff"] = df.groupby("customer_ID")[col].diff()
+        df[f"{col}_diff1"] = df.groupby("customer_ID")[col].diff()
 
     return df
-
-
-def get_difference(data: pd.DataFrame, num_features: List[str]) -> pd.DataFrame:
-    df1 = []
-    customer_ids = []
-    for customer_id, df in tqdm(data.groupby(["customer_ID"])):
-        # Get the differences
-        diff_df1 = df[num_features].diff(1).iloc[[-1]].values.astype(np.float32)
-        # Append to lists
-        df1.append(diff_df1)
-        customer_ids.append(customer_id)
-    # Concatenate
-    df1 = np.concatenate(df1, axis=0)
-    # Transform to dataframe
-    df1 = pd.DataFrame(
-        df1, columns=[col + "_diff1" for col in df[num_features].columns]
-    )
-    # Add customer id
-    df1["customer_ID"] = customer_ids
-    return df1
 
 
 def build_features(df: pd.DataFrame) -> pd.DataFrame:
     # FEATURE ENGINEERING FROM
     # https://www.kaggle.com/code/huseyincot/amex-agg-data-how-it-created
-    features = df.drop(["customer_ID", "S_2"], axis=1).columns.to_list()
+    all_cols = [c for c in list(df.columns) if c not in ["customer_ID", "S_2"]]
     cat_features = (
         "B_30, B_38, D_114, D_116, D_117, D_120, D_126, D_63, D_64, D_66, D_68"
     )
 
     cat_features = cat_features.split(", ")
 
-    num_features = [col for col in features if col not in cat_features]
+    time_features = (
+        "D_39,D_41,D_47,D_45,D_46,D_48,D_54,D_59,D_61,D_62,D_75,D_96,D_105,D_112,D_124,"
+        "S_3,S_7,S_19,S_23,S_26,P_2,P_3,B_2,B_3,B_4,B_5,B_7,B_9,B_20,R_1,R_3,R_13,R_18"
+    )
+    time_features = time_features.split(",")
+    time_diff_features = [f"{col}_diff1" for col in time_features]
 
-    print("Starting training feature engineer...")
+    num_features = [
+        col for col in all_cols if col not in cat_features + time_diff_features
+    ]
+
     df_num_agg = df.groupby("customer_ID")[num_features].agg(
-        ["mean", "std", "min", "max", "last"]
+        ["first", "mean", "std", "min", "max", "last"]
     )
     df_num_agg.columns = ["_".join(x) for x in df_num_agg.columns]
     df_num_agg.reset_index(inplace=True)
 
+    # Lag Features
+    for col in time_features:
+        if "last" in col and col.replace("last", "first") in df_num_agg:
+            df_num_agg[col + "_lag_sub"] = (
+                df_num_agg[col] - df_num_agg[col.replace("last", "first")]
+            )
+            df_num_agg[col + "_lag_div"] = (
+                df_num_agg[col] / df_num_agg[col.replace("last", "first")]
+            )
+
     df_cat_agg = df.groupby("customer_ID")[cat_features].agg(
-        ["count", "last", "nunique"]
+        ["last", "nunique", "count"]
     )
     df_cat_agg.columns = ["_".join(x) for x in df_cat_agg.columns]
     df_cat_agg.reset_index(inplace=True)
@@ -127,13 +125,16 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     for col in tqdm(cols):
         df_cat_agg[col] = df_cat_agg[col].astype(np.int32)
 
-    # Get the difference
-    df_diff = get_difference(df, num_features)
+    df_diff_agg = df.groupby("customer_ID")[time_diff_features].agg(["last"])
+    df_diff_agg.columns = ["_".join(x) for x in df_diff_agg.columns]
+    df_diff_agg.columns = [x.replace("_last", "") for x in df_diff_agg.columns]
+    df_diff_agg.reset_index(inplace=True)
+
     df = df_num_agg.merge(df_cat_agg, how="inner", on="customer_ID").merge(
-        df_diff, how="inner", on="customer_ID"
+        df_diff_agg, how="inner", on="customer_ID"
     )
 
-    del df_num_agg, df_cat_agg, df_diff
+    del df_num_agg, df_cat_agg, df_diff_agg
     gc.collect()
 
     return df
@@ -144,7 +145,7 @@ def add_trick_features(df: pd.DataFrame) -> pd.DataFrame:
     Create nan feature
     Args:
         df: dataframe
-    Returns:
+    Returns:stacking neural network
         dataframe
     """
     num_cols = df.dtypes[
@@ -160,63 +161,18 @@ def add_trick_features(df: pd.DataFrame) -> pd.DataFrame:
 
 def add_diff_features(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Add features that are only available after payment.
+    Create diff feature
     Args:
-        df: DataFrame with customer_ID as index.
+        df: dataframe
     Returns:
-        DataFrame with customer_ID as index and additional features.
+        dataframe
     """
     # Get the difference between last and mean
     num_cols = [col for col in df.columns if "last" in col]
     num_cols = [col[:-5] for col in num_cols if "round" not in col]
-
     for col in num_cols:
         try:
             df[f"{col}_last_mean_diff"] = df[f"{col}_last"] - df[f"{col}_mean"]
-
         except Exception:
             pass
-
     return df
-
-
-def feature_filter(data: pd.DataFrame, threshold: float = 0.1) -> List[str]:
-    features = data.columns
-    filtered_features = []
-    for feature in features:
-        if data[feature].isnull().sum() < threshold:
-            filtered_features.append(feature)
-    return filtered_features
-
-
-def feature_correlation(
-    data: pd.DataFrame, target: pd.Series, threshold: float = 0.1
-) -> List[str]:
-    data = pd.concat([data, target], axis=1)
-    correlations = data.corr()["target"].drop("target")
-
-    # Filter the features with correlation to the target less than threshold
-    filtered_features = correlations[abs(correlations) < threshold].index.tolist()
-
-    # save memory
-    del data
-    gc.collect()
-
-    return filtered_features
-
-
-def fill_missing_values(
-    data: pd.DataFrame, imputation_method: str = "median"
-) -> pd.DataFrame:
-    data_copy = data.copy()
-    for column in data_copy.columns:
-        if data_copy[column].dtype == np.dtype("O"):
-            data_copy[column] = data_copy[column].fillna(
-                data_copy[column].mode().iloc[0]
-            )
-        else:
-            if imputation_method == "median":
-                data_copy[column] = data_copy[column].fillna(data_copy[column].median())
-            elif imputation_method == "mean":
-                data_copy[column] = data_copy[column].fillna(data_copy[column].mean())
-    return data_copy

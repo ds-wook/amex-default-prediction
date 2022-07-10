@@ -1,4 +1,4 @@
-path: input/amex-trick-features/
+path: input/amex-lag-diff-features/
 target: target
 train: train_diff_features.pkl
 test: test_diff_features

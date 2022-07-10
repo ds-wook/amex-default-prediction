@@ -15,6 +15,7 @@ from utils import reduce_mem_usage, seed_everything
 @hydra.main(config_path="../config/", config_name="train")
 def _main(cfg: DictConfig):
     seed_everything(cfg.model.params.seed)
+
     # create dataset
     train_x, train_y = load_train_dataset(cfg)
     train_x = create_categorical_train(train_x, cfg)

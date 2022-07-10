@@ -5,7 +5,7 @@ import warnings
 from abc import ABCMeta, abstractclassmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, NoReturn, Optional
 
 import lightgbm as lgb
 import numpy as np
@@ -41,13 +41,13 @@ class BaseModel(metaclass=ABCMeta):
         y_train: pd.Series,
         X_valid: Optional[pd.DataFrame] = None,
         y_valid: Optional[pd.Series] = None,
-    ):
+    ) -> NoReturn:
         """
         Trains the model.
         """
         raise NotImplementedError
 
-    def save_model(self):
+    def save_model(self) -> NoReturn:
         """
         Save model
         """

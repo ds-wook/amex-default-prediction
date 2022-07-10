@@ -43,10 +43,10 @@ def load_test_dataset(config: DictConfig, num: int = 0) -> pd.DataFrame:
     path = Path(get_original_cwd()) / config.dataset.path
     logging.info("Loading test dataset...")
     test = pd.read_pickle(path / f"{config.dataset.test}_{num}.pkl", compression="gzip")
+    test_x = test.drop(columns=[config.dataset.drop_features])
+    logging.info(f"test: {test_x.shape}")
 
-    logging.info(f"test: {test.shape}")
-
-    return test
+    return test_x
 
 
 # https://stackoverflow.com/questions/2130016/splitting-a-list-into-n-parts-of-approximately-equal-length

@@ -10,19 +10,21 @@ class AmexMetric(Metric):
         self._name = "amex-metric"
         self._maximize = True
 
-    def __call__(self, y_true, y_score):
+    def __call__(self, y_true: np.ndarray, y_score: np.ndarray) -> float:
         score = amex_metric(y_true, y_score[:, 1])
         return score
 
 
 class CatBoostEvalMetricAmex:
-    def get_final_error(self, error, weight):
+    def get_final_error(self, error: np.ndarray, weight: np.ndarray) -> np.ndarray:
         return error
 
-    def is_max_optimal(self):
+    def is_max_optimal(self) -> bool:
         return True
 
-    def evaluate(self, approxes, target, weight):
+    def evaluate(
+        self, approxes: np.ndarray, target: np.ndarray, weight: np.ndarray
+    ) -> Tuple[float, int]:
         assert len(approxes) == 1
         assert len(target) == len(approxes[0])
         preds = np.array(approxes[0])
