@@ -1,8 +1,10 @@
 import pickle
 from pathlib import Path
 
+import lightgbm as lgb
 import numpy as np
 import pandas as pd
+import xgboost as xgb
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 from tqdm import tqdm
@@ -61,7 +63,11 @@ def predict(result: ModelResult, test_x: pd.DataFrame) -> np.ndarray:
     preds_proba = np.zeros((test_x.shape[0],))
 
     for model in tqdm(result.models.values(), total=folds):
-        preds_proba += model.predict(test_x) / folds
+        preds_proba += (
+            model.predict(test_x) / folds
+            if isinstance(model, (lgb.Booster, xgb.Booster))
+            else model.predict_proba(test_x)[:, 1] / folds
+        )
 
     assert len(preds_proba) == len(test_x)
 

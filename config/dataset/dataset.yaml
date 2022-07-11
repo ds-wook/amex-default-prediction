@@ -1,7 +1,7 @@
-path: input/amex-lag-diff-features/
+path: input/amex-gradient-features/
 target: target
-train: train_diff_features.pkl
-test: test_diff_features
+train: train_gradient_features.pkl
+test: test_gradient_features
 drop_features: customer_ID
 cat_features:
 - B_30_last

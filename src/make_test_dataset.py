@@ -10,7 +10,7 @@ from features.build import add_diff_features, build_features
 def main(args: argparse.ArgumentParser):
     test = pd.read_parquet(args.path + "test.parquet")
     split_ids = split_dataset(test.customer_ID.unique(), 10)
-    path = "input/amex-lag-diff-features/"
+    path = "input/amex-gradient-features/"
 
     for (i, ids) in enumerate(split_ids):
         test_sample = test[test.customer_ID.isin(ids)]
@@ -28,6 +28,6 @@ def main(args: argparse.ArgumentParser):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--path", type=str, default="input/amex-data-parquet/")
-    parser.add_argument("--name", type=str, default="test_diff_features")
+    parser.add_argument("--name", type=str, default="test_gradient_features")
     args = parser.parse_args()
     main(args)

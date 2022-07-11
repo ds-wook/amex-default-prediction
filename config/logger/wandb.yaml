@@ -1,3 +1,3 @@
 project: amex-default-prediction
 entity: ds-wook
-name: lightgbm_diff_1
+name: lightgbm_gradient_2
