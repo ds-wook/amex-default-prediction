@@ -9,6 +9,7 @@ from omegaconf import DictConfig
 from data.dataset import load_test_dataset
 from features.build import (
     add_diff_features,
+    add_rate_features,
     add_trick_features,
     create_categorical_test,
 )
@@ -33,7 +34,7 @@ def _main(cfg: DictConfig):
         # test_sample = test_sample[cfg.features.selected_features]
         test_sample = add_trick_features(test_sample)
         test_sample = add_diff_features(test_sample)
-
+        test_sample = add_rate_features(test_sample)
         logging.info(f"Test dataset {num} predicting...")
         preds = inference(results, test_sample)
         preds_proba.extend(preds.tolist())
