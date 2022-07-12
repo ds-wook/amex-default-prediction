@@ -1,7 +1,7 @@
-path: input/amex-gradient-features/
+path: input/amex-rate-features/
 target: target
-train: train_gradient_features.pkl
-test: test_gradient_features
+train: train_rate_features.parquet
+test: test_rate_features
 drop_features: customer_ID
 cat_features:
 - B_30_last

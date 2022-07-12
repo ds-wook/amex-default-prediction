@@ -12,7 +12,7 @@ from features.build import (
     add_trick_features,
     create_categorical_test,
 )
-from models.infer import load_model, predict
+from models.infer import inference, load_model
 from utils import seed_everything
 
 
@@ -35,7 +35,7 @@ def _main(cfg: DictConfig):
         test_sample = add_diff_features(test_sample)
 
         logging.info(f"Test dataset {num} predicting...")
-        preds = predict(results, test_sample)
+        preds = inference(results, test_sample)
         preds_proba.extend(preds.tolist())
 
     submit = pd.read_csv(path / cfg.output.submit)

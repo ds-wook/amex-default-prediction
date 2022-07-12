@@ -9,13 +9,11 @@ input:
   train_labels: train_labels.csv
 model:
   path: res/models/
-  lgbm_oof: 5fold_lightgbm_time_feature_trick.pkl
-  tabnet_oof: 5fold_lightgbm_trick.pkl
+  model1_oof: 5fold_lightgbm_time_diff_features.pkl
+  model2_oof: 5fold_lightgbm_gradient_features.pkl
 output:
   name: output
   submission: sample_submission.csv
-  lgbm_preds: 5fold_lightgbm_dart_seed42.csv
-  tabnet_preds: 5fold_lightgbm_trick.csv
-  ensemble_preds: ensemble_preds.csv
-  lb_preds: lb_best_ensemble.csv
+  model1_preds: 5fold_lightgbm_time_diff_features.csv
+  model2_preds: 5fold_lightgbm_gradient_features.csv
   preds: gradient_ensemble.csv

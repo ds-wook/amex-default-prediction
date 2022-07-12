@@ -28,28 +28,7 @@ def load_model(config: DictConfig, model_name: str) -> ModelResult:
     return model_result
 
 
-def predict_proba(result: ModelResult, test_x: pd.DataFrame) -> np.ndarray:
-    """
-    Given a model, predict probabilities for each class.
-    Args:
-        model_results: ModelResult object
-        test_x: test dataframe
-    Returns:
-        predict probabilities for each class
-    """
-
-    folds = len(result.models)
-    preds_proba = np.zeros((test_x.shape[0],))
-
-    for model in tqdm(result.models.values(), total=folds):
-        preds_proba += model.predict_proba(test_x)[:, 1] / folds
-
-    assert len(preds_proba) == len(test_x)
-
-    return preds_proba
-
-
-def predict(result: ModelResult, test_x: pd.DataFrame) -> np.ndarray:
+def inference(result: ModelResult, test_x: pd.DataFrame) -> np.ndarray:
     """
     Given a model, predict probabilities for each class.
     Args:

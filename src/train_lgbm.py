@@ -6,6 +6,7 @@ from evaluation.evaluate import amex_metric
 from features.build import (
     add_diff_features,
     add_trick_features,
+    add_rate_features,
     create_categorical_train,
 )
 from models.boosting import LightGBMTrainer
@@ -22,6 +23,7 @@ def _main(cfg: DictConfig):
     # train_x = train_x[cfg.features.selected_features]
     train_x = add_trick_features(train_x)
     train_x = add_diff_features(train_x)
+    train_x = add_rate_features(train_x)
     train_x = reduce_mem_usage(train_x)
 
     # train model
