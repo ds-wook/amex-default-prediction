@@ -21,12 +21,12 @@ def main(args: argparse.ArgumentParser):
 
         if args.type == "pkl":
             train_agg.to_pickle(path + args.name + f"_{i}.pkl", compression="gzip")
-            del train_agg
-            gc.collect()
+
         else:
             train_agg.to_parquet(path + args.name + f"_{i}.parquet")
-            del train_agg
-            gc.collect()
+
+        del train_agg
+        gc.collect()
 
     if args.type == "pkl":
         train_sample0 = pd.read_pickle(path + args.name + "_0.pkl", compression="gzip")
