@@ -48,10 +48,6 @@ def main(args: argparse.ArgumentParser):
         train.to_pickle(path + args.name + ".pkl", compression="gzip")
 
     else:
-        train_agg.to_parquet(path + args.name + f"_{i}.parquet")
-        del train_agg
-        gc.collect()
-
         train_sample0 = pd.read_parquet(path + args.name + "_0.parquet")
         train_sample1 = pd.read_parquet(path + args.name + "_1.parquet")
         train_sample2 = pd.read_parquet(path + args.name + "_2.parquet")
