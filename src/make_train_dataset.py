@@ -23,81 +23,52 @@ def main(args: argparse.ArgumentParser):
             train_agg.to_pickle(path + args.name + f"_{i}.pkl", compression="gzip")
             del train_agg
             gc.collect()
-
-            train_sample0 = pd.read_pickle(
-                path + args.name + "_0.pkl", compression="gzip"
-            )
-            train_sample1 = pd.read_pickle(
-                path + args.name + "_1.pkl", compression="gzip"
-            )
-            train_sample2 = pd.read_pickle(
-                path + args.name + "_2.pkl", compression="gzip"
-            )
-            train_sample3 = pd.read_pickle(
-                path + args.name + "_3.pkl", compression="gzip"
-            )
-            train_sample4 = pd.read_pickle(
-                path + args.name + "_4.pkl", compression="gzip"
-            )
-
-            train = pd.concat(
-                [
-                    train_sample0,
-                    train_sample1,
-                    train_sample2,
-                    train_sample3,
-                    train_sample4,
-                ],
-                axis=0,
-            )
-            del (
-                train_sample0,
-                train_sample1,
-                train_sample2,
-                train_sample3,
-                train_sample4,
-            )
-            gc.collect()
-
-            label = pd.read_csv("input/amex-default-prediction/train_labels.csv")
-            train = pd.merge(train, label, on="customer_ID")
-            print(train.shape)
-            train.to_pickle(path + args.name + ".pkl", compression="gzip")
-
         else:
             train_agg.to_parquet(path + args.name + f"_{i}.parquet")
             del train_agg
             gc.collect()
 
-            train_sample0 = pd.read_parquet(path + args.name + "_0.parquet")
-            train_sample1 = pd.read_parquet(path + args.name + "_1.parquet")
-            train_sample2 = pd.read_parquet(path + args.name + "_2.parquet")
-            train_sample3 = pd.read_parquet(path + args.name + "_3.parquet")
-            train_sample4 = pd.read_parquet(path + args.name + "_4.parquet")
+    if args.type == "pkl":
+        train_sample0 = pd.read_pickle(path + args.name + "_0.pkl", compression="gzip")
+        train_sample1 = pd.read_pickle(path + args.name + "_1.pkl", compression="gzip")
+        train_sample2 = pd.read_pickle(path + args.name + "_2.pkl", compression="gzip")
+        train_sample3 = pd.read_pickle(path + args.name + "_3.pkl", compression="gzip")
+        train_sample4 = pd.read_pickle(path + args.name + "_4.pkl", compression="gzip")
 
-            train = pd.concat(
-                [
-                    train_sample0,
-                    train_sample1,
-                    train_sample2,
-                    train_sample3,
-                    train_sample4,
-                ],
-                axis=0,
-            )
-            del (
-                train_sample0,
-                train_sample1,
-                train_sample2,
-                train_sample3,
-                train_sample4,
-            )
-            gc.collect()
+        train = pd.concat(
+            [train_sample0, train_sample1, train_sample2, train_sample3, train_sample4],
+            axis=0,
+        )
+        del (train_sample0, train_sample1, train_sample2, train_sample3, train_sample4)
+        gc.collect()
 
-            label = pd.read_csv("input/amex-default-prediction/train_labels.csv")
-            train = pd.merge(train, label, on="customer_ID")
-            print(train.shape)
-            train.to_parquet(path + args.name + ".parquet")
+        label = pd.read_csv("input/amex-default-prediction/train_labels.csv")
+        train = pd.merge(train, label, on="customer_ID")
+        print(train.shape)
+        train.to_pickle(path + args.name + ".pkl", compression="gzip")
+
+    else:
+        train_agg.to_parquet(path + args.name + f"_{i}.parquet")
+        del train_agg
+        gc.collect()
+
+        train_sample0 = pd.read_parquet(path + args.name + "_0.parquet")
+        train_sample1 = pd.read_parquet(path + args.name + "_1.parquet")
+        train_sample2 = pd.read_parquet(path + args.name + "_2.parquet")
+        train_sample3 = pd.read_parquet(path + args.name + "_3.parquet")
+        train_sample4 = pd.read_parquet(path + args.name + "_4.parquet")
+
+        train = pd.concat(
+            [train_sample0, train_sample1, train_sample2, train_sample3, train_sample4],
+            axis=0,
+        )
+        del (train_sample0, train_sample1, train_sample2, train_sample3, train_sample4)
+        gc.collect()
+
+        label = pd.read_csv("input/amex-default-prediction/train_labels.csv")
+        train = pd.merge(train, label, on="customer_ID")
+        print(train.shape)
+        train.to_parquet(path + args.name + ".parquet")
 
 
 if __name__ == "__main__":
