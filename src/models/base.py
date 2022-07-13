@@ -106,7 +106,7 @@ class BaseModel(metaclass=ABCMeta):
 
             scores[f"fold_{fold}"] = score
 
-            wandb.log({f"fold_{fold} score": score})
+            wandb.log({"fold score": score})
 
             if not self.search:
                 logging.info(f"Fold {fold}: {score}")

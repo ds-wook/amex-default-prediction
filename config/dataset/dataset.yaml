@@ -1,7 +1,8 @@
-path: input/amex-rate-features/
+path: input/amex-diff-features/
 target: target
-train: train_rate_features.parquet
-test: test_rate_features
+train: train_diff_features
+test: test_diff_features
+type: .parquet
 drop_features: customer_ID
 cat_features:
 - B_30_last

@@ -6,7 +6,7 @@ import pandas as pd
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 
-from data.dataset import load_test_dataset
+from data.dataset import load_test_dataset, load_test_dataset_parquet
 from features.build import (
     add_diff_features,
     add_rate_features,
@@ -29,7 +29,11 @@ def _main(cfg: DictConfig):
 
     for num in range(10):
         seed_everything(cfg.model.params.seed)
-        test_sample = load_test_dataset(cfg, num)
+        test_sample = (
+            load_test_dataset(cfg, num)
+            if cfg.dataset.type == ".pkl"
+            else load_test_dataset_parquet(cfg, num)
+        )
         test_sample = create_categorical_test(test_sample, cfg)
         # test_sample = test_sample[cfg.features.selected_features]
         test_sample = add_trick_features(test_sample)

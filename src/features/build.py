@@ -237,7 +237,7 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     df_cat_agg.reset_index(inplace=True)
 
     # gradient features
-    df_grad_agg = add_gradient_features(df, time_features)
+    # df_grad_agg = add_gradient_features(df, time_features)
 
     # Transform int64 columns to int32
     cols = list(df_num_agg.dtypes[df_num_agg.dtypes == "float64"].index)
@@ -253,11 +253,12 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
 
     df = (
         df_num_agg.merge(df_cat_agg, how="inner", on="customer_ID")
-        .merge(df_grad_agg, how="inner", on="customer_ID")
         .merge(df_diff, how="inner", on="customer_ID")
+        # .merge(df_grad_agg, how="inner", on="customer_ID")
     )
 
-    del df_num_agg, df_cat_agg, df_diff, df_grad_agg
+    # del df_num_agg, df_cat_agg, df_diff, df_grad_agg
+    del df_num_agg, df_cat_agg, df_diff
     gc.collect()
 
     return df

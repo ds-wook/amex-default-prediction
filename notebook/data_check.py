@@ -12,7 +12,7 @@ lgbm = pd.read_csv("../output/gradient_ensemble.csv")
 lgbm.head()
 # %%
 ensemble_preds["prediction"] = (
-    0.7 * ensemble_preds["prediction"] + 0.3 * lgbm["prediction"]
+    0.5 * ensemble_preds["prediction"] + 0.5 * lgbm["prediction"]
 )
 ensemble_preds.head()
 # %%

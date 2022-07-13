@@ -11,9 +11,11 @@ model:
   path: res/models/
   model1_oof: 5fold_lightgbm_time_diff_features.pkl
   model2_oof: 5fold_lightgbm_gradient_features.pkl
+  model3_oof: 5fold_lightgbm_rate_features.pkl
 output:
   name: output
   submission: sample_submission.csv
   model1_preds: 5fold_lightgbm_time_diff_features.csv
   model2_preds: 5fold_lightgbm_gradient_features.csv
+  model3_preds: 5fold_lightgbm_rate_features.csv
   preds: gradient_ensemble.csv
