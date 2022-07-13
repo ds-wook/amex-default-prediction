@@ -1,7 +1,7 @@
-path: input/amex-diff-features/
+path: input/amex-rate-features/
 target: target
-train: train_diff_features
-test: test_diff_features
+train: train_rate_features
+test: test_rate_features
 type: parquet
 drop_features: customer_ID
 cat_features:
