@@ -19,3 +19,8 @@ ensemble_preds.head()
 ensemble_preds.to_csv("../output/ensemble_gradient_lightgbm.csv", index=False)
 
 # %%
+x = np.array([[2, 3, 6], [32, 4, 56]])
+x
+# %%
+np.gradient(x, axis=0)
+# %%
