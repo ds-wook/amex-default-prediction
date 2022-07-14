@@ -28,6 +28,7 @@ def _main(cfg: DictConfig):
     # train_x = train_x[cfg.features.selected_features]
     train_x = add_trick_features(train_x)
     train_x = add_diff_features(train_x)
+
     # train_x = add_rate_features(train_x)
     # train_x = reduce_mem_usage(train_x)
 
