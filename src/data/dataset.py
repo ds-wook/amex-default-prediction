@@ -24,7 +24,7 @@ def load_train_dataset(config: DictConfig) -> Tuple[pd.DataFrame, pd.Series]:
     logging.info("Loading train dataset...")
 
     train = pd.read_pickle(
-        path / f"{config.dataset.train}{config.dataset.type}", compression="gzip"
+        path / f"{config.dataset.train}.{config.dataset.type}", compression="gzip"
     )
     train_y = train[config.dataset.target]
     train_x = train.drop(columns=[config.dataset.drop_features, config.dataset.target])
@@ -46,7 +46,7 @@ def load_train_dataset_parquet(config: DictConfig) -> Tuple[pd.DataFrame, pd.Ser
     path = Path(get_original_cwd()) / config.dataset.path
     logging.info("Loading train dataset...")
 
-    train = pd.read_parquet(path / f"{config.dataset.train}{config.dataset.type}")
+    train = pd.read_parquet(path / f"{config.dataset.train}.{config.dataset.type}")
     train_y = train[config.dataset.target]
     train_x = train.drop(columns=[config.dataset.drop_features, config.dataset.target])
 
@@ -66,7 +66,7 @@ def load_test_dataset(config: DictConfig, num: int = 0) -> pd.DataFrame:
     path = Path(get_original_cwd()) / config.dataset.path
     logging.info("Loading test dataset...")
     test = pd.read_pickle(
-        path / f"{config.dataset.test}_{num}{config.dataset.type}", compression="gzip"
+        path / f"{config.dataset.test}_{num}.{config.dataset.type}", compression="gzip"
     )
     test_x = test.drop(columns=[config.dataset.drop_features])
     logging.info(f"test: {test_x.shape}")
@@ -84,7 +84,7 @@ def load_test_dataset_parquet(config: DictConfig, num: int = 0) -> pd.DataFrame:
     """
     path = Path(get_original_cwd()) / config.dataset.path
     logging.info("Loading test dataset...")
-    test = pd.read_parquet(path / f"{config.dataset.test}_{num}{config.dataset.type}")
+    test = pd.read_parquet(path / f"{config.dataset.test}_{num}.{config.dataset.type}")
     test_x = test.drop(columns=[config.dataset.drop_features])
     logging.info(f"test: {test_x.shape}")
 

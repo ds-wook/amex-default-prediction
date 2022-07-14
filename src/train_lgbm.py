@@ -5,13 +5,12 @@ from data.dataset import load_train_dataset, load_train_dataset_parquet
 from evaluation.evaluate import amex_metric
 from features.build import (
     add_diff_features,
+    add_rate_features,
     add_trick_features,
     create_categorical_train,
 )
 from models.boosting import LightGBMTrainer
 from utils import seed_everything
-
-# from utils import reduce_mem_usage, seed_everything
 
 
 @hydra.main(config_path="../config/", config_name="train")
@@ -21,14 +20,13 @@ def _main(cfg: DictConfig):
     # create dataset
     train_x, train_y = (
         load_train_dataset(cfg)
-        if cfg.dataset.type == ".pkl"
+        if cfg.dataset.type == "pkl"
         else load_train_dataset_parquet(cfg)
     )
     train_x = create_categorical_train(train_x, cfg)
     # train_x = train_x[cfg.features.selected_features]
     train_x = add_trick_features(train_x)
     train_x = add_diff_features(train_x)
-
     # train_x = add_rate_features(train_x)
     # train_x = reduce_mem_usage(train_x)
 

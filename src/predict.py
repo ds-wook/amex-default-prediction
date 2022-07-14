@@ -31,7 +31,7 @@ def _main(cfg: DictConfig):
         seed_everything(cfg.model.params.seed)
         test_sample = (
             load_test_dataset(cfg, num)
-            if cfg.dataset.type == ".pkl"
+            if cfg.dataset.type == "pkl"
             else load_test_dataset_parquet(cfg, num)
         )
         test_sample = create_categorical_test(test_sample, cfg)

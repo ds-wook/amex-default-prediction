@@ -19,3 +19,6 @@ ensemble_preds.head()
 ensemble_preds.to_csv("../output/ensemble_gradient_lightgbm.csv", index=False)
 
 # %%
+train = pd.read_parquet("../input/amex-data-parquet/train.parquet")
+train.head()
+# %%
