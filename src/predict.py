@@ -14,7 +14,7 @@ from features.build import (
     create_categorical_test,
 )
 from models.infer import inference, load_model
-from utils import seed_everything
+from utils import reduce_float_memory, seed_everything
 
 
 @hydra.main(config_path="../config/", config_name="predict")
@@ -39,6 +39,7 @@ def _main(cfg: DictConfig):
         test_sample = add_trick_features(test_sample)
         test_sample = add_diff_features(test_sample)
         test_sample = add_rate_features(test_sample)
+        test_sample = reduce_float_memory(test_sample)
         logging.info(f"Test dataset {num} predicting...")
         preds = inference(results, test_sample)
         preds_proba.extend(preds.tolist())

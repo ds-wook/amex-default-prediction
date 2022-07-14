@@ -10,7 +10,7 @@ from features.build import (
     create_categorical_train,
 )
 from models.boosting import LightGBMTrainer
-from utils import seed_everything
+from utils import reduce_float_memory, seed_everything
 
 
 @hydra.main(config_path="../config/", config_name="train")
@@ -28,7 +28,7 @@ def _main(cfg: DictConfig):
     train_x = add_trick_features(train_x)
     train_x = add_diff_features(train_x)
     train_x = add_rate_features(train_x)
-    # train_x = reduce_mem_usage(train_x)
+    train_x = reduce_float_memory(train_x)
 
     # train model
     lgb_trainer = LightGBMTrainer(config=cfg, metric=amex_metric)
