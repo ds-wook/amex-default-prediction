@@ -8,7 +8,7 @@ from omegaconf import DictConfig
 
 from data.dataset import load_test_dataset, load_test_dataset_parquet
 from models.infer import inference, load_model
-from utils import reduce_float_memory, seed_everything
+from utils import reduce_mem_usage, seed_everything
 
 
 @hydra.main(config_path="../config/", config_name="predict")
@@ -30,7 +30,7 @@ def _main(cfg: DictConfig):
         )
 
         # test_sample = test_sample[cfg.features.selected_features]
-        test_sample = reduce_float_memory(test_sample)
+        test_sample = reduce_mem_usage(test_sample)
         logging.info(f"Test dataset {num} predicting...")
         preds = inference(results, test_sample)
         preds_proba.extend(preds.tolist())

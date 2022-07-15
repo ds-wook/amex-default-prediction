@@ -68,17 +68,25 @@ def _main(cfg: DictConfig):
     lgbm_oofs1 = load_model(cfg, cfg.model.model1_oof)
     lgbm_oofs2 = load_model(cfg, cfg.model.model2_oof)
     lgbm_oofs3 = load_model(cfg, cfg.model.model3_oof)
+    lgbm_oofs4 = load_model(cfg, cfg.model.model4_oof)
 
     lgbm_preds1 = pd.read_csv(path / cfg.output.name / cfg.output.model1_preds)
     lgbm_preds2 = pd.read_csv(path / cfg.output.name / cfg.output.model2_preds)
     lgbm_preds3 = pd.read_csv(path / cfg.output.name / cfg.output.model3_preds)
+    lgbm_preds4 = pd.read_csv(path / cfg.output.name / cfg.output.model4_preds)
 
-    oofs = [lgbm_oofs1.oof_preds, lgbm_oofs2.oof_preds, lgbm_oofs3.oof_preds]
+    oofs = [
+        lgbm_oofs1.oof_preds,
+        lgbm_oofs2.oof_preds,
+        lgbm_oofs3.oof_preds,
+        lgbm_oofs4.oof_preds,
+    ]
 
     preds = [
         lgbm_preds1.prediction.to_numpy(),
         lgbm_preds2.prediction.to_numpy(),
         lgbm_preds3.prediction.to_numpy(),
+        lgbm_preds4.prediction.to_numpy(),
     ]
 
     best_weights = get_best_weights(oofs, target.to_numpy())

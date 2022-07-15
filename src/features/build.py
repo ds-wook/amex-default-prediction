@@ -196,7 +196,7 @@ def add_trick_features(df: pd.DataFrame) -> pd.DataFrame:
     num_cols = df.dtypes[
         (df.dtypes == "float32") | (df.dtypes == "float64")
     ].index.to_list()
-    num_cols = [col for col in num_cols if "last" in col or "first" in col]
+    num_cols = [col for col in num_cols if "last" in col or "mean" in col]
 
     for col in num_cols:
         df[col + "_round2"] = df[col].round(2)
@@ -225,7 +225,7 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     df_diff = get_difference(df, num_features)
 
     df_num_agg = df.groupby("customer_ID")[num_features].agg(
-        ["first", "mean", "std", "min", "max", "last"]
+        ["mean", "std", "min", "max", "last"]
     )
     df_num_agg.columns = ["_".join(x) for x in df_num_agg.columns]
     df_num_agg.reset_index(inplace=True)
