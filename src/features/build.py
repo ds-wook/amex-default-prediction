@@ -196,7 +196,7 @@ def add_trick_features(df: pd.DataFrame) -> pd.DataFrame:
     num_cols = df.dtypes[
         (df.dtypes == "float32") | (df.dtypes == "float64")
     ].index.to_list()
-    num_cols = [col for col in num_cols if "last" in col]
+    num_cols = [col for col in num_cols if "last" in col or "first" in col]
 
     for col in num_cols:
         df[col + "_round2"] = df[col].round(2)
@@ -225,7 +225,7 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     df_diff = get_difference(df, num_features)
 
     df_num_agg = df.groupby("customer_ID")[num_features].agg(
-        ["mean", "std", "min", "max", "last"]
+        ["first", "mean", "std", "min", "max", "last"]
     )
     df_num_agg.columns = ["_".join(x) for x in df_num_agg.columns]
     df_num_agg.reset_index(inplace=True)
@@ -237,7 +237,7 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     df_cat_agg.reset_index(inplace=True)
 
     # gradient features
-    df_grad_agg = add_gradient_features(df, time_features)
+    # df_grad_agg = add_gradient_features(df, time_features)
 
     # Transform int64 columns to int32
     cols = list(df_num_agg.dtypes[df_num_agg.dtypes == "float64"].index)
@@ -254,11 +254,11 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     df = (
         df_num_agg.merge(df_cat_agg, how="inner", on="customer_ID")
         .merge(df_diff, how="inner", on="customer_ID")
-        .merge(df_grad_agg, how="inner", on="customer_ID")
+        # .merge(df_grad_agg, how="inner", on="customer_ID")
     )
 
-    del df_num_agg, df_cat_agg, df_diff, df_grad_agg
-    # del df_num_agg, df_cat_agg, df_diff
+    # del df_num_agg, df_cat_agg, df_diff, df_grad_agg
+    del df_num_agg, df_cat_agg, df_diff
     gc.collect()
 
     return df

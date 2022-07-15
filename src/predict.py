@@ -7,12 +7,6 @@ from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 
 from data.dataset import load_test_dataset, load_test_dataset_parquet
-from features.build import (
-    add_diff_features,
-    add_rate_features,
-    add_trick_features,
-    create_categorical_test,
-)
 from models.infer import inference, load_model
 from utils import reduce_float_memory, seed_everything
 
@@ -34,11 +28,8 @@ def _main(cfg: DictConfig):
             if cfg.dataset.type == "pkl"
             else load_test_dataset_parquet(cfg, num)
         )
-        test_sample = create_categorical_test(test_sample, cfg)
+
         # test_sample = test_sample[cfg.features.selected_features]
-        test_sample = add_trick_features(test_sample)
-        test_sample = add_diff_features(test_sample)
-        test_sample = add_rate_features(test_sample)
         test_sample = reduce_float_memory(test_sample)
         logging.info(f"Test dataset {num} predicting...")
         preds = inference(results, test_sample)
