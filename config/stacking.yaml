@@ -4,48 +4,20 @@ hydra:
   output_subdir: null
   job:
     chdir: True
-dataset:
-  path: input/amex-default-prediction
-  train_label: train_labels.csv
-  drop_features: customer_ID
-  target: target
 input:
-  path: res/models
-  oof_pred1: 10fold_lightgbm_dart.pkl
-  oof_pred2: 10fold_lightgbm_trick_selected.pkl
-  oof_pred3: 10fold_lightgbm_pay_features.pkl
-  oof_pred4: 10fold_lightgbm_pay_features_te.pkl
-output:
-  path: output
-  train: lightgbm_meta.csv
-  test: lightgbm_preds.csv
-  name: stacking_preds.csv
-  preds1: 10fold_lightgbm_dart.csv
-  preds2: 10fold_lightgbm_trick_selected.csv
-  preds3: 10fold_lightgbm_pay_features.csv
-  preds4: 10fold_lightgbm_pay_features_te.csv
-experiment:
-  project: amex-default-prediction
-  entity: ds-wook
-  name: xgboost_stacking_1
+  name: input/amex-default-prediction
+  train_labels: train_labels.csv
 model:
-  fold: 10
-  params:
-    booster: dart
-    colsample_bytree: 0.4
-    gamma: 0.07
-    learning_rate: 0.03
-    max_depth: 2
-    min_child_weight: 5
-    n_estimators: 200
-    n_jobs: -1
-    objective: binary:logistic
-    reg_alpha: 0.3
-    reg_lambda: 0.8
-    subsample: 0.8
   path: res/models/
-  name: 10fold_xgboost_stacking.pkl
-  early_stopping_rounds: 100
-  search: False
-  seed: 42
-  verbose: 100
+  model1_oof: 5fold_lightgbm_time_diff_features_seed42.pkl
+  model2_oof: 5fold_lightgbm_gradient_features_seed42.pkl
+  model3_oof: 5fold_lightgbm_rate_features_seed42.pkl
+  model4_oof: 5fold_lightgbm_trick_features_seed42.pkl
+output:
+  name: output
+  submission: sample_submission.csv
+  model1_preds: 5fold_lightgbm_time_diff_features_seed42.csv
+  model2_preds: 5fold_lightgbm_gradient_features_seed42.csv
+  model3_preds: 5fold_lightgbm_rate_features_seed42.csv
+  model4_preds: 5fold_lightgbm_trick_features_seed42.csv
+  preds: stacking_ensemble.csv

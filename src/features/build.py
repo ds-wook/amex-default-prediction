@@ -145,26 +145,6 @@ def add_pay_features(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def add_fft_features(df: pd.DataFrame, time_features: List[str]) -> pd.DataFrame:
-    """
-    Create fft features
-    Args:
-        df: datafram
-        time_features: list of time features
-    Returns:
-        dataframe
-    """
-    df_fft = (
-        df.loc[:, time_features + ["customer_ID"]]
-        .groupby(["customer_ID"])
-        .progress_apply(lambda x: np.fft.fft(x, axis=0)[-1])
-    )
-    cols = [col + "_fft" for col in df[time_features].columns]
-    df_fft = pd.DataFrame(df_fft.values.tolist(), columns=cols, index=df_fft.index)
-    df_fft.reset_index(inplace=True)
-    return df_fft
-
-
 def add_gradient_features(df: pd.DataFrame, time_features: List[str]) -> pd.DataFrame:
     """
     Create gradient features
@@ -196,7 +176,7 @@ def add_trick_features(df: pd.DataFrame) -> pd.DataFrame:
     num_cols = df.dtypes[
         (df.dtypes == "float32") | (df.dtypes == "float64")
     ].index.to_list()
-    num_cols = [col for col in num_cols if "last" in col or "mean" in col]
+    num_cols = [col for col in num_cols if "last" in col or "first" in col]
 
     for col in num_cols:
         df[col + "_round2"] = df[col].round(2)
@@ -213,19 +193,13 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     cat_features = cat_features.split(", ")
-
-    time_features = (
-        "D_39,D_41,D_47,D_45,D_46,D_48,D_54,D_59,D_61,D_62,D_75,D_96,D_105,D_112,D_124,"
-        "S_3,S_7,S_19,S_23,S_26,P_2,P_3,B_2,B_3,B_4,B_5,B_7,B_9,B_20,R_1,R_3,R_13,R_18"
-    )
-    time_features = time_features.split(",")
     num_features = [col for col in all_cols if col not in cat_features]
 
     # Get the difference
     df_diff = get_difference(df, num_features)
 
     df_num_agg = df.groupby("customer_ID")[num_features].agg(
-        ["mean", "std", "min", "max", "last"]
+        ["first", "mean", "std", "min", "max", "last"]
     )
     df_num_agg.columns = ["_".join(x) for x in df_num_agg.columns]
     df_num_agg.reset_index(inplace=True)
@@ -235,9 +209,6 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     )
     df_cat_agg.columns = ["_".join(x) for x in df_cat_agg.columns]
     df_cat_agg.reset_index(inplace=True)
-
-    # gradient features
-    # df_grad_agg = add_gradient_features(df, time_features)
 
     # Transform int64 columns to int32
     cols = list(df_num_agg.dtypes[df_num_agg.dtypes == "float64"].index)
@@ -254,10 +225,8 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     df = (
         df_num_agg.merge(df_cat_agg, how="inner", on="customer_ID")
         .merge(df_diff, how="inner", on="customer_ID")
-        # .merge(df_grad_agg, how="inner", on="customer_ID")
     )
 
-    # del df_num_agg, df_cat_agg, df_diff, df_grad_agg
     del df_num_agg, df_cat_agg, df_diff
     gc.collect()
 

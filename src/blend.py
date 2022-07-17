@@ -94,6 +94,9 @@ def _main(cfg: DictConfig):
     oof_preds = np.average(oofs, weights=best_weights, axis=0)
     print(amex_metric(target.to_numpy(), lgbm_oofs1.oof_preds))
     print(amex_metric(target.to_numpy(), lgbm_oofs2.oof_preds))
+    print(amex_metric(target.to_numpy(), lgbm_oofs3.oof_preds))
+    print(amex_metric(target.to_numpy(), lgbm_oofs4.oof_preds))
+
     print(f"OOF Score: {amex_metric(target.to_numpy(), oof_preds)}")
 
     blending_preds = np.average(preds, weights=best_weights, axis=0)

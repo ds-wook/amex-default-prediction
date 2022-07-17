@@ -17,9 +17,9 @@ This repository is the code that placed ?th [American Express - Default Predicti
 |LightGBM(10-stratified kfold pay-features - all - dart) - trick|0.7961|0.797|
 |LightGBM(5-stratified kfold - dart) - trick|0.7960|0.797|
 |LightGBM(5-stratified kfold time-features - shap - dart) - trick|0.7970|0.797|
-|LightGBM(5-stratified kfold time-lag-features - dart) - trick|**0.7973**|0.797|
-|LightGBM(5-stratified kfold diff-features - dart) - trick|**0.7973**|**0.799**|
-|LightGBM(5-stratified kfold gradient-features - dart) - trick|-|-|
+|LightGBM(5-stratified kfold time-lag-features - dart) - trick|0.7973|0.797|
+|LightGBM(5-stratified kfold diff-features - dart) - trick|0.7973|**0.799**|
+|LightGBM(5-stratified kfold trick-features - dart) - trick|**0.7978**|0.798|
 ### Project Organization
 ```
 ├── LICENSE

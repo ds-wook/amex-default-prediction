@@ -4,7 +4,7 @@ import gc
 import pandas as pd
 
 from data.dataset import split_dataset
-from features.build import add_diff_features, build_features
+from features.build import build_features
 
 
 def main(args: argparse.ArgumentParser):
@@ -14,7 +14,6 @@ def main(args: argparse.ArgumentParser):
 
     for (i, ids) in enumerate(split_ids):
         test_sample = test[test.customer_ID.isin(ids)]
-        test_agg = add_diff_features(test_sample)
         test_agg = build_features(test_sample)
         print(i, test_agg.shape)
 

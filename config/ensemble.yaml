@@ -12,12 +12,12 @@ model:
   model1_oof: 5fold_lightgbm_time_diff_features_seed42.pkl
   model2_oof: 5fold_lightgbm_gradient_features_seed42.pkl
   model3_oof: 5fold_lightgbm_rate_features_seed42.pkl
-  model4_oof: 5fold_lightgbm_rate_features_seed52.pkl
+  model4_oof: 5fold_lightgbm_trick_features_seed42.pkl
 output:
   name: output
   submission: sample_submission.csv
   model1_preds: 5fold_lightgbm_time_diff_features_seed42.csv
   model2_preds: 5fold_lightgbm_gradient_features_seed42.csv
   model3_preds: 5fold_lightgbm_rate_features_seed42.csv
-  model4_preds: 5fold_lightgbm_rate_features_seed52.csv
+  model4_preds: 5fold_lightgbm_trick_features_seed42.csv
   preds: gradient_ensemble.csv
