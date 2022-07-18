@@ -99,7 +99,7 @@ class BaseModel(metaclass=ABCMeta):
                 model.predict(X_valid)
                 if isinstance(model, lgb.Booster)
                 else model.predict(xgb.DMatrix(X_valid))
-                if np.isinstance(model, xgb.Booster)
+                if isinstance(model, xgb.Booster)
                 else model.predict_proba(X_valid)[:, 1]
             )
 
