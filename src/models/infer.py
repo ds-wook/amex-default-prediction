@@ -44,7 +44,9 @@ def inference(result: ModelResult, test_x: pd.DataFrame) -> np.ndarray:
     for model in tqdm(result.models.values(), total=folds):
         preds_proba += (
             model.predict(test_x) / folds
-            if isinstance(model, (lgb.Booster, xgb.Booster))
+            if isinstance(model, lgb.Booster)
+            else model.predict(xgb.DMatrix(test_x)) / folds
+            if isinstance(model, xgb.Booster)
             else model.predict_proba(test_x)[:, 1] / folds
         )
 

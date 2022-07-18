@@ -97,7 +97,9 @@ class BaseModel(metaclass=ABCMeta):
             # validation
             oof_preds[valid_idx] = (
                 model.predict(X_valid)
-                if isinstance(model, (lgb.Booster, xgb.Booster))
+                if isinstance(model, lgb.Booster)
+                else model.predict(xgb.DMatrix(X_valid))
+                if np.isinstance(model, xgb.Booster)
                 else model.predict_proba(X_valid)[:, 1]
             )
 

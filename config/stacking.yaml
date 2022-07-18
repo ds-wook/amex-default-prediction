@@ -12,12 +12,29 @@ model:
   model1_oof: 5fold_lightgbm_time_diff_features_seed42.pkl
   model2_oof: 5fold_lightgbm_gradient_features_seed42.pkl
   model3_oof: 5fold_lightgbm_rate_features_seed42.pkl
-  model4_oof: 5fold_lightgbm_trick_features_seed42.pkl
+  model4_oof: 5fold_lightgbm_trick_features_seed94.pkl
+  model5_oof: 5fold_lightgbm_time_feature_trick.pkl
+  model6_oof: 5fold_lightgbm_time_features_dart.pkl
+  model7_oof: 10fold_lightgbm_pay_features_cross_last_gbdt.pkl
+  model8_oof: 10fold_lightgbm_pay_features_cross_last_dart.pkl
+  model9_oof: 10fold_lightgbm_pay_features_last.pkl
+  model10_oof: 5fold_lightgbm_rate_features_seed42.pkl
 output:
   name: output
   submission: sample_submission.csv
   model1_preds: 5fold_lightgbm_time_diff_features_seed42.csv
   model2_preds: 5fold_lightgbm_gradient_features_seed42.csv
   model3_preds: 5fold_lightgbm_rate_features_seed42.csv
-  model4_preds: 5fold_lightgbm_trick_features_seed42.csv
+  model4_preds: 5fold_lightgbm_trick_features_seed94.csv
+  model5_preds: 5fold_lightgbm_time_feature_trick.csv
+  model6_preds: 5fold_lightgbm_time_features_dart.csv
+  model7_preds: 10fold_lightgbm_pay_features_cross_last_gbdt.csv
+  model8_preds: 10fold_lightgbm_pay_features_cross_last.csv
+  model9_preds: 10fold_lightgbm_pay_features_last.csv
+  model10_preds: 5fold_lightgbm_rate_features_seed42.csv
   preds: stacking_ensemble.csv
+defaults:
+  - dataset: dataset
+  - features: features
+  - logger: wandb
+  - model: xgb

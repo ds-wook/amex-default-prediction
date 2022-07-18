@@ -6,9 +6,9 @@ import pandas as pd
 import wandb.catboost as wandb_cb
 import wandb.lightgbm as wandb_lgb
 import wandb.xgboost as wandb_xgb
+import xgboost as xgb
 from catboost import CatBoostClassifier, Pool
 from lightgbm import Booster
-from xgboost import XGBClassifier
 
 from evaluation.evaluate import CatBoostEvalMetricAmex, lgb_amex_metric, xgb_amex_metric
 from models.base import BaseModel
@@ -104,23 +104,24 @@ class XGBoostTrainer(BaseModel):
         y_train: pd.Series,
         X_valid: Optional[pd.DataFrame] = None,
         y_valid: Optional[pd.Series] = None,
-    ) -> XGBClassifier:
+    ) -> Booster:
         """
         load train model
         """
+        dtrain = xgb.DMatrix(data=X_train, label=y_train)
+        dvalid = xgb.DMatrix(data=X_valid, label=y_valid)
+        watchlist = [(dtrain, "train"), (dvalid, "eval")]
 
-        model = XGBClassifier(
-            random_state=self.config.model.seed, **self.config.model.params
-        )
-
-        model.fit(
-            X_train,
-            y_train,
-            eval_metric=xgb_amex_metric,
-            eval_set=[(X_train, y_train), (X_valid, y_valid)],
+        model = xgb.train(
+            dict(self.config.model.params),
+            dtrain=dtrain,
+            evals=watchlist,
+            feval=xgb_amex_metric,
+            maximize=True,
+            callbacks=[wandb_xgb.WandbCallback()],
+            num_boost_round=self.config.model.num_boost_round,
             early_stopping_rounds=self.config.model.early_stopping_rounds,
-            verbose=self.config.model.verbose,
-            callbacks=[wandb_xgb.wandb_callback()],
+            verbose_eval=self.config.model.verbose,
         )
 
         return model
