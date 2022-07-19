@@ -1,4 +1,5 @@
 path: input/amex-trick-features/
+num: 5
 target: target
 train: train_trick_features
 test: test_trick_features

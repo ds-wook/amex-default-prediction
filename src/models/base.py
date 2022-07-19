@@ -98,7 +98,9 @@ class BaseModel(metaclass=ABCMeta):
             oof_preds[valid_idx] = (
                 model.predict(X_valid)
                 if isinstance(model, lgb.Booster)
-                else model.predict(xgb.DMatrix(X_valid))
+                else model.predict(
+                    xgb.DMatrix(X_valid), iteration_range=(0, model.best_ntree_limit)
+                )
                 if isinstance(model, xgb.Booster)
                 else model.predict_proba(X_valid)[:, 1]
             )
@@ -123,7 +125,6 @@ class BaseModel(metaclass=ABCMeta):
 
         oof_score = self.metric(train_y.to_numpy(), oof_preds)
         logging.info(f"OOF Score: {oof_score}")
-        logging.info(f"CV Score: {np.mean(list(scores.values()))}")
 
         self.result = ModelResult(
             oof_preds=oof_preds,

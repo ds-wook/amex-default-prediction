@@ -45,7 +45,10 @@ def inference(result: ModelResult, test_x: pd.DataFrame) -> np.ndarray:
         preds_proba += (
             model.predict(test_x) / folds
             if isinstance(model, lgb.Booster)
-            else model.predict(xgb.DMatrix(test_x)) / folds
+            else model.predict(
+                xgb.DMatrix(test_x), iteration_range=(0, model.best_ntree_limit)
+            )
+            / folds
             if isinstance(model, xgb.Booster)
             else model.predict_proba(test_x)[:, 1] / folds
         )

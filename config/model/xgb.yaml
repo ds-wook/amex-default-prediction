@@ -1,5 +1,6 @@
 fold: 10
 params:
+  objective: reg:squaredlogerror
   eta: 0.03
   gamma: 1.5
   lambda: 70
@@ -8,10 +9,9 @@ params:
   min_child_weight: 8
   colsample_bytree: 0.5
   seed: 42
-  objective: binary:logistic
 path: res/models/
 name: 10fold_xgb_stacking.pkl
 num_boost_round: 10000
-early_stopping_rounds: 100
+early_stopping_rounds: 500
 search: False
 verbose: 100

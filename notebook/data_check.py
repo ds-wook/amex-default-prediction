@@ -5,20 +5,23 @@ import numpy as np
 import pandas as pd
 
 # %%
-ensemble_preds = pd.read_csv("../output/test_lgbm_baseline_5fold_seed42.csv")
-ensemble_preds.head()
+preds1 = pd.read_csv("../output/5fold_lightgbm_trick_features_seed22.csv")
+preds2 = pd.read_csv("../output/5fold_lightgbm_rate_features_seed52.csv")
+preds3 = pd.read_csv("../output/5fold_lightgbm_trick_features_seed94.csv")
 # %%
-lgbm = pd.read_csv("../output/5fold_lightgbm_rate_features_seed52.csv")
-lgbm.head()
+preds1["prediction"] = (
+    preds1["prediction"]
+    + preds2["prediction"]
+    + preds3["prediction"]
+) / 3
+preds1.head()
 # %%
-ensemble_preds["prediction"] = (
-    0.7 * ensemble_preds["prediction"] + 0.3 * lgbm["prediction"]
-)
-ensemble_preds.head()
-# %%
-ensemble_preds.to_csv("../output/ensemble_gradient_lightgbm.csv", index=False)
+preds1.to_csv("../output/ensemble_gradient_lightgbm.csv", index=False)
 
 # %%
-train = pd.read_parquet("../input/amex-data-parquet/train.parquet")
-train.head()
+ensemble_preds = pd.read_csv("../output/overfitting_lb.csv")
+preds1["prediction"] = (preds1["prediction"] * 0.2 + ensemble_preds["prediction"] * 0.8)
+preds1.head()
+# %%
+preds1.to_csv("../output/overfitting_lb.csv", index=False)
 # %%

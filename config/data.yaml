@@ -1,0 +1,8 @@
+hydra:
+  run:
+    dir: log/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  output_subdir: null
+  job:
+    chdir: True
+defaults:
+  - dataset: dataset

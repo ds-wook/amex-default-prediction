@@ -28,7 +28,7 @@ model:
     - 0.1
     - 1.0 
     min_split_gain:
-    - 0.00000001
+    - 1e-08
     - 10
     bagging_freq:
     - 0
@@ -37,7 +37,7 @@ model:
     - 1
     - 400
     lambda_l1:
-    - 0.00000001
+    - 1e-08
     - 50
     lambda_l2:
     - 0.00000001

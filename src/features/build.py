@@ -10,6 +10,8 @@ from omegaconf import DictConfig
 from sklearn.preprocessing import LabelEncoder
 from tqdm import tqdm
 
+from features.aggregate import last_2, last_3
+
 tqdm.pandas()
 
 
@@ -68,6 +70,8 @@ def add_diff_features(df: pd.DataFrame) -> pd.DataFrame:
     for col in num_cols:
         try:
             df[f"{col}_last_mean_diff"] = df[f"{col}_last"] - df[f"{col}_mean"]
+            df[f"{col}_last_2_mean_diff"] = df[f"{col}_last_2"] - df[f"{col}_mean"]
+            df[f"{col}_last_3_mean_diff"] = df[f"{col}_last_3"] - df[f"{col}_mean"]
         except Exception:
             pass
 
@@ -199,7 +203,7 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     df_diff = get_difference(df, num_features)
 
     df_num_agg = df.groupby("customer_ID")[num_features].agg(
-        ["first", "mean", "std", "min", "max", "last"]
+        ["first", "mean", "std", "min", "max", "last", last_2, last_3]
     )
     df_num_agg.columns = ["_".join(x) for x in df_num_agg.columns]
     df_num_agg.reset_index(inplace=True)
@@ -222,9 +226,8 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
         lambda x: x.astype(np.int32)
     )
 
-    df = (
-        df_num_agg.merge(df_cat_agg, how="inner", on="customer_ID")
-        .merge(df_diff, how="inner", on="customer_ID")
+    df = df_num_agg.merge(df_cat_agg, how="inner", on="customer_ID").merge(
+        df_diff, how="inner", on="customer_ID"
     )
 
     del df_num_agg, df_cat_agg, df_diff

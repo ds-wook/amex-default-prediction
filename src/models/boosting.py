@@ -112,16 +112,29 @@ class XGBoostTrainer(BaseModel):
         dvalid = xgb.DMatrix(data=X_valid, label=y_valid)
         watchlist = [(dtrain, "train"), (dvalid, "eval")]
 
-        model = xgb.train(
-            dict(self.config.model.params),
-            dtrain=dtrain,
-            evals=watchlist,
-            feval=xgb_amex_metric,
-            maximize=True,
-            callbacks=[wandb_xgb.WandbCallback()],
-            num_boost_round=self.config.model.num_boost_round,
-            early_stopping_rounds=self.config.model.early_stopping_rounds,
-            verbose_eval=self.config.model.verbose,
-        )
+        try:
+            model = xgb.train(
+                dict(self.config.model.params),
+                dtrain=dtrain,
+                evals=watchlist,
+                feval=xgb_amex_metric,
+                maximize=True,
+                callbacks=[wandb_xgb.WandbCallback()],
+                num_boost_round=self.config.model.num_boost_round,
+                early_stopping_rounds=self.config.model.early_stopping_rounds,
+                verbose_eval=self.config.model.verbose,
+            )
+
+        except Exception:
+            model = xgb.train(
+                dict(self.config.model.params),
+                dtrain=dtrain,
+                evals=watchlist,
+                feval=xgb_amex_metric,
+                maximize=True,
+                num_boost_round=self.config.model.num_boost_round,
+                early_stopping_rounds=self.config.model.early_stopping_rounds,
+                verbose_eval=self.config.model.verbose,
+            )
 
         return model
