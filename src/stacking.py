@@ -78,6 +78,8 @@ def _main(cfg: DictConfig):
 
     submission["prediction"] = preds
     submission.to_csv(path / cfg.output.name / cfg.output.preds, index=False)
+    oof_df.to_csv(path / cfg.output.name / "stacking_oof_df.csv", index=False)
+    preds_df.to_csv(path / cfg.output.name / "stacking_preds_df.csv", index=False)
 
 
 if __name__ == "__main__":

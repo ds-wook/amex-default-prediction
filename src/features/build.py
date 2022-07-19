@@ -191,6 +191,13 @@ def add_trick_features(df: pd.DataFrame) -> pd.DataFrame:
 def build_features(df: pd.DataFrame) -> pd.DataFrame:
     # FEATURE ENGINEERING FROM
     # https://www.kaggle.com/code/huseyincot/amex-agg-data-how-it-created
+
+    df["S_2"] = pd.to_datetime(df["S_2"])
+    df["SDist"] = df[["customer_ID", "S_2"]].groupby(
+        "customer_ID"
+    ).diff() / np.timedelta64(1, "D")
+    df["SDist"] = df["SDist"].fillna(30.53)
+
     all_cols = [c for c in list(df.columns) if c not in ["customer_ID", "S_2"]]
     cat_features = (
         "B_30, B_38, D_114, D_116, D_117, D_120, D_126, D_63, D_64, D_66, D_68"

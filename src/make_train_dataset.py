@@ -1,5 +1,4 @@
 import gc
-import logging
 from pathlib import Path
 from typing import NoReturn
 
@@ -24,7 +23,7 @@ def _main(cfg: DictConfig) -> NoReturn:
         train_sample = train[train.customer_ID.isin(ids)]
         train_agg = build_features(train_sample)
 
-        logging.info(i, train_agg.shape)
+        print(i, train_agg.shape)
         train_agg.to_parquet(path / f"{cfg.dataset.train}_{i}.parquet")
 
         del train_agg

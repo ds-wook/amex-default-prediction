@@ -1,5 +1,4 @@
 import gc
-import logging
 from pathlib import Path
 from typing import NoReturn
 
@@ -23,7 +22,7 @@ def _main(cfg: DictConfig) -> NoReturn:
     for (i, ids) in enumerate(split_ids):
         test_sample = test[test.customer_ID.isin(ids)]
         test_agg = build_features(test_sample)
-        logging.info(i, test_agg.shape)
+        print(i, test_agg.shape)
 
         test_agg.to_parquet(path / f"{cfg.dataset.test}_{i}.parquet")
 

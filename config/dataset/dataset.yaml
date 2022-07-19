@@ -1,8 +1,8 @@
-path: input/amex-trick-features/
+path: input/amex-sdist-features/
 num: 5
 target: target
-train: train_trick_features
-test: test_trick_features
+train: train_sdist_features
+test: test_sdist_features
 type: parquet
 drop_features: customer_ID
 cat_features:

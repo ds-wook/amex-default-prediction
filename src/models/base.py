@@ -98,9 +98,7 @@ class BaseModel(metaclass=ABCMeta):
             oof_preds[valid_idx] = (
                 model.predict(X_valid)
                 if isinstance(model, lgb.Booster)
-                else model.predict(
-                    xgb.DMatrix(X_valid), iteration_range=(0, model.best_ntree_limit)
-                )
+                else model.predict(xgb.DMatrix(X_valid))
                 if isinstance(model, xgb.Booster)
                 else model.predict_proba(X_valid)[:, 1]
             )
