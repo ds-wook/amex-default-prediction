@@ -15,6 +15,7 @@ from features.build import build_features
 def _main(cfg: DictConfig) -> NoReturn:
     path = Path(get_original_cwd())
     train = pd.read_parquet(path / "input/amex-data-parquet/train.parquet")
+    label = pd.read_csv(path / "input/amex-default-prediction/train_labels.csv")
     split_ids = split_dataset(train.customer_ID.unique(), cfg.dataset.num)
 
     path = Path(get_original_cwd()) / cfg.dataset.path
@@ -32,15 +33,14 @@ def _main(cfg: DictConfig) -> NoReturn:
     train = pd.read_parquet(path / f"{cfg.dataset.train}_0.parquet")
 
     for num in range(1, cfg.dataset.num):
-        train_sample = pd.read_parquet(path / cfg.dataset.train + f"_{num}.parquet")
+        train_sample = pd.read_parquet(path / f"{cfg.dataset.train}_{num}.parquet")
         train = pd.concat([train, train_sample], axis=0)
         del train_sample
         gc.collect()
 
-    label = pd.read_csv("input/amex-default-prediction/train_labels.csv")
     train = pd.merge(train, label, on="customer_ID")
     print(train.shape)
-    train.to_parquet(path / f"{cfg.dataset.train}.{cfg.dataset.type}")
+    train.to_parquet(path / f"{cfg.dataset.train}.parquet")
 
 
 if __name__ == "__main__":

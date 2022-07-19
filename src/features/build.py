@@ -10,7 +10,6 @@ from omegaconf import DictConfig
 from sklearn.preprocessing import LabelEncoder
 from tqdm import tqdm
 
-from features.aggregate import last_2, last_3
 
 tqdm.pandas()
 
@@ -210,7 +209,7 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     df_diff = get_difference(df, num_features)
 
     df_num_agg = df.groupby("customer_ID")[num_features].agg(
-        ["first", "mean", "std", "min", "max", "last", last_2, last_3]
+        ["first", "mean", "std", "min", "max", "last"]
     )
     df_num_agg.columns = ["_".join(x) for x in df_num_agg.columns]
     df_num_agg.reset_index(inplace=True)
