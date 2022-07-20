@@ -86,12 +86,7 @@ class BaseModel(metaclass=ABCMeta):
             )
 
             # model
-            model = self._train(
-                X_train,
-                y_train,
-                X_valid,
-                y_valid,
-            )
+            model = self._train(X_train, y_train, X_valid, y_valid)
             models[f"fold_{fold}"] = model
 
             # validation

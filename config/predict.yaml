@@ -11,6 +11,6 @@ defaults:
 
 output:
   path: output
-  name: 5fold_lightgbm_trick_features_fair_seed42.csv
+  name: 5fold_lightgbm_statement_features_seed42.csv
   submit: sample_submission.csv
   features: features.yaml

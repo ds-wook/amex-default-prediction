@@ -10,7 +10,6 @@ from omegaconf import DictConfig
 from sklearn.preprocessing import LabelEncoder
 from tqdm import tqdm
 
-
 tqdm.pandas()
 
 
@@ -206,7 +205,7 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     num_features = [col for col in all_cols if col not in cat_features]
 
     # Get the difference
-    df_diff = get_difference(df, num_features)
+    df_diff_agg = get_difference(df, num_features)
 
     df_num_agg = df.groupby("customer_ID")[num_features].agg(
         ["first", "mean", "std", "min", "max", "last"]
@@ -220,6 +219,21 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     df_cat_agg.columns = ["_".join(x) for x in df_cat_agg.columns]
     df_cat_agg.reset_index(inplace=True)
 
+    # add last statement date, statements count and "new customer" category (LT=0.5)
+    df_date_agg = df.groupby("customer_ID")[["S_2", "B_3", "D_104"]].agg(
+        ["last", "count"]
+    )
+    df_date_agg.columns = ["_".join(x) for x in df_date_agg.columns]
+    df_date_agg.rename(columns={"S_2_count": "LT", "S_2_last": "S_2"}, inplace=True)
+    df_date_agg.loc[(df_date_agg.B_3_last.isnull()) & (df_date_agg.LT == 1), "LT"] = 0.5
+    df_date_agg.loc[
+        (df_date_agg.D_104_last.isnull()) & (df_date_agg.LT == 1), "LT"
+    ] = 0.5
+    df_date_agg.drop(
+        ["B_3_last", "D_104_last", "B_3_count", "D_104_count", "S_2"], axis=1, inplace=True
+    )
+    df_date_agg.reset_index(inplace=True)
+
     # Transform int64 columns to int32
     cols = list(df_num_agg.dtypes[df_num_agg.dtypes == "float64"].index)
     df_num_agg.loc[:, cols] = df_num_agg.loc[:, cols].progress_apply(
@@ -232,11 +246,13 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
         lambda x: x.astype(np.int32)
     )
 
-    df = df_num_agg.merge(df_cat_agg, how="inner", on="customer_ID").merge(
-        df_diff, how="inner", on="customer_ID"
+    df = (
+        df_num_agg.merge(df_cat_agg, how="inner", on="customer_ID")
+        .merge(df_diff_agg, how="inner", on="customer_ID")
+        .merge(df_date_agg, how="inner", on="customer_ID")
     )
 
-    del df_num_agg, df_cat_agg, df_diff
+    del df_num_agg, df_cat_agg, df_diff_agg, df_date_agg
     gc.collect()
 
     return df

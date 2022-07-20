@@ -6,7 +6,7 @@ import pandas as pd
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 
-from data.dataset import load_test_dataset, load_test_dataset_parquet
+from data.dataset import load_test_dataset
 from models.infer import inference, load_model
 from utils import seed_everything
 
@@ -23,11 +23,8 @@ def _main(cfg: DictConfig):
 
     for num in range(10):
         seed_everything(cfg.model.params.seed)
-        test_sample = (
-            load_test_dataset(cfg, num)
-            if cfg.dataset.type == "pkl"
-            else load_test_dataset_parquet(cfg, num)
-        )
+        test_sample = load_test_dataset(cfg, num)
+
         logging.info(f"Test dataset {num} predicting...")
         preds = inference(results, test_sample)
         preds_proba.extend(preds.tolist())

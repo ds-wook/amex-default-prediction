@@ -1,9 +1,9 @@
-path: input/amex-sdist-features/
+path: input/amex-statement-features/
 num: 5
 target: target
-train: train_sdist_features
-test: test_sdist_features
-type: parquet
+train: train_statement_features
+test: test_statement_features
+
 drop_features: customer_ID
 cat_features:
 - B_30_last

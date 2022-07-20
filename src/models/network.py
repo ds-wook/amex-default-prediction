@@ -96,12 +96,7 @@ class TabNetTrainer(BaseModel):
             X_valid, y_valid = train_x.iloc[valid_idx], train_y.iloc[valid_idx]
 
             # model
-            model = self._train(
-                X_train,
-                y_train,
-                X_valid,
-                y_valid,
-            )
+            model = self._train(X_train, y_train, X_valid, y_valid)
             models[f"fold_{fold}"] = model
 
             # validation
