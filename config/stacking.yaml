@@ -32,7 +32,7 @@ output:
   model8_preds: 10fold_lightgbm_pay_features_cross_last.csv
   model9_preds: 10fold_lightgbm_pay_features_last.csv
   model10_preds: 5fold_lightgbm_trick_features_seed22.csv
-  preds: stacking_ensemble.csv
+  preds: 10fold_xgboost_stacking.csv
 defaults:
   - dataset: dataset
   - features: features

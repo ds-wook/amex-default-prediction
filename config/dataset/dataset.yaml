@@ -1,10 +1,11 @@
-path: input/amex-statement-features/
+path: input/amex-sdist-features/
 num: 5
 target: target
-train: train_statement_features
-test: test_statement_features
-
-drop_features: customer_ID
+train: train_sdist_features
+test: test_sdist_features
+drop_features:
+- customer_ID
+- S_2
 cat_features:
 - B_30_last
 - B_38_last

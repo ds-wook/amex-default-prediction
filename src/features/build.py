@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
+
 from sklearn.preprocessing import LabelEncoder
 from tqdm import tqdm
 
@@ -230,7 +231,7 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
         (df_date_agg.D_104_last.isnull()) & (df_date_agg.LT == 1), "LT"
     ] = 0.5
     df_date_agg.drop(
-        ["B_3_last", "D_104_last", "B_3_count", "D_104_count", "S_2"], axis=1, inplace=True
+        ["B_3_last", "D_104_last", "B_3_count", "D_104_count"], axis=1, inplace=True
     )
     df_date_agg.reset_index(inplace=True)
 

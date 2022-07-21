@@ -10,7 +10,7 @@ params:
   colsample_bytree: 0.5
   seed: 42
 path: res/models/
-name: 10fold_xgb_stacking.pkl
+name: 10fold_xgboost_stacking.pkl
 num_boost_round: 10000
 early_stopping_rounds: 500
 search: False

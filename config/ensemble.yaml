@@ -9,6 +9,7 @@ input:
   train_labels: train_labels.csv
 model:
   path: res/models/
+  xgb_oof: 10fold_xgboost_stacking.pkl
   model1_oof: 5fold_lightgbm_time_diff_features_seed42.pkl
   model2_oof: 5fold_lightgbm_gradient_features_seed42.pkl
   model3_oof: 5fold_lightgbm_rate_features_seed42.pkl

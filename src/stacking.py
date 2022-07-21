@@ -74,8 +74,12 @@ def _main(cfg: DictConfig):
     preds_df = pd.DataFrame(preds_array, columns=[f"preds_{i}" for i in range(1, 11)])
     xgb_trainer = XGBoostTrainer(config=cfg, metric=amex_metric)
     xgb_results = xgb_trainer.train(oof_df, target)
-    preds = inference(xgb_results, preds_df)
 
+    # save model
+    xgb_trainer.save_model()
+
+    # save predictions
+    preds = inference(xgb_results, preds_df)
     submission["prediction"] = preds
     submission.to_csv(path / cfg.output.name / cfg.output.preds, index=False)
     oof_df.to_csv(path / cfg.output.name / "stacking_oof_df.csv", index=False)
