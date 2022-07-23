@@ -33,4 +33,7 @@ output:
   model8_preds: 10fold_lightgbm_pay_features_cross_last.csv
   model9_preds: 10fold_lightgbm_pay_features_last.csv
   model10_preds: 5fold_lightgbm_rate_features_seed42.csv
-  preds: gradient_ensemble.csv
+  overfitting1: overfitting_lb.csv
+  overfitting2: overfitting_lb2.csv
+  overfitting3: overfitting_lb3.csv
+  preds: rank_ensemble.csv

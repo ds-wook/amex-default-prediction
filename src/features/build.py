@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
-
 from sklearn.preprocessing import LabelEncoder
 from tqdm import tqdm
 
@@ -19,7 +18,7 @@ def create_categorical_train(train: pd.DataFrame, config: DictConfig) -> pd.Data
     Categorical encoding
     Args:
         df: dataframe
-        cat_col: list of categorical columns
+        config: config
     Returns:
         dataframe
     """
@@ -40,7 +39,7 @@ def create_categorical_test(test: pd.DataFrame, config: DictConfig) -> pd.DataFr
     Categorical encoding
     Args:
         df: dataframe
-        cat_col: list of categorical columns
+        config: config
     Returns:
         dataframe
     """
@@ -69,8 +68,6 @@ def add_diff_features(df: pd.DataFrame) -> pd.DataFrame:
     for col in num_cols:
         try:
             df[f"{col}_last_mean_diff"] = df[f"{col}_last"] - df[f"{col}_mean"]
-            df[f"{col}_last_2_mean_diff"] = df[f"{col}_last_2"] - df[f"{col}_mean"]
-            df[f"{col}_last_3_mean_diff"] = df[f"{col}_last_3"] - df[f"{col}_mean"]
         except Exception:
             pass
 
@@ -173,7 +170,7 @@ def add_trick_features(df: pd.DataFrame) -> pd.DataFrame:
     Create nan feature
     Args:
         df: dataframe
-    Returns:stacking neural network
+    Returns:
         dataframe
     """
     num_cols = df.dtypes[
@@ -190,7 +187,7 @@ def add_trick_features(df: pd.DataFrame) -> pd.DataFrame:
 def build_features(df: pd.DataFrame) -> pd.DataFrame:
     # FEATURE ENGINEERING FROM
     # https://www.kaggle.com/code/huseyincot/amex-agg-data-how-it-created
-
+    # df = df.drop(columns=["B_29", "S_9", "D_103", "D_107", "D_139", "D_145"])
     df["S_2"] = pd.to_datetime(df["S_2"])
     df["SDist"] = df[["customer_ID", "S_2"]].groupby(
         "customer_ID"

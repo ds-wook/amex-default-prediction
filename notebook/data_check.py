@@ -1,7 +1,4 @@
 # %%
-import gc
-
-import numpy as np
 import pandas as pd
 
 # %%
@@ -15,13 +12,11 @@ preds1["prediction"] = (
 preds1.head()
 
 # %%
-ensemble_preds1 = pd.read_csv("../output/stacking_ensemble.csv")
-ensemble_preds2 = pd.read_csv("../output/10fold_stacking_tabnet.csv")
+import numpy as np
+
+ensemble_preds1 = pd.read_csv("../output/overfitting_lb.csv")
+ensemble_preds1["prediction"] = np.clip(ensemble_preds1["prediction"], 0, 1)
+ensemble_preds1.head()
 # %%
-ensemble_preds1["prediction"] = (
-    0.4 * preds1["prediction"]
-    + 0.2 * ensemble_preds1["prediction"]
-    + 0.4 * ensemble_preds2["prediction"]
-)
-ensemble_preds1.to_csv("../output/ensemble_mean_preds.csv", index=False)
+ensemble_preds1.to_csv("../output/overfitting_lb_test.csv", index=False)
 # %%

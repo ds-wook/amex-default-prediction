@@ -6,3 +6,6 @@ hydra:
     chdir: True
 defaults:
   - dataset: dataset
+  - _self_  
+  - override hydra/hydra_logging: disabled  
+  - override hydra/job_logging: disabled  

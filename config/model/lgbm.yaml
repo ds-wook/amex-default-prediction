@@ -13,8 +13,8 @@ params:
   min_data_in_leaf: 40
   verbose: -1
 path: res/models/
-name: 5fold_lightgbm_statement_features_seed42.pkl
-early_stopping_rounds: 500
+name: 5fold_lightgbm_sdist_features_seed42.pkl
+early_stopping_rounds: 1500
 num_boost_round: 10500
 search: False
 verbose: 500
