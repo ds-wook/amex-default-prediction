@@ -18,7 +18,7 @@ from features.build import (
 warnings.filterwarnings("ignore")
 
 
-def load_train_dataset(config: DictConfig) -> Tuple[pd.DataFrame, pd.Series]:
+def load_train_dataset(config: DictConfig,) -> Tuple[pd.DataFrame, pd.Series]:
     """
     Load train dataset
     Args:

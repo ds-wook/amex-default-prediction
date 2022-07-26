@@ -1,0 +1,28 @@
+hydra:
+  run:
+    dir: log/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  output_subdir: null
+  job:
+    chdir: True
+input:
+  name: input/amex-default-prediction
+  train_labels: train_labels.csv
+model:
+  path: res/models/
+  xgb_oof: 10fold_xgboost_stacking.pkl
+  tabnet_oof: 10fold_tabnet_stacking.npy
+  model1_oof: 5fold_lightgbm_statement_features_seed22.pkl
+  model2_oof: 5fold_lightgbm_statement_features_seed42.pkl
+  model3_oof: 5fold_lightgbm_statement_features_seed94.pkl
+output:
+  name: output
+  submission: sample_submission.csv
+  xgb_preds: 10fold_xgboost_stacking.csv
+  tabnet_preds: 10fold_tabnet_stacking.csv
+  model1_preds: 5fold_lightgbm_statement_features_seed22.csv
+  model2_preds: 5fold_lightgbm_statement_features_seed42.csv
+  model3_preds: 5fold_lightgbm_statement_features_seed94.csv
+  overfitting1: overfitting_lb.csv
+  overfitting2: overfitting_lb2.csv
+  overfitting3: overfitting_lb3.csv
+  preds: gradient_ensemble.csv

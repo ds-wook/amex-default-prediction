@@ -9,25 +9,13 @@ path = "../input/amex-data-parquet/"
 train = pd.read_parquet(path + "train.parquet")
 train.head()
 # %%
-train["B_30"].head()
+group = train.groupby(["customer_ID"]).size().to_frame("size").to_numpy()
+group.shape
 # %%
-train["B_2"].head()
-
+np.unique(group)
 # %%
-
-sns.lineplot(x="S_2", y="B_2", data=train)
-plt.xticks(rotation=45)
-plt.show()
-
+group = train.groupby(["customer_ID"]).size()
+group
 # %%
-
-train["B_2_Bin"] = train["B_2"].map(
-    lambda x: 0 if 0.7 < x < 0.9 else np.nan if np.isnan(x) else 1
-)
-train["B_2_Bin"].head()
-# %%
-
-train["B_2_Bin"].isna().sum()
-# %%
-train["B_2"].isna().sum()
+group.unique()
 # %%

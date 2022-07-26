@@ -12,19 +12,17 @@ from tqdm import tqdm
 warnings.filterwarnings("ignore")
 
 
-@hydra.main(config_path="../config/", config_name="ensemble.yaml")
+@hydra.main(config_path="../config/", config_name="rank.yaml")
 def _main(cfg: DictConfig):
     path = Path(get_original_cwd())
     submission = pd.read_csv(path / cfg.output.name / cfg.output.submission)
     submission["prediction"] = 0
 
-    lgbm_preds1 = pd.read_csv(path / cfg.output.name / cfg.output.model1_preds)
-    lgbm_preds2 = pd.read_csv(path / cfg.output.name / cfg.output.model2_preds)
-    lgbm_preds3 = pd.read_csv(path / cfg.output.name / cfg.output.model3_preds)
-    lgbm_preds4 = pd.read_csv(path / cfg.output.name / cfg.output.model4_preds)
+    model1_preds = pd.read_csv(path / cfg.output.name / cfg.output.model1_preds)
+    model2_preds = pd.read_csv(path / cfg.output.name / cfg.output.model2_preds)
+    model3_preds = pd.read_csv(path / cfg.output.name / cfg.output.model3_preds)
     overfitting = pd.read_csv(path / cfg.output.name / cfg.output.overfitting1)
-
-    preds = [lgbm_preds1, lgbm_preds2, lgbm_preds3, lgbm_preds4, overfitting]
+    preds = [model1_preds, model2_preds, model3_preds, overfitting]
     preds = [pred.sort_values(by="customer_ID") for pred in preds]
 
     for pred in tqdm(preds):

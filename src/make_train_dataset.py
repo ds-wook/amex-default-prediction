@@ -39,7 +39,9 @@ def _main(cfg: DictConfig) -> NoReturn:
         gc.collect()
 
     train = pd.merge(train, label, on="customer_ID")
+
     print(train.shape)
+
     train.to_parquet(path / f"{cfg.dataset.train}.parquet")
 
 

@@ -1,0 +1,16 @@
+hydra:
+  run:
+    dir: log/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  output_subdir: null
+  job:
+    chdir: True
+output:
+  name: output
+  submission: sample_submission.csv
+  model1_preds: 5fold_lightgbm_statement_features_seed22.csv
+  model2_preds: 5fold_lightgbm_statement_features_seed42.csv
+  model3_preds: 5fold_lightgbm_statement_features_seed94.csv
+  overfitting1: overfitting_lb.csv
+  overfitting2: overfitting_lb2.csv
+  overfitting3: overfitting_lb3.csv
+  preds: rank_ensemble_statement.csv

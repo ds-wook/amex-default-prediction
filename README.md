@@ -5,13 +5,15 @@ This repository is the code that placed ?th [American Express - Default Predicti
 ### Benchmark
 |Model|CV|Public LB|
 |-----|--|------|
-|TabNet(10-stratified kfold)|0.789|0.790|
 |XGBoost(10-KFold - gbdt)|0.792|0.793|
-|LightGBM(5-stratified kfold time-features - shap - dart) - trick|0.7970|0.797|
-|LightGBM(5-stratified kfold time-lag-features - dart) - trick|0.7973|0.797|
-|LightGBM(5-stratified kfold diff-features - dart) - trick|0.7973|**0.799**|
-|LightGBM(5-stratified kfold trick-features - dart) - seed42|0.7977|0.798|
-|LightGBM(5-stratified kfold sdist-features - dart) - seed42|**0.7979**|0.798|
+|TabNet(10-StratifiedKFold)|0.789|0.790|
+|LightGBM(5-StratifiedKFold time-features - shap - dart) - trick|0.7970|0.797|
+|LightGBM(5-StratifiedKFold time-lag-features - dart) - trick|0.7973|0.797|
+|LightGBM(5-StratifiedKFold diff-features - dart) - trick|0.7973|**0.799**|
+|LightGBM(5-StratifiedKFold trick-features - dart) - seed42|0.7977|0.798|
+|LightGBM(5-StratifiedKFold sdist-features - dart) - seed42|0.7979|0.798|
+|LightGBM(5-StratifiedKFold sdist-features - dart) - seed22|**0.7981**|0.798|
+|LightGBM(5-StratifiedGroupKFold sdist-features - dart) - seed42|-|-|
 |XGBoost(10-KFold - stacking regression)|**0.7985**|**0.799**|
 
 ### Project Organization
