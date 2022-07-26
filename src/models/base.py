@@ -58,9 +58,7 @@ class BaseModel(metaclass=ABCMeta):
         with open(model_path, "wb") as output:
             pickle.dump(self.result, output, pickle.HIGHEST_PROTOCOL)
 
-    def train(
-        self, train_x: pd.DataFrame, train_y: pd.Series, group: np.ndarray
-    ) -> ModelResult:
+    def train(self, train_x: pd.DataFrame, train_y: pd.Series) -> ModelResult:
         """
         Train data
         Args:
@@ -74,7 +72,7 @@ class BaseModel(metaclass=ABCMeta):
         folds = self.config.model.fold
 
         str_kf = StratifiedKFold(n_splits=folds, shuffle=True, random_state=42)
-        splits = str_kf.split(train_x, train_y, group)
+        splits = str_kf.split(train_x, train_y)
         oof_preds = np.zeros(len(train_x))
 
         for fold, (train_idx, valid_idx) in enumerate(splits, 1):
