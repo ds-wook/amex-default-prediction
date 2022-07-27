@@ -14,6 +14,7 @@ model:
   model1_oof: 5fold_lightgbm_statement_features_seed22.pkl
   model2_oof: 5fold_lightgbm_statement_features_seed42.pkl
   model3_oof: 5fold_lightgbm_statement_features_seed94.pkl
+  model4_oof: 5fold_lightgbm_statement_features_seed99.pkl
 output:
   name: output
   submission: sample_submission.csv
@@ -22,6 +23,7 @@ output:
   model1_preds: 5fold_lightgbm_statement_features_seed22.csv
   model2_preds: 5fold_lightgbm_statement_features_seed42.csv
   model3_preds: 5fold_lightgbm_statement_features_seed94.csv
+  model4_preds: 5fold_lightgbm_statement_features_seed99.csv
   overfitting1: overfitting_lb.csv
   overfitting2: overfitting_lb2.csv
   overfitting3: overfitting_lb3.csv
