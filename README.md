@@ -3,18 +3,19 @@
 This repository is the code that placed ?th [American Express - Default Prediction](https://www.kaggle.com/competitions/amex-default-prediction/overview)
 
 ### Benchmark
-|Model|CV|Public LB|
-|-----|--|------|
-|XGBoost(10-KFold - gbdt)|0.792|0.793|
-|TabNet(10-StratifiedKFold)|0.789|0.790|
-|LightGBM(5-StratifiedKFold time-features - shap - dart) - trick|0.7970|0.797|
-|LightGBM(5-StratifiedKFold time-lag-features - dart) - trick|0.7973|0.797|
-|LightGBM(5-StratifiedKFold diff-features - dart) - trick|0.7973|**0.799**|
-|LightGBM(5-StratifiedKFold trick-features - dart) - seed42|0.7977|0.798|
-|LightGBM(5-StratifiedKFold sdist-features - dart) - seed42|0.7979|0.798|
-|LightGBM(5-StratifiedKFold sdist-features - dart) - seed22|**0.7981**|0.798|
-|LightGBM(5-StratifiedGroupKFold sdist-features - dart) - seed42|-|-|
-|XGBoost(10-KFold - stacking regression)|**0.7985**|**0.799**|
+|Model|CV|Public LB|Private LB|
+|-----|--|------|---------|
+|XGBoost(10-KFold - gbdt)|0.792|0.793|-|
+|TabNet(10-StratifiedKFold)|0.789|0.790|-|
+|LightGBM(5-StratifiedKFold time-features - shap - dart) - trick|0.7970|0.797|-|
+|LightGBM(5-StratifiedKFold time-lag-features - dart) - trick|0.7973|0.797|-|
+|LightGBM(5-StratifiedKFold diff-features - dart) - trick|0.7973|0.799|-|
+|LightGBM(5-StratifiedKFold trick-features - dart) - seed42|0.7977|0.798|-|
+|LightGBM(5-StratifiedKFold sdist-features - dart) - seed42|0.7979|0.798|-|
+|LightGBM(5-StratifiedKFold sdist-features - dart) - seed22|**0.7981**|0.798|-|
+|LightGBM(5-StratifiedKFold sdist-features - dart) - seed94|0.7976|**0.799**|-|
+|LightGBM(5-StratifiedKFold sdist-features - dart) - seed99|0.7979|**0.799**|-|
+|XGBoost(10-KFold - stacking regression)|**0.7985**|0.799|-|
 
 ### Project Organization
 ```

@@ -4,7 +4,7 @@ params:
   learning_rate: 0.01
   objective: binary
   num_leaves: 100
-  seed: 99
+  seed: 88
   feature_fraction: 0.2
   bagging_freq: 10
   bagging_fraction: 0.5
@@ -13,7 +13,7 @@ params:
   min_data_in_leaf: 40
   verbose: -1
 path: res/models/
-name: 5fold_lightgbm_statement_features_seed99.pkl
+name: 5fold_lightgbm_statement_features_seed88.pkl
 early_stopping_rounds: 1500
 num_boost_round: 10500
 search: False
