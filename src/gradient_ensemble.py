@@ -66,30 +66,40 @@ def _main(cfg: DictConfig):
     train_labels = pd.read_csv(path / cfg.input.name / cfg.input.train_labels)
     target = train_labels["target"]
     lgbm_oofs1 = load_model(cfg, cfg.model.model1_oof)
+    lgbm_oofs2 = load_model(cfg, cfg.model.model2_oof)
     lgbm_oofs3 = load_model(cfg, cfg.model.model3_oof)
-    lgbm_oofs4 = load_model(cfg, cfg.model.model4_oof)
 
     xgb_oof = load_model(cfg, cfg.model.xgb_oof)
     tab_oof = np.load(path / cfg.model.path / cfg.model.tabnet_oof)
     lgbm_preds1 = pd.read_csv(path / cfg.output.name / cfg.output.model1_preds)
+    lgbm_preds2 = pd.read_csv(path / cfg.output.name / cfg.output.model2_preds)
     lgbm_preds3 = pd.read_csv(path / cfg.output.name / cfg.output.model3_preds)
-    lgbm_preds4 = pd.read_csv(path / cfg.output.name / cfg.output.model4_preds)
     xgb_preds = pd.read_csv(path / cfg.output.name / cfg.output.xgb_preds)
     tab_preds = pd.read_csv(path / cfg.output.name / cfg.output.tabnet_preds)
 
     oofs = [
+        lgbm_oofs1.oof_preds,
+        lgbm_oofs2.oof_preds,
         lgbm_oofs3.oof_preds,
-        lgbm_oofs4.oof_preds,
+        xgb_oof.oof_preds,
+        tab_oof,
     ]
 
     preds = [
+        lgbm_preds1.prediction.to_numpy(),
+        lgbm_preds2.prediction.to_numpy(),
         lgbm_preds3.prediction.to_numpy(),
-        lgbm_preds4.prediction.to_numpy(),
+        xgb_preds.prediction.to_numpy(),
+        tab_preds.prediction.to_numpy(),
     ]
 
     best_weights = get_best_weights(oofs, target.to_numpy())
 
     oof_preds = np.average(oofs, weights=best_weights, axis=0)
+    print(amex_metric(target.to_numpy(), lgbm_oofs1.oof_preds))
+    print(amex_metric(target.to_numpy(), lgbm_oofs2.oof_preds))
+    print(amex_metric(target.to_numpy(), xgb_oof.oof_preds))
+    print(amex_metric(target.to_numpy(), tab_oof))
     print(f"OOF Score: {amex_metric(target.to_numpy(), oof_preds)}")
 
     blending_preds = np.average(preds, weights=best_weights, axis=0)
