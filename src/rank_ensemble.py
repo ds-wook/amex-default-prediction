@@ -21,8 +21,7 @@ def _main(cfg: DictConfig):
     model1_preds = pd.read_csv(path / cfg.output.name / cfg.output.model1_preds)
     model2_preds = pd.read_csv(path / cfg.output.name / cfg.output.model2_preds)
     model3_preds = pd.read_csv(path / cfg.output.name / cfg.output.model3_preds)
-    overfitting = pd.read_csv(path / cfg.output.name / cfg.output.overfitting1)
-    preds = [model1_preds, model2_preds, model3_preds, overfitting]
+    preds = [model1_preds, model2_preds, model3_preds]
     preds = [pred.sort_values(by="customer_ID") for pred in preds]
 
     for pred in tqdm(preds):

@@ -4,9 +4,9 @@ import pandas as pd
 from scipy.stats import rankdata
 
 # %%
-preds1 = pd.read_csv("../output/5fold_lightgbm_statement_features_seed22.csv")
-preds2 = pd.read_csv("../output/5fold_lightgbm_statement_features_seed42.csv")
-preds3 = pd.read_csv("../output/5fold_lightgbm_statement_features_seed94.csv")
+preds1 = pd.read_csv("../output/5fold_lightgbm_statement_features_seed88.csv")
+preds2 = pd.read_csv("../output/5fold_lightgbm_statement_features_seed94.csv")
+preds3 = pd.read_csv("../output/5fold_lightgbm_statement_features_seed99.csv")
 # %%
 preds1["prediction"] = (
     preds1["prediction"] + preds2["prediction"] + preds3["prediction"]
@@ -26,7 +26,7 @@ ensemble_preds1.to_csv("../output/overfitting_lb_test.csv", index=False)
 # %%
 
 
-rankdata(preds1["prediction"]) / preds1.shape[0]
+rankdata(preds1["prediction"])
 # %%
-rankdata(preds2["prediction"]) / preds2.shape[0]
+rankdata(preds2["prediction"])
 # %%

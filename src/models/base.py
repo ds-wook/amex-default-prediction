@@ -70,8 +70,9 @@ class BaseModel(metaclass=ABCMeta):
         models = dict()
         scores = dict()
         folds = self.config.model.fold
+        seed = self.config.dataset.seed
 
-        str_kf = StratifiedKFold(n_splits=folds, shuffle=True, random_state=42)
+        str_kf = StratifiedKFold(n_splits=folds, shuffle=True, random_state=seed)
         splits = str_kf.split(train_x, train_y)
         oof_preds = np.zeros(len(train_x))
 

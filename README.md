@@ -11,11 +11,15 @@ This repository is the code that placed ?th [American Express - Default Predicti
 |LightGBM(5-StratifiedKFold time-lag-features - dart) - trick|0.7973|0.797|-|
 |LightGBM(5-StratifiedKFold diff-features - dart) - trick|0.7973|0.799|-|
 |LightGBM(5-StratifiedKFold trick-features - dart) - seed42|0.7977|0.798|-|
-|LightGBM(5-StratifiedKFold sdist-features - dart) - seed42|0.7979|0.798|-|
 |LightGBM(5-StratifiedKFold sdist-features - dart) - seed22|**0.7981**|0.798|-|
-|LightGBM(5-StratifiedKFold sdist-features - dart) - seed94|0.7976|**0.799**|-|
+|LightGBM(5-StratifiedKFold sdist-features - dart) - seed42|0.7979|0.798|-|
+|LightGBM(5-StratifiedKFold sdist-features - dart) - seed88|0.7977|**0.799**|-|
+|LightGBM(5-StratifiedKFold sdist-features - dart) - seed94|0.7972|**0.799**|-|
 |LightGBM(5-StratifiedKFold sdist-features - dart) - seed99|0.7979|**0.799**|-|
+|LightGBM(5-StratifiedKFold sdist-features - dart) - seed2020|0.7978|0.798|-|
+|LightGBM(5-StratifiedKFold sdist-features - dart) - seed3407|0.7977|**0.799**|-|
 |XGBoost(10-KFold - stacking regression)|**0.7985**|0.799|-|
+|LightGBM-Gradient Ensemble|**0.7989**|0.799|-|
 
 ### Project Organization
 ```

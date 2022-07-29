@@ -1,0 +1,10 @@
+hydra:
+  run:
+    dir: log/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  output_subdir: null
+
+defaults:
+  - dataset: dataset
+  - features: features
+  - logger: wandb
+  - tuning: lgbm

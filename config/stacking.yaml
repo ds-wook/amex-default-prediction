@@ -17,7 +17,7 @@ model:
   model6_oof: 5fold_lightgbm_time_features_dart.pkl
   model7_oof: 5fold_lightgbm_trick_features_seed42.pkl
   model8_oof: 10fold_lightgbm_pay_features_cross_last_dart.pkl
-  model9_oof: 10fold_lightgbm_pay_features_last.pkl
+  model9_oof: 5fold_lightgbm_rate_features_seed52.pkl
   model10_oof: 5fold_lightgbm_trick_features_seed22.pkl
 output:
   name: output
@@ -30,7 +30,7 @@ output:
   model6_preds: 5fold_lightgbm_time_features_dart.csv
   model7_preds: 5fold_lightgbm_trick_features_seed42.csv
   model8_preds: 10fold_lightgbm_pay_features_cross_last.csv
-  model9_preds: 10fold_lightgbm_pay_features_last.csv
+  model9_preds: 5fold_lightgbm_rate_features_seed52.csv
   model10_preds: 5fold_lightgbm_trick_features_seed22.csv
   preds: 10fold_xgboost_stacking.csv
 defaults:

@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
+from scipy.stats import rankdata
 
 from evaluation.evaluate import amex_metric
 from models.boosting import XGBoostTrainer
@@ -71,12 +72,17 @@ def _main(cfg: DictConfig):
     )
 
     oof_df = pd.DataFrame(oof_array, columns=[f"preds_{i}" for i in range(1, 11)])
+
+    for col in oof_df.columns:
+        oof_df[f"{col}_rank"] = rankdata(oof_df[col]) / len(oof_df)
+
     preds_df = pd.DataFrame(preds_array, columns=[f"preds_{i}" for i in range(1, 11)])
+
+    for col in preds_df.columns:
+        preds_df[f"{col}_rank"] = rankdata(preds_df[col]) / len(preds_df)
+
     xgb_trainer = XGBoostTrainer(config=cfg, metric=amex_metric)
     xgb_results = xgb_trainer.train(oof_df, target)
-
-    # save model
-    xgb_trainer.save_model()
 
     # save predictions
     preds = inference(xgb_results, preds_df)
@@ -84,6 +90,9 @@ def _main(cfg: DictConfig):
     submission.to_csv(path / cfg.output.name / cfg.output.preds, index=False)
     oof_df.to_csv(path / cfg.output.name / "stacking_oof_df.csv", index=False)
     preds_df.to_csv(path / cfg.output.name / "stacking_preds_df.csv", index=False)
+
+    # save model
+    xgb_trainer.save_model()
 
 
 if __name__ == "__main__":

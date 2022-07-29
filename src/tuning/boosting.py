@@ -1,11 +1,11 @@
+import lightgbm as lgb
 import pandas as pd
-from lightgbm import LGBMClassifier
 from omegaconf import DictConfig
 from optuna.trial import Trial
 from sklearn.model_selection import train_test_split
 
-from amex.evaluation.evaluate import lgb_amex_metric
-from amex.tuning.base import BaseTuner
+from evaluation.evaluate import lgb_amex_metric
+from tuning.base import BaseTuner
 
 
 class LightGBMTuner(BaseTuner):
@@ -19,7 +19,7 @@ class LightGBMTuner(BaseTuner):
         self.train_y = train_y
         super().__init__(config)
 
-    def _objective(self, trial: Trial, config: DictConfig) -> float:
+    def _objective(self, trial: Trial) -> float:
         """
         Objective function
         Args:
@@ -30,23 +30,33 @@ class LightGBMTuner(BaseTuner):
         """
         # trial parameters
         params = {
-            "max_depth": trial.suggest_int("max_depth", *config.search.max_depth),
-            "subsample": trial.suggest_float("subsample", *config.search.subsample),
-            "reg_alpha": trial.suggest_float("reg_alpha", *config.search.reg_alpha),
-            "reg_lambda": trial.suggest_float("reg_lambda", *config.search.reg_lambda),
-            "num_leaves": trial.suggest_int("num_leaves", *config.search.num_leaves),
-            "max_bin": trial.suggest_int("max_bin", *config.search.max_bin),
-            "colsample_bytree": trial.suggest_float(
-                "colsample_bytree", *config.search.colsample_bytree
-            ),
-            "min_child_samples": trial.suggest_int(
-                "min_child_samples", *config.search.min_child_weight
-            ),
+            "objective": "binary",
+            "verbosity": -1,
+            "boosting_type": "gbdt",
+            "seed": 42,
             "learning_rate": trial.suggest_float(
-                "learning_rate", *config.search.learning_rate
+                "learning_rate", **self.config.tuning.params.learning_rate
             ),
-            "n_estimators": trial.suggest_float(
-                "n_estimators", *config.search.n_estimators
+            "lambda_l1": trial.suggest_loguniform(
+                "lambda_l1", **self.config.tuning.params.lambda_l1
+            ),
+            "lambda_l2": trial.suggest_loguniform(
+                "lambda_l2", **self.config.tuning.params.lambda_l2
+            ),
+            "num_leaves": trial.suggest_int(
+                "num_leaves", **self.config.tuning.params.num_leaves
+            ),
+            "feature_fraction": trial.suggest_uniform(
+                "feature_fraction", **self.config.tuning.params.feature_fraction
+            ),
+            "bagging_fraction": trial.suggest_uniform(
+                "bagging_fraction", **self.config.tuning.params.bagging_fraction
+            ),
+            "bagging_freq": trial.suggest_int(
+                "bagging_freq", **self.config.tuning.params.bagging_freq
+            ),
+            "min_data_in_leaf": trial.suggest_int(
+                "min_child_samples", **self.config.tuning.params.min_child_samples
             ),
         }
 
@@ -58,21 +68,27 @@ class LightGBMTuner(BaseTuner):
             stratify=self.train_y,
         )
 
-        model = LGBMClassifier(random_state=self.config.model.seed, **params)
-
-        model.fit(
+        train_set = lgb.Dataset(
             X_train,
             y_train,
-            eval_set=[(X_train, y_train), (X_valid, y_valid)],
-            eval_metric=lgb_amex_metric,
-            early_stopping_rounds=self.config.model.early_stopping_rounds,
-            verbose=self.config.model.verbose,
+            categorical_feature=self.config.dataset.cat_features,
+        )
+        valid_set = lgb.Dataset(
+            X_valid,
+            y_valid,
+            categorical_feature=self.config.dataset.cat_features,
         )
 
-        y_preds = model.predict_proba(X_valid)[:, 1]
-        score = self.metric(
-            pd.DataFrame({"target": y_valid.to_numpy()}),
-            pd.Series(y_preds, name="prediction"),
+        model = lgb.train(
+            params=params,
+            train_set=train_set,
+            valid_sets=[train_set, valid_set],
+            verbose_eval=self.config.model.verbose,
+            num_boost_round=self.config.model.num_boost_round,
+            feval=lgb_amex_metric,
         )
+
+        y_preds = model.predict(X_valid)
+        score = self.metric(y_valid, y_preds)
 
         return score

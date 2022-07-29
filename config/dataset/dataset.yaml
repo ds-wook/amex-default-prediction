@@ -1,5 +1,6 @@
 path: input/amex-statement-features/
 num: 5
+seed: 42
 target: target
 train: train_statement_features
 test: test_statement_features

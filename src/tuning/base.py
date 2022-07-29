@@ -1,6 +1,5 @@
 import warnings
 from abc import ABCMeta, abstractclassmethod
-from functools import partial
 from pathlib import Path
 
 import optuna
@@ -22,12 +21,11 @@ class BaseTuner(metaclass=ABCMeta):
         self.config = config
 
     @abstractclassmethod
-    def _objective(self, trial: FrozenTrial, config: DictConfig) -> float:
+    def _objective(self, trial: FrozenTrial) -> float:
         """
         Objective function
         Args:
             trial: trial object
-            config: config object
         Returns:
             metric score
         """
@@ -42,35 +40,28 @@ class BaseTuner(metaclass=ABCMeta):
             study
         """
         wandb_kwargs = {
-            "project": self.config.experiment.project,
-            "entity": self.config.experiment.entity,
-            "name": self.config.experiment.name,
-            "reinit": self.config.experiment.reinit,
+            "project": self.config.logger.project,
+            "entity": self.config.logger.entity,
+            "name": self.config.logger.name,
+            "reinit": self.config.logger.reinit,
         }
         wandbc = WeightsAndBiasesCallback(wandb_kwargs=wandb_kwargs)
 
         study = optuna.create_study(
-            study_name=self.config.search.study_name,
-            direction=self.config.search.direction,
-            sampler=self._create_sampler(
-                config=self.config.search.get("sampler", None),
-            ),
-            pruner=self._create_pruner(
-                config=self.config.search.get("pruner", None),
-            ),
+            study_name=self.config.tuning.search.study_name,
+            direction=self.config.tuning.search.direction,
+            sampler=self._create_sampler(),
+            pruner=self._create_pruner(),
         )
-
-        # define callbacks
-        objective = partial(self._objective, config=self.config)
 
         # optimize
         study.optimize(
-            objective,
-            n_trials=self.config.search.n_trials,
+            self._objective,
+            n_trials=self.config.tuning.search.n_trials,
             callbacks=[wandbc],
         )
 
-        wandb.run.summary["best accuracy"] = study.best_trial.value
+        wandb.run.summary["best_accuracy"] = study.best_trial.value
 
         wandb.log(
             {
@@ -89,14 +80,14 @@ class BaseTuner(metaclass=ABCMeta):
         Args:
             study: study best hyperparameter object.
         """
-        path = Path(get_original_cwd()) / self.config.search.path_name
+        path = Path(get_original_cwd()) / self.config.tuning.search.path_name
         update_params = OmegaConf.load(path)
 
         update_params.model.params.update(study.best_trial.params)
 
         OmegaConf.save(update_params, path)
 
-    def _create_sampler(self, config: DictConfig) -> BaseSampler:
+    def _create_sampler(self) -> BaseSampler:
         """
         Create sampler
         Args:
@@ -106,21 +97,21 @@ class BaseTuner(metaclass=ABCMeta):
             BaseSampler: sampler
         """
         # config update
-        with open_dict(config):
-            mode = config.pop("type")
+        with open_dict(self.config.tuning.search):
+            mode = self.config.tuning.search.sampler.pop("type")
 
         if mode == "random":
-            sampler = RandomSampler(**config)
+            sampler = RandomSampler(**self.config.tuning.search.sampler)
         elif mode == "tpe":
-            sampler = TPESampler(**config)
+            sampler = TPESampler(**self.config.tuning.search.sampler)
         elif mode == "cma":
-            sampler = CmaEsSampler(**config)
+            sampler = CmaEsSampler(**self.config.tuning.search.sampler)
         else:
             raise ValueError(f"Unknown sampler mode: {mode}")
 
         return sampler
 
-    def _create_pruner(self, config: DictConfig) -> BasePruner:
+    def _create_pruner(self) -> BasePruner:
         """
         Create pruner
         Args:
@@ -130,13 +121,13 @@ class BaseTuner(metaclass=ABCMeta):
             HyperbandPruner: pruner
         """
         # config update
-        with open_dict(config):
-            mode = config.pop("type")
+        with open_dict(self.config.tuning.search):
+            mode = self.config.tuning.search.pruner.pop("type")
 
         if mode == "hyperband":
-            pruner = HyperbandPruner(**config)
+            pruner = HyperbandPruner(**self.config.tuning.search.pruner)
         elif mode == "median":
-            pruner = MedianPruner(**config)
+            pruner = MedianPruner(**self.config.tuning.search.pruner)
         elif mode == "nop":
             pruner = NopPruner()
         else:
