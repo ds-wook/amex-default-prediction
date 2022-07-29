@@ -1,7 +1,9 @@
+from typing import Callable
+
 import lightgbm as lgb
 import pandas as pd
 from omegaconf import DictConfig
-from optuna.trial import Trial
+from optuna.trial import FrozenTrial
 from sklearn.model_selection import train_test_split
 
 from evaluation.evaluate import lgb_amex_metric
@@ -14,12 +16,13 @@ class LightGBMTuner(BaseTuner):
         train_x: pd.DataFrame,
         train_y: pd.Series,
         config: DictConfig,
+        metric: Callable,
     ):
         self.train_x = train_x
         self.train_y = train_y
-        super().__init__(config)
+        super().__init__(config, metric)
 
-    def _objective(self, trial: Trial) -> float:
+    def _objective(self, trial: FrozenTrial) -> float:
         """
         Objective function
         Args:
@@ -33,7 +36,7 @@ class LightGBMTuner(BaseTuner):
             "objective": "binary",
             "verbosity": -1,
             "boosting_type": "gbdt",
-            "seed": 42,
+            "seed": trial.suggest_int("seed", **self.config.tuning.params.seed),
             "learning_rate": trial.suggest_float(
                 "learning_rate", **self.config.tuning.params.learning_rate
             ),
@@ -64,7 +67,7 @@ class LightGBMTuner(BaseTuner):
         X_train, X_valid, y_train, y_valid = train_test_split(
             self.train_x,
             self.train_y,
-            random_state=self.config.model.seed,
+            random_state=self.config.dataset.seed,
             stratify=self.train_y,
         )
 

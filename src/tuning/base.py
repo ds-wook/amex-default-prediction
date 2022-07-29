@@ -1,6 +1,7 @@
 import warnings
 from abc import ABCMeta, abstractclassmethod
 from pathlib import Path
+from typing import Callable
 
 import optuna
 import wandb
@@ -17,8 +18,9 @@ warnings.filterwarnings("ignore")
 
 
 class BaseTuner(metaclass=ABCMeta):
-    def __init__(self, config: DictConfig):
+    def __init__(self, config: DictConfig, metric: Callable):
         self.config = config
+        self.metric = metric
 
     @abstractclassmethod
     def _objective(self, trial: FrozenTrial) -> float:

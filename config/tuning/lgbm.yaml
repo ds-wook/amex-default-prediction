@@ -2,7 +2,9 @@ params:
   boosting_type: dart
   n_jobs: -1
   objective: binary
-  seed: 42
+  seed:
+  - 10
+  - 10000
   n_estimators:
   - 2500
   - 5000
