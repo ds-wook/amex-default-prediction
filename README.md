@@ -66,5 +66,6 @@ This repository is the code that placed ?th [American Express - Default Predicti
 + [Ensemble model](https://www.sciencedirect.com/science/article/pii/S0957417421003407)
 + [feature-engineering](https://www.kaggle.com/code/susnato/amex-data-preprocesing-feature-engineering)
 + [statement-features](https://www.kaggle.com/code/romaupgini/statement-dates-to-use-or-not-to-use)
++ [seed-number](https://paperswithcode.com/paper/torch-manual-seed-3407-is-all-you-need-on-the)
 --------
 Project based on the [cookiecutter data science project template](https://drivendata.github.io/cookiecutter-data-science/) & [microsoft recommenders](https://github.com/microsoft/recommenders/tree/main/recommenders).

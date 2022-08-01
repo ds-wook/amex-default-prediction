@@ -1,6 +1,6 @@
 params:
   verbose: -1
-  boosting_type: dart
+  boosting_type: gbdt
   n_jobs: -1
   objective: binary
   seed:
