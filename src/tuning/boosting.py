@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, NoReturn
 
 import lightgbm as lgb
 import pandas as pd
@@ -17,7 +17,7 @@ class LightGBMTuner(BaseTuner):
         train_y: pd.Series,
         config: DictConfig,
         metric: Callable,
-    ):
+    ) -> NoReturn:
         self.train_x = train_x
         self.train_y = train_y
         super().__init__(config, metric)
@@ -33,33 +33,34 @@ class LightGBMTuner(BaseTuner):
         """
         # trial parameters
         params = {
-            "objective": "binary",
-            "verbosity": -1,
-            "boosting_type": "gbdt",
-            "seed": trial.suggest_int("seed", **self.config.tuning.params.seed),
+            "objective": self.config.tuning.params.objective,
+            "verbose": self.config.tuning.params.verbose,
+            "boosting_type": self.config.tuning.params.boosting_type,
+            "n_jobs": self.config.tuning.params.n_jobs,
+            "seed": trial.suggest_int("seed", *self.config.tuning.params.seed),
             "learning_rate": trial.suggest_float(
-                "learning_rate", **self.config.tuning.params.learning_rate
+                "learning_rate", *self.config.tuning.params.learning_rate
             ),
             "lambda_l1": trial.suggest_loguniform(
-                "lambda_l1", **self.config.tuning.params.lambda_l1
+                "lambda_l1", *self.config.tuning.params.lambda_l1
             ),
             "lambda_l2": trial.suggest_loguniform(
-                "lambda_l2", **self.config.tuning.params.lambda_l2
+                "lambda_l2", *self.config.tuning.params.lambda_l2
             ),
             "num_leaves": trial.suggest_int(
-                "num_leaves", **self.config.tuning.params.num_leaves
+                "num_leaves", *self.config.tuning.params.num_leaves
             ),
             "feature_fraction": trial.suggest_uniform(
-                "feature_fraction", **self.config.tuning.params.feature_fraction
+                "feature_fraction", *self.config.tuning.params.feature_fraction
             ),
             "bagging_fraction": trial.suggest_uniform(
-                "bagging_fraction", **self.config.tuning.params.bagging_fraction
+                "bagging_fraction", *self.config.tuning.params.bagging_fraction
             ),
             "bagging_freq": trial.suggest_int(
-                "bagging_freq", **self.config.tuning.params.bagging_freq
+                "bagging_freq", *self.config.tuning.params.bagging_freq
             ),
             "min_data_in_leaf": trial.suggest_int(
-                "min_child_samples", **self.config.tuning.params.min_child_samples
+                "min_data_in_leaf", *self.config.tuning.params.min_data_in_leaf
             ),
         }
 
@@ -86,8 +87,8 @@ class LightGBMTuner(BaseTuner):
             params=params,
             train_set=train_set,
             valid_sets=[train_set, valid_set],
-            verbose_eval=self.config.model.verbose,
-            num_boost_round=self.config.model.num_boost_round,
+            verbose_eval=self.config.tuning.verbose,
+            num_boost_round=self.config.tuning.num_boost_round,
             feval=lgb_amex_metric,
         )
 

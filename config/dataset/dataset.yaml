@@ -1,9 +1,9 @@
-path: input/amex-statement-features/
+path: input/amex-lag-features/
 num: 5
 seed: 42
 target: target
-train: train_statement_features
-test: test_statement_features
+train: train_lag_features
+test: test_lag_features
 drop_features:
 - customer_ID
 - S_2

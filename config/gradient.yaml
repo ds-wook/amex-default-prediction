@@ -15,7 +15,8 @@ model:
   model2_oof: 5fold_lightgbm_statement_features_seed99.pkl
   model3_oof: 5fold_lightgbm_statement_features_seed3407.pkl
   model4_oof: 5fold_lightgbm_statement_features_seed22.pkl
-  model5_oof: 5fold_lightgbm_statement_features_seed42.pkl
+  model5_oof: 5fold_lightgbm_lag_features_seed3407.pkl
+  model6_oof: 5fold_lightgbm_statement_features_seed42.pkl
 output:
   name: output
   submission: sample_submission.csv
@@ -25,5 +26,6 @@ output:
   model2_preds: 5fold_lightgbm_statement_features_seed99.csv
   model3_preds: 5fold_lightgbm_statement_features_seed3407.csv
   model4_preds: 5fold_lightgbm_statement_features_seed22.csv
-  model5_preds: 5fold_lightgbm_statement_features_seed42.csv
+  model5_preds: 5fold_lightgbm_lag_features_seed3407.csv
+  model6_preds: 5fold_lightgbm_statement_features_seed42.csv
   preds: gradient_ensemble.csv

@@ -45,7 +45,6 @@ class BaseTuner(metaclass=ABCMeta):
             "project": self.config.logger.project,
             "entity": self.config.logger.entity,
             "name": self.config.logger.name,
-            "reinit": self.config.logger.reinit,
         }
         wandbc = WeightsAndBiasesCallback(wandb_kwargs=wandb_kwargs)
 

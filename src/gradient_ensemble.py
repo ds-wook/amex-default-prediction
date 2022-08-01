@@ -41,7 +41,7 @@ def get_best_weights(oofs: List[np.ndarray], preds: np.ndarray) -> float:
 
     logging.info("Blending Start")
     kf = KFold(n_splits=5)
-    for fold, (train_idx, valid_idx) in enumerate(kf.split(oofs[0])):
+    for fold, (train_idx, _) in enumerate(kf.split(oofs[0]), 1):
         res = minimize(
             get_score,
             weights,
@@ -70,13 +70,14 @@ def _main(cfg: DictConfig):
     lgbm_oofs3 = load_model(cfg, cfg.model.model3_oof)
     lgbm_oofs4 = load_model(cfg, cfg.model.model4_oof)
     lgbm_oofs5 = load_model(cfg, cfg.model.model5_oof)
-    xgb_oofs1 = load_model(cfg, cfg.modelxgb_oof)
+    lgbm_oofs6 = load_model(cfg, cfg.model.model6_oof)
+
     lgbm_preds1 = pd.read_csv(path / cfg.output.name / cfg.output.model1_preds)
     lgbm_preds2 = pd.read_csv(path / cfg.output.name / cfg.output.model2_preds)
     lgbm_preds3 = pd.read_csv(path / cfg.output.name / cfg.output.model3_preds)
     lgbm_preds4 = pd.read_csv(path / cfg.output.name / cfg.output.model4_preds)
     lgbm_preds5 = pd.read_csv(path / cfg.output.name / cfg.output.model5_preds)
-    xgb_preds1 = pd.read_csv(path / cfg.output.name / cfg.output.xgb_preds)
+    lgbm_preds6 = pd.read_csv(path / cfg.output.name / cfg.output.model6_preds)
 
     oofs = [
         lgbm_oofs1.oof_preds,
@@ -84,7 +85,7 @@ def _main(cfg: DictConfig):
         lgbm_oofs3.oof_preds,
         lgbm_oofs4.oof_preds,
         lgbm_oofs5.oof_preds,
-        xgb_oofs1.oof_preds,
+        lgbm_oofs6.oof_preds,
     ]
 
     preds = [
@@ -93,21 +94,14 @@ def _main(cfg: DictConfig):
         lgbm_preds3.prediction.to_numpy(),
         lgbm_preds4.prediction.to_numpy(),
         lgbm_preds5.prediction.to_numpy(),
-        xgb_preds1.prediction.to_numpy(),
+        lgbm_preds6.prediction.to_numpy(),
     ]
 
     best_weights = get_best_weights(oofs, target.to_numpy())
 
     oof_preds = np.average(oofs, weights=best_weights, axis=0)
-    print(amex_metric(target.to_numpy(), lgbm_oofs1.oof_preds))
-    print(amex_metric(target.to_numpy(), lgbm_oofs2.oof_preds))
-    print(amex_metric(target.to_numpy(), lgbm_oofs3.oof_preds))
-    print(amex_metric(target.to_numpy(), lgbm_oofs4.oof_preds))
-    print(amex_metric(target.to_numpy(), lgbm_oofs5.oof_preds))
     print(f"OOF Score: {amex_metric(target.to_numpy(), oof_preds)}")
-
     blending_preds = np.average(preds, weights=best_weights, axis=0)
-
     submission["prediction"] = blending_preds
     submission.to_csv(path / cfg.output.name / cfg.output.preds, index=False)
 

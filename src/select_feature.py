@@ -5,7 +5,6 @@ from hydra.utils import get_original_cwd
 from omegaconf import DictConfig, OmegaConf
 
 from data.dataset import load_test_dataset, load_train_dataset
-from features.build import create_categorical_test, create_categorical_train
 from features.select import select_features
 
 
@@ -13,10 +12,7 @@ from features.select import select_features
 def _main(cfg: DictConfig):
     # load train test dataset
     train_x, train_y = load_train_dataset(cfg)
-    train_x = create_categorical_train(train_x, cfg)
     test_x = load_test_dataset(cfg)
-    test_x = create_categorical_test(test_x, cfg)
-
     # calculate shap values
     features = select_features(train_x, train_y, test_x)
 

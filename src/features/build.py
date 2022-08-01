@@ -1,7 +1,7 @@
 import gc
 import pickle
 from pathlib import Path
-from typing import List, Union
+from typing import List
 
 import numpy as np
 import pandas as pd
@@ -74,7 +74,7 @@ def add_diff_features(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def add_rate_features(df: pd.DataFrame) -> pd.DataFrame:
+def add_lag_features(df: pd.DataFrame) -> pd.DataFrame:
     """
     Create diff feature
     Args:
@@ -82,13 +82,13 @@ def add_rate_features(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         dataframe
     """
-    # Get the difference between last and mean
     num_cols = [col for col in df.columns if "last" in col]
     num_cols = [col[:-5] for col in num_cols if "round" not in col]
 
+    # Lag Features
     for col in num_cols:
         try:
-            df[f"{col}_last_mean_rate"] = df[f"{col}_last"] / df[f"{col}_mean"]
+            df[f"{col}_lag_sub"] = df[f"{col}_last"] - df[f"{col}_first"]
         except Exception:
             pass
 
@@ -117,52 +117,6 @@ def get_difference(df: pd.DataFrame, num_features: List[str]) -> pd.DataFrame:
     df_diff.reset_index(inplace=True)
 
     return df_diff
-
-
-def get_gradient(x: np.ndarray) -> Union[pd.DataFrame, List]:
-    try:
-        return np.gradient(x, axis=0)[-1]
-    except ValueError:
-        return []
-
-
-def add_pay_features(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Create pay features
-    Args:
-        df: dataframe
-    Returns:
-        dataframe
-    """
-    # compute "after pay" features
-    before_cols = ["B_9", "B_11", "B_14", "B_17", "D_39", "D_131", "S_16", "S_23"]
-    after_cols = ["P_2", "P_3"]
-    for bcol in before_cols:
-        for pcol in after_cols:
-            if bcol in df.columns:
-                df[f"{bcol}-{pcol}"] = df[bcol] - df[pcol]
-
-    return df
-
-
-def add_gradient_features(df: pd.DataFrame, time_features: List[str]) -> pd.DataFrame:
-    """
-    Create gradient features
-    Args:
-        df: dataframe
-        time_features: list of time features
-    Returns:
-        dataframe
-    """
-    df_grad = (
-        df.loc[:, time_features + ["customer_ID"]]
-        .groupby(["customer_ID"])
-        .progress_apply(lambda x: get_gradient(x))
-    )
-    cols = [col + "_gradient" for col in df[time_features].columns]
-    df_grad = pd.DataFrame(df_grad.values.tolist(), columns=cols, index=df_grad.index)
-    df_grad.reset_index(inplace=True)
-    return df_grad
 
 
 def add_trick_features(df: pd.DataFrame) -> pd.DataFrame:
@@ -198,7 +152,6 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     cat_features = (
         "B_30, B_38, D_114, D_116, D_117, D_120, D_126, D_63, D_64, D_66, D_68"
     )
-
     cat_features = cat_features.split(", ")
     num_features = [col for col in all_cols if col not in cat_features]
 
