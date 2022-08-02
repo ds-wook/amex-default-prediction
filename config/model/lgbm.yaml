@@ -1,20 +1,21 @@
 fold: 5
 params:
   boosting: dart
-  learning_rate: 0.01
+  learning_rate: 0.005
+  drop_rate: 0.045
   objective: binary
-  num_leaves: 100
-  seed: 3407
-  feature_fraction: 0.2
-  bagging_freq: 10
-  bagging_fraction: 0.5
+  num_leaves: 250
+  seed: 42
+  feature_fraction: 0.848447997774773
+  bagging_freq: 2
+  bagging_fraction: 0.681816095469519
   n_jobs: -1
-  lambda_l2: 2
+  lambda_l2: 4.532318498660464
+  lambda_l1: 0.0009572306286098796
   min_data_in_leaf: 40
   verbose: -1
 path: res/models/
-name: 5fold_lightgbm_lag_features_seed3407.pkl
+name: 5fold_lightgbm_lag_features_seed5230.pkl
 early_stopping_rounds: 1500
 num_boost_round: 10500
-search: False
 verbose: 500

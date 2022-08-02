@@ -29,7 +29,7 @@ This repository is the code that placed ?th [American Express - Default Predicti
 │
 ├── res
 |   ├── data               <- encoding pickle file
-|   ├── models             <- Trained and serialized models
+|   └── models             <- Trained and serialized models
 |
 ├── notebooks              <- ipykernel
 │
