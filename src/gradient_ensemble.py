@@ -1,20 +1,42 @@
 import logging
 import warnings
+from functools import partial
 from pathlib import Path
-from typing import List
+from typing import List, NoReturn
 
 import hydra
 import numpy as np
 import pandas as pd
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
-from scipy.optimize import minimize
+from scipy.optimize import fmin, minimize
 from sklearn.model_selection import KFold
 
 from evaluation.evaluate import amex_metric
 from models.infer import load_model
 
 warnings.filterwarnings("ignore")
+
+
+class OptimizeAmex:
+    def __init__(self) -> NoReturn:
+        self.coef_ = 0
+
+    def _amex(self, coef: np.ndarray, X: pd.DataFrame, y: pd.Series) -> float:
+        x_coef = X * coef
+        predictions = np.sum(x_coef, axis=1)
+        amex_score = amex_metric(y, predictions)
+        return -1.0 * amex_score
+
+    def fit(self, X: pd.DataFrame, y: pd.Series) -> NoReturn:
+        partial_loss = partial(self._amex, X=X, y=y)
+        init_coef = np.random.dirichlet(np.ones(X.shape[1]))
+        self.coef_ = fmin(partial_loss, init_coef, disp=False)
+
+    def predict(self, X: pd.DataFrame) -> np.ndarray:
+        x_coef = X * self.coef_
+        predictions = np.sum(x_coef, axis=1)
+        return predictions
 
 
 def get_score(

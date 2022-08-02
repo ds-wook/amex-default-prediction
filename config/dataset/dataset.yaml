@@ -1,5 +1,6 @@
 path: input/amex-lag-features/
-num: 5
+num_train: 5
+num_test: 10
 seed: 42
 target: target
 train: train_lag_features

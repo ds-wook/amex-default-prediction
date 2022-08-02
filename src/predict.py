@@ -21,7 +21,7 @@ def _main(cfg: DictConfig):
     # infer test
     preds_proba = []
 
-    for num in range(10):
+    for num in range(cfg.dataset.num_test):
         seed_everything(cfg.model.params.seed)
         test_sample = load_test_dataset(cfg, num)
 

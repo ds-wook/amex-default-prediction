@@ -16,7 +16,7 @@ def _main(cfg: DictConfig) -> NoReturn:
     path = Path(get_original_cwd())
     train = pd.read_parquet(path / "input/amex-data-parquet/train.parquet")
     label = pd.read_csv(path / "input/amex-default-prediction/train_labels.csv")
-    split_ids = split_dataset(train.customer_ID.unique(), cfg.dataset.num)
+    split_ids = split_dataset(train.customer_ID.unique(), cfg.dataset.num_train)
 
     path = Path(get_original_cwd()) / cfg.dataset.path
 

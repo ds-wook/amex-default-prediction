@@ -15,7 +15,7 @@ from features.build import build_features
 def _main(cfg: DictConfig) -> NoReturn:
     path = Path(get_original_cwd())
     test = pd.read_parquet(path / "input/amex-data-parquet/test.parquet")
-    split_ids = split_dataset(test.customer_ID.unique(), cfg.dataset.num)
+    split_ids = split_dataset(test.customer_ID.unique(), cfg.dataset.num_test)
 
     path = Path(get_original_cwd()) / cfg.dataset.path
 
