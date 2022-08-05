@@ -1,7 +1,7 @@
 fold: 5
 params:
   boosting_type: Ordered
-  learning_rate: 0.01
+  learning_rate: 0.02
   nan_mode: Min
   l2_leaf_reg: 0.3
   max_depth: 4
