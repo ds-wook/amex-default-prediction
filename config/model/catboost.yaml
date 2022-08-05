@@ -10,10 +10,10 @@ params:
   objective: Logloss
   od_type: Iter
   od_wait: 500
-  iterations: 11000
+  iterations: 10500
 path: res/models/
-name: 5fold_catboost_total_features.pkl
-early_stopping_rounds: 2000
+name: 5fold_catboost_lag_features_seed131.pkl
+early_stopping_rounds: 1500
 search: False
-seed: 42
+seed: 131
 verbose: 500

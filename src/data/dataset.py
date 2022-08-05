@@ -10,11 +10,12 @@ from omegaconf import DictConfig
 
 from features.build import (
     add_diff_features,
-    add_trick_features,
     add_lag_features,
+    add_trick_features,
     create_categorical_test,
     create_categorical_train,
 )
+from utils import reduce_mem_usage
 
 warnings.filterwarnings("ignore")
 
@@ -38,6 +39,7 @@ def load_train_dataset(config: DictConfig) -> Tuple[pd.DataFrame, pd.Series]:
     train_x = add_lag_features(train_x)
     train_x = add_diff_features(train_x)
     train_x = create_categorical_train(train_x, config)
+    train_x = reduce_mem_usage(train_x)
     logging.info(f"train: {train_x.shape}, target: {train_y.shape}")
 
     return train_x, train_y

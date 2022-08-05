@@ -19,6 +19,10 @@ model:
   model8_oof: 10fold_lightgbm_pay_features_cross_last_dart.pkl
   model9_oof: 5fold_lightgbm_rate_features_seed52.pkl
   model10_oof: 5fold_lightgbm_trick_features_seed22.pkl
+  model11_oof: 5fold_lightgbm_statement_features_seed94.pkl
+  model12_oof: 5fold_lightgbm_lag_features_seed222.pkl
+  model13_oof: 5fold_lightgbm_lag_features_seed5230.pkl
+  model14_oof: 5fold_lightgbm_lag_features_seed42.pkl
 output:
   name: output
   submission: sample_submission.csv
@@ -32,6 +36,10 @@ output:
   model8_preds: 10fold_lightgbm_pay_features_cross_last.csv
   model9_preds: 5fold_lightgbm_rate_features_seed52.csv
   model10_preds: 5fold_lightgbm_trick_features_seed22.csv
+  model11_preds: 5fold_lightgbm_statement_features_seed94.csv
+  model12_preds: 5fold_lightgbm_lag_features_seed222.csv
+  model13_preds: 5fold_lightgbm_lag_features_seed5230.csv
+  model14_preds: 5fold_lightgbm_lag_features_seed42.csv
   preds: 10fold_xgboost_stacking.csv
 defaults:
   - dataset: dataset

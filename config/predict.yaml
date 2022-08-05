@@ -11,6 +11,6 @@ defaults:
 
 output:
   path: output
-  name: 5fold_lightgbm_lag_features_seed222.csv
+  name: 5fold_catboost_lag_features_seed131.csv
   submit: sample_submission.csv
   features: features.yaml

@@ -28,6 +28,10 @@ def _main(cfg: DictConfig):
     lgbm_oofs8 = load_model(cfg, cfg.model.model8_oof)
     lgbm_oofs9 = load_model(cfg, cfg.model.model9_oof)
     lgbm_oofs10 = load_model(cfg, cfg.model.model10_oof)
+    lgbm_oofs11 = load_model(cfg, cfg.model.model11_oof)
+    lgbm_oofs12 = load_model(cfg, cfg.model.model12_oof)
+    lgbm_oofs13 = load_model(cfg, cfg.model.model13_oof)
+    lgbm_oofs14 = load_model(cfg, cfg.model.model14_oof)
 
     target = train_labels["target"]
     oof_array = np.column_stack(
@@ -42,6 +46,10 @@ def _main(cfg: DictConfig):
             lgbm_oofs8.oof_preds,
             lgbm_oofs9.oof_preds,
             lgbm_oofs10.oof_preds,
+            lgbm_oofs11.oof_preds,
+            lgbm_oofs12.oof_preds,
+            lgbm_oofs13.oof_preds,
+            lgbm_oofs14.oof_preds,
         ]
     )
 
@@ -55,6 +63,10 @@ def _main(cfg: DictConfig):
     lgbm_preds8 = pd.read_csv(path / cfg.output.name / cfg.output.model8_preds)
     lgbm_preds9 = pd.read_csv(path / cfg.output.name / cfg.output.model9_preds)
     lgbm_preds10 = pd.read_csv(path / cfg.output.name / cfg.output.model10_preds)
+    lgbm_preds11 = pd.read_csv(path / cfg.output.name / cfg.output.model11_preds)
+    lgbm_preds12 = pd.read_csv(path / cfg.output.name / cfg.output.model12_preds)
+    lgbm_preds13 = pd.read_csv(path / cfg.output.name / cfg.output.model13_preds)
+    lgbm_preds14 = pd.read_csv(path / cfg.output.name / cfg.output.model14_preds)
 
     preds_array = np.column_stack(
         [
@@ -68,6 +80,10 @@ def _main(cfg: DictConfig):
             lgbm_preds8.prediction.to_numpy(),
             lgbm_preds9.prediction.to_numpy(),
             lgbm_preds10.prediction.to_numpy(),
+            lgbm_preds11.prediction.to_numpy(),
+            lgbm_preds12.prediction.to_numpy(),
+            lgbm_preds13.prediction.to_numpy(),
+            lgbm_preds14.prediction.to_numpy(),
         ]
     )
 

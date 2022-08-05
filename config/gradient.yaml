@@ -11,21 +11,23 @@ model:
   path: res/models/
   xgb_oof: 10fold_xgboost_rank_stacking.pkl
   tabnet_oof: 10fold_tabnet_stacking.npy
-  model1_oof: 5fold_lightgbm_statement_features_seed88.pkl
+  model1_oof: 5fold_lightgbm_statement_features_seed2222.pkl
   model2_oof: 5fold_lightgbm_statement_features_seed99.pkl
   model3_oof: 5fold_lightgbm_statement_features_seed3407.pkl
-  model4_oof: 5fold_lightgbm_statement_features_seed22.pkl
-  model5_oof: 5fold_lightgbm_lag_features_seed3407.pkl
-  model6_oof: 5fold_lightgbm_statement_features_seed42.pkl
+  model4_oof: 5fold_lightgbm_lag_features_seed3407.pkl
+  model5_oof: 5fold_lightgbm_statement_features_seed88.pkl
+  model6_oof: 5fold_lightgbm_statement_features_seed22.pkl
+  model7_oof: 5fold_lightgbm_statement_features_seed42.pkl
 output:
   name: output
   submission: sample_submission.csv
   xgb_preds: 10fold_xgboost_rank_stacking.csv
   tabnet_preds: 10fold_tabnet_stacking.csv
-  model1_preds: 5fold_lightgbm_statement_features_seed88.csv
+  model1_preds: 5fold_lightgbm_statement_features_seed2222.csv
   model2_preds: 5fold_lightgbm_statement_features_seed99.csv
   model3_preds: 5fold_lightgbm_statement_features_seed3407.csv
-  model4_preds: 5fold_lightgbm_statement_features_seed22.csv
-  model5_preds: 5fold_lightgbm_lag_features_seed3407.csv
-  model6_preds: 5fold_lightgbm_statement_features_seed42.csv
+  model4_preds: 5fold_lightgbm_lag_features_seed222.csv
+  model5_preds: 5fold_lightgbm_statement_features_seed88.csv
+  model6_preds: 5fold_lightgbm_statement_features_seed22.csv
+  model7_preds: 5fold_lightgbm_statement_features_seed42.csv
   preds: gradient_ensemble.csv

@@ -93,6 +93,7 @@ def _main(cfg: DictConfig):
     lgbm_oofs4 = load_model(cfg, cfg.model.model4_oof)
     lgbm_oofs5 = load_model(cfg, cfg.model.model5_oof)
     lgbm_oofs6 = load_model(cfg, cfg.model.model6_oof)
+    lgbm_oofs7 = load_model(cfg, cfg.model.model7_oof)
 
     lgbm_preds1 = pd.read_csv(path / cfg.output.name / cfg.output.model1_preds)
     lgbm_preds2 = pd.read_csv(path / cfg.output.name / cfg.output.model2_preds)
@@ -100,6 +101,7 @@ def _main(cfg: DictConfig):
     lgbm_preds4 = pd.read_csv(path / cfg.output.name / cfg.output.model4_preds)
     lgbm_preds5 = pd.read_csv(path / cfg.output.name / cfg.output.model5_preds)
     lgbm_preds6 = pd.read_csv(path / cfg.output.name / cfg.output.model6_preds)
+    lgbm_preds7 = pd.read_csv(path / cfg.output.name / cfg.output.model7_preds)
 
     oofs = [
         lgbm_oofs1.oof_preds,
@@ -108,6 +110,7 @@ def _main(cfg: DictConfig):
         lgbm_oofs4.oof_preds,
         lgbm_oofs5.oof_preds,
         lgbm_oofs6.oof_preds,
+        lgbm_oofs7.oof_preds,
     ]
 
     preds = [
@@ -117,6 +120,7 @@ def _main(cfg: DictConfig):
         lgbm_preds4.prediction.to_numpy(),
         lgbm_preds5.prediction.to_numpy(),
         lgbm_preds6.prediction.to_numpy(),
+        lgbm_preds7.prediction.to_numpy(),
     ]
 
     best_weights = get_best_weights(oofs, target.to_numpy())
