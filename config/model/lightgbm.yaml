@@ -4,17 +4,17 @@ params:
   learning_rate: 0.01
   objective: binary
   num_leaves: 100
-  lambda_l2: 2
-  lambda_l1: 8.578714335586462e-08
+  lambda_l2: 4.532318498660464
+  lambda_l1: 0.0009572306286098796
   feature_fraction: 0.35
   bagging_fraction: 0.5
   bagging_freq: 10
   min_data_in_leaf: 40
-  seed: 2222
+  seed: 131
   verbose: -1
   n_jobs: -1
 path: res/models/
-name: 5fold_lightgbm_statement_features_seed2222.pkl
+name: 5fold_lightgbm_statement_features_seed131.pkl
 early_stopping_rounds: 1500
 num_boost_round: 9500
 verbose: 500

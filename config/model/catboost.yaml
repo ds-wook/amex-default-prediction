@@ -1,19 +1,18 @@
 fold: 5
 params:
   boosting_type: Ordered
-  learning_rate: 0.02
-  nan_mode: Min
-  l2_leaf_reg: 0.3
-  max_depth: 4
+  learning_rate: 0.03
+  l2_leaf_reg: 70
+  max_depth: 7
   min_data_in_leaf: 57
   max_bin: 494
   objective: Logloss
   od_type: Iter
   od_wait: 500
-  iterations: 10500
+  iterations: 20500
 path: res/models/
-name: 5fold_catboost_lag_features_seed131.pkl
+name: 5fold_catboost_lag_features_seed42.pkl
 early_stopping_rounds: 1500
 search: False
-seed: 131
+seed: 42
 verbose: 500

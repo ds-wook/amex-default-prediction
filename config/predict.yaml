@@ -7,10 +7,10 @@ defaults:
   - dataset: dataset
   - features: features
   - logger: wandb
-  - model: lgbm
+  - model: catboost
 
 output:
   path: output
-  name: 5fold_catboost_lag_features_seed131.csv
+  name: 5fold_catboost_lag_features_seed42.csv
   submit: sample_submission.csv
   features: features.yaml

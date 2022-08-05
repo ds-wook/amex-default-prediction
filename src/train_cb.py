@@ -3,7 +3,6 @@ from omegaconf import DictConfig
 
 from data.dataset import load_train_dataset
 from evaluation.evaluate import amex_metric
-from features.build import create_categorical_train
 from models.boosting import CatBoostTrainer
 
 
@@ -11,7 +10,6 @@ from models.boosting import CatBoostTrainer
 def _main(cfg: DictConfig):
     # create dataset
     train_x, train_y = load_train_dataset(cfg)
-    train_x = create_categorical_train(train_x, cfg)
 
     # train model
     cb_trainer = CatBoostTrainer(config=cfg, metric=amex_metric)

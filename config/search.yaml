@@ -7,4 +7,4 @@ defaults:
   - dataset: dataset
   - features: features
   - logger: wandb
-  - tuning: lgbm
+  - tuning: lightgbm
