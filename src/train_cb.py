@@ -4,10 +4,12 @@ from omegaconf import DictConfig
 from data.dataset import load_train_dataset
 from evaluation.evaluate import amex_metric
 from models.boosting import CatBoostTrainer
+from utils import seed_everything
 
 
 @hydra.main(config_path="../config/", config_name="train")
 def _main(cfg: DictConfig):
+    seed_everything(cfg.model.seed)
     # create dataset
     train_x, train_y = load_train_dataset(cfg)
 

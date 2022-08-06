@@ -22,7 +22,10 @@ def _main(cfg: DictConfig):
     preds_proba = []
 
     for num in range(cfg.dataset.num_test):
-        seed_everything(cfg.model.params.seed)
+        try:
+            seed_everything(cfg.model.params.seed)
+        except Exception:
+            seed_everything(cfg.model.seed)
         test_sample = load_test_dataset(cfg, num)
 
         logging.info(f"Test dataset {num} predicting...")
