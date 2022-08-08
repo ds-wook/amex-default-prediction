@@ -17,6 +17,7 @@ from omegaconf import DictConfig
 from sklearn.model_selection import StratifiedKFold
 from wandb.sklearn import plot_feature_importances
 
+
 warnings.filterwarnings("ignore")
 
 
@@ -24,7 +25,7 @@ warnings.filterwarnings("ignore")
 class ModelResult:
     oof_preds: np.ndarray
     models: Dict[str, Any]
-    scores: Dict[str, float]
+    scores: Dict[str, Dict[str, float]]
 
 
 class BaseModel(metaclass=ABCMeta):
@@ -80,6 +81,7 @@ class BaseModel(metaclass=ABCMeta):
             # split train and validation data
             X_train, y_train = train_x.iloc[train_idx], train_y.iloc[train_idx]
             X_valid, y_valid = train_x.iloc[valid_idx], train_y.iloc[valid_idx]
+
             wandb.init(
                 entity=self.config.logger.entity,
                 project=self.config.logger.project,
@@ -119,6 +121,8 @@ class BaseModel(metaclass=ABCMeta):
 
         oof_score = self.metric(train_y.to_numpy(), oof_preds)
         logging.info(f"OOF Score: {oof_score}")
+        logging.info(f"CV means: {np.mean(list(scores.values()))}")
+        logging.info(f"CV std: {np.std(list(scores.values()))}")
 
         self.result = ModelResult(
             oof_preds=oof_preds,

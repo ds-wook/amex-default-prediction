@@ -32,7 +32,7 @@ def _main(cfg: DictConfig):
     lgbm_oofs12 = load_model(cfg, cfg.model.model12_oof)
     lgbm_oofs13 = load_model(cfg, cfg.model.model13_oof)
     lgbm_oofs14 = load_model(cfg, cfg.model.model14_oof)
-
+    lgbm_oofs15 = load_model(cfg, cfg.model.model15_oof)
     target = train_labels["target"]
     oof_array = np.column_stack(
         [
@@ -50,6 +50,7 @@ def _main(cfg: DictConfig):
             lgbm_oofs12.oof_preds,
             lgbm_oofs13.oof_preds,
             lgbm_oofs14.oof_preds,
+            lgbm_oofs15.oof_preds,
         ]
     )
 
@@ -67,6 +68,7 @@ def _main(cfg: DictConfig):
     lgbm_preds12 = pd.read_csv(path / cfg.output.name / cfg.output.model12_preds)
     lgbm_preds13 = pd.read_csv(path / cfg.output.name / cfg.output.model13_preds)
     lgbm_preds14 = pd.read_csv(path / cfg.output.name / cfg.output.model14_preds)
+    lgbm_preds15 = pd.read_csv(path / cfg.output.name / cfg.output.model15_preds)
 
     preds_array = np.column_stack(
         [
@@ -84,18 +86,17 @@ def _main(cfg: DictConfig):
             lgbm_preds12.prediction.to_numpy(),
             lgbm_preds13.prediction.to_numpy(),
             lgbm_preds14.prediction.to_numpy(),
+            lgbm_preds15.prediction.to_numpy(),
         ]
     )
 
-    oof_df = pd.DataFrame(oof_array, columns=[f"preds_{i}" for i in range(1, 11)])
+    oof_df = pd.DataFrame(
+        oof_array, columns=[f"preds_{i}" for i in range(1, oof_array.shape[1] + 1)]
+    )
 
-    for col in oof_df.columns:
-        oof_df[f"{col}_rank"] = rankdata(oof_df[col]) / len(oof_df)
-
-    preds_df = pd.DataFrame(preds_array, columns=[f"preds_{i}" for i in range(1, 11)])
-
-    for col in preds_df.columns:
-        preds_df[f"{col}_rank"] = rankdata(preds_df[col]) / len(preds_df)
+    preds_df = pd.DataFrame(
+        preds_array, columns=[f"preds_{i}" for i in range(1, preds_array.shape[1] + 1)]
+    )
 
     xgb_trainer = XGBoostTrainer(config=cfg, metric=amex_metric)
     xgb_results = xgb_trainer.train(oof_df, target)

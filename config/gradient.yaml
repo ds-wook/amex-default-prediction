@@ -9,25 +9,33 @@ input:
   train_labels: train_labels.csv
 model:
   path: res/models/
-  xgb_oof: 10fold_xgboost_rank_stacking.pkl
-  tabnet_oof: 10fold_tabnet_stacking.npy
+  xgb_oof: 10fold_xgboost_stacking.pkl
+  tabnet_oof: 10fold_oof_stacking_tabnet.npy
   model1_oof: 5fold_lightgbm_statement_features_seed22.pkl
-  model2_oof: 5fold_lightgbm_statement_features_seed42.pkl
-  model3_oof: 5fold_lightgbm_statement_features_seed88.pkl
-  model4_oof: 5fold_lightgbm_statement_features_seed99.pkl
-  model5_oof: 5fold_lightgbm_statement_features_seed2222.pkl
-  model6_oof: 5fold_lightgbm_statement_features_seed3407.pkl
+  model2_oof: 5fold_lightgbm_statement_features_seed88.pkl
+  model3_oof: 5fold_lightgbm_statement_features_seed99.pkl
+  model4_oof: 5fold_lightgbm_statement_features_seed3407.pkl
+  model5_oof: 5fold_lightgbm_statement_features_seed42.pkl
+  model6_oof: 5fold_lightgbm_selected_features_seed3407.pkl
   model7_oof: 5fold_lightgbm_lag_features_seed3407.pkl
+  cb1_oof: oof_5fold_catboost_lag_features_seed22.csv
+  cb2_oof: oof_5fold_catboost_lag_features_seed99.csv
+  cb3_oof: 5fold_catboost_lag_features_seed42.pkl
 output:
   name: output
   submission: sample_submission.csv
-  xgb_preds: 10fold_xgboost_rank_stacking.csv
-  tabnet_preds: 10fold_tabnet_stacking.csv
+  xgb_preds: 10fold_xgboost_stacking.csv
+  tabnet_preds: 10fold_stacking_tabnet.csv
   model1_preds: 5fold_lightgbm_statement_features_seed22.csv
-  model2_preds: 5fold_lightgbm_statement_features_seed42.csv
-  model3_preds: 5fold_lightgbm_statement_features_seed88.csv
-  model4_preds: 5fold_lightgbm_statement_features_seed99.csv
-  model5_preds: 5fold_lightgbm_statement_features_seed2222.csv
-  model6_preds: 5fold_lightgbm_statement_features_seed3407.csv
+  model2_preds: 5fold_lightgbm_statement_features_seed88.csv
+  model3_preds: 5fold_lightgbm_statement_features_seed99.csv
+  model4_preds: 5fold_lightgbm_statement_features_seed3407.csv
+  model5_preds: 5fold_lightgbm_statement_features_seed42.csv
+  model6_preds: 5fold_lightgbm_selected_features_seed3407.csv
   model7_preds: 5fold_lightgbm_lag_features_seed3407.csv
+  cb1_preds: 5fold_catboost_lag_features_seed22.csv
+  cb2_preds: 5fold_catboost_lag_features_seed99.csv
+  cb3_preds: 5fold_catboost_lag_features_seed42.csv
   preds: gradient_ensemble.csv
+score:
+  name: log_loss

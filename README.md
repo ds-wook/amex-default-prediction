@@ -7,6 +7,10 @@ This repository is the code that placed ?th [American Express - Default Predicti
 |-----|--|------|---------|
 |XGBoost(10-KFold - gbdt)|0.792|0.793|-|
 |TabNet(10-StratifiedKFold)|0.789|0.790|-|
+|CatBoost(5-StratifiedKFold sdist-lag-features - dart) - seed22|0.7953|0.797|-|
+|CatBoost(5-StratifiedKFold sdist-lag-features - dart) - seed42|0.7954|0.797|-|
+|CatBoost(5-StratifiedKFold sdist-lag-features - dart) - seed99|0.7958|0.797|-|
+|CatBoost(5-StratifiedKFold sdist-lag-features - dart) - seed3407|0.7948|0.797|-|
 |LightGBM(5-StratifiedKFold time-features - shap - dart) - trick|0.7970|0.797|-|
 |LightGBM(5-StratifiedKFold time-lag-features - dart) - trick|0.7973|0.797|-|
 |LightGBM(5-StratifiedKFold diff-features - dart) - trick|0.7973|0.799|-|
@@ -21,8 +25,8 @@ This repository is the code that placed ?th [American Express - Default Predicti
 |LightGBM(5-StratifiedKFold sdist-features - dart) - seed3407|0.7977|**0.799**|-|
 |LightGBM(5-StratifiedKFold sdist-lag-features - dart) - seed3407|0.7977|**0.799**|-|
 |LightGBM(5-StratifiedKFold sdist-lag-features - dart) - seed5230|0.7963|**0.799**|-|
-|XGBoost(10-KFold - stacking regression)|**0.7985**|0.799|-|
-|LightGBM-Gradient Ensemble|**0.7989**|0.799|-|
+|XGBoost(10-KFold - stacking regression)|0.7985|0.799|-|
+|LightGBM-Gradient Ensemble|**0.7993**|**0.799**|-|
 
 ### Project Organization
 ```
@@ -70,5 +74,6 @@ This repository is the code that placed ?th [American Express - Default Predicti
 + [feature-engineering](https://www.kaggle.com/code/susnato/amex-data-preprocesing-feature-engineering)
 + [statement-features](https://www.kaggle.com/code/romaupgini/statement-dates-to-use-or-not-to-use)
 + [seed-number](https://paperswithcode.com/paper/torch-manual-seed-3407-is-all-you-need-on-the)
++ [clean-data](https://www.kaggle.com/competitions/amex-default-prediction/discussion/328514)
 --------
 Project based on the [cookiecutter data science project template](https://drivendata.github.io/cookiecutter-data-science/) & [microsoft recommenders](https://github.com/microsoft/recommenders/tree/main/recommenders).

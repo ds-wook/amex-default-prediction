@@ -6,7 +6,7 @@ params:
   max_depth: 7
   min_data_in_leaf: 57
   max_bin: 494
-  objective: Logloss
+  loss_function: Logloss
   od_type: Iter
   od_wait: 500
   iterations: 20500

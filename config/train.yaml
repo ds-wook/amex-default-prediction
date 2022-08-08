@@ -7,4 +7,4 @@ defaults:
   - dataset: dataset
   - features: features
   - logger: wandb
-  - model: catboost
+  - model: lightgbm

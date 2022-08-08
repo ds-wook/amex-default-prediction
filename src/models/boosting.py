@@ -31,14 +31,14 @@ class LightGBMTrainer(BaseModel):
         load train model
         """
         train_set = lgb.Dataset(
-            X_train,
-            y_train,
-            categorical_feature=self.config.dataset.cat_features,
+            data=X_train,
+            label=y_train,
+            categorical_feature=self.config.features.cat_features,
         )
         valid_set = lgb.Dataset(
-            X_valid,
-            y_valid,
-            categorical_feature=self.config.dataset.cat_features,
+            data=X_valid,
+            label=y_valid,
+            categorical_feature=self.config.features.cat_features,
         )
 
         model = lgb.train(
@@ -71,10 +71,10 @@ class CatBoostTrainer(BaseModel):
         load train model
         """
         train_data = Pool(
-            data=X_train, label=y_train, cat_features=self.config.dataset.cat_features
+            data=X_train, label=y_train, cat_features=self.config.features.cat_features
         )
         valid_data = Pool(
-            data=X_valid, label=y_valid, cat_features=self.config.dataset.cat_features
+            data=X_valid, label=y_valid, cat_features=self.config.features.cat_features
         )
 
         model = CatBoostClassifier(
