@@ -27,3 +27,48 @@ df["prediction4"] = preds4.prediction
 # %%
 df.corr()
 # %%
+scores_df = pd.read_csv("../input/scores_correlation.csv")
+scores_df.head()
+# %%
+scores_df.sort_values("split_score", ascending=False)
+# %%
+scores_df[scores_df["gain_score"] > 0].shape
+# %%
+def get_score_correlation(
+    actual_imp_df: pd.DataFrame, null_imp_df: pd.Series
+) -> pd.DataFrame:
+    correlation_scores = []
+    for _f in actual_imp_df["feature"].unique():
+        f_null_imps = null_imp_df.loc[
+            null_imp_df["feature"] == _f, "importance_gain"
+        ].values
+        f_act_imps = actual_imp_df.loc[
+            actual_imp_df["feature"] == _f, "importance_gain"
+        ].values
+        gain_score = (
+            100 * (f_null_imps < np.percentile(f_act_imps, 25)).sum() / f_null_imps.size
+        )
+        f_null_imps = null_imp_df.loc[
+            null_imp_df["feature"] == _f, "importance_split"
+        ].values
+        f_act_imps = actual_imp_df.loc[
+            actual_imp_df["feature"] == _f, "importance_split"
+        ].values
+        split_score = (
+            100 * (f_null_imps < np.percentile(f_act_imps, 25)).sum() / f_null_imps.size
+        )
+        correlation_scores.append((_f, split_score, gain_score))
+
+    corr_scores_df = pd.DataFrame(
+        correlation_scores, columns=["feature", "split_score", "gain_score"]
+    )
+
+    return corr_scores_df
+
+
+# %%
+shap_df = pd.read_csv("../input/shap_importance.csv")
+shap_df.head()
+# %%
+shap_df.values.tolist()
+# %%

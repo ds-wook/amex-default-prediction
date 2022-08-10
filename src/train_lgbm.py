@@ -10,7 +10,6 @@ from utils import seed_everything
 @hydra.main(config_path="../config/", config_name="train")
 def _main(cfg: DictConfig):
     seed_everything(cfg.model.params.seed)
-
     # create dataset
     train_x, train_y = load_train_dataset(cfg)
 

@@ -44,7 +44,7 @@ def get_score(
     weights: np.ndarray,
     train_idx: List[int],
     oofs: List[np.ndarray],
-    preds: List[np.ndarray],
+    target: np.ndarray,
     score: str,
 ) -> float:
     blending = np.zeros_like(oofs[0][train_idx])
@@ -55,14 +55,14 @@ def get_score(
     blending += (1 - np.sum(weights)) * oofs[-1][train_idx]
 
     scores = (
-        log_loss(preds[train_idx], blending)
+        log_loss(target[train_idx], blending)
         if score == "log_loss"
-        else amex_metric(preds[train_idx], blending)
+        else amex_metric(target[train_idx], blending)
     )
     return scores
 
 
-def get_best_weights(oofs: List[np.ndarray], preds: np.ndarray, score: str) -> float:
+def get_best_weights(oofs: List[np.ndarray], target: np.ndarray, score: str) -> float:
     weight_list = []
     weights = np.array([1 / len(oofs) for _ in range(len(oofs) - 1)])
 
@@ -72,9 +72,9 @@ def get_best_weights(oofs: List[np.ndarray], preds: np.ndarray, score: str) -> f
         res = minimize(
             partial(get_score, score=score),
             weights,
-            args=(train_idx, oofs, preds),
+            args=(train_idx, oofs, target),
             method="Nelder-Mead",
-            tol=0.000001,
+            tol=1e-06,
         )
         logging.info(f"fold: {fold} res.x: {res.x}")
         weight_list.append(res.x)
@@ -99,11 +99,13 @@ def _main(cfg: DictConfig):
     lgbm_oofs4 = load_model(cfg, cfg.model.model4_oof)
     lgbm_oofs5 = load_model(cfg, cfg.model.model5_oof)
     lgbm_oofs6 = load_model(cfg, cfg.model.model6_oof)
-    lgbm_oofs7 = load_model(cfg, cfg.model.model7_oof)
-    xgb_oof = load_model(cfg, cfg.model.xgb_oof)
-    tabnet_oof = np.load(path / cfg.model.path / cfg.model.tabnet_oof)
-    cb1_oof = pd.read_csv(path / cfg.model.path / cfg.model.cb1_oof)
-    cb2_oof = pd.read_csv(path / cfg.model.path / cfg.model.cb2_oof)
+    # xgb_oof = load_model(cfg, cfg.model.xgb_oof)
+    tabnet_oof = pd.read_csv(path / cfg.model.path / cfg.model.tabnet_oof)
+    # cb1_oof = pd.read_csv(path / cfg.model.path / cfg.model.cb1_oof)
+    # cb2_oof = pd.read_csv(path / cfg.model.path / cfg.model.cb2_oof)
+    # cb3_oof = load_model(cfg, cfg.model.cb3_oof)
+    # cb4_oof = pd.read_csv(path / cfg.model.path / cfg.model.cb4_oof)
+    # cb5_oof = pd.read_csv(path / cfg.model.path / cfg.model.cb5_oof)
 
     lgbm_preds1 = pd.read_csv(path / cfg.output.name / cfg.output.model1_preds)
     lgbm_preds2 = pd.read_csv(path / cfg.output.name / cfg.output.model2_preds)
@@ -111,41 +113,53 @@ def _main(cfg: DictConfig):
     lgbm_preds4 = pd.read_csv(path / cfg.output.name / cfg.output.model4_preds)
     lgbm_preds5 = pd.read_csv(path / cfg.output.name / cfg.output.model5_preds)
     lgbm_preds6 = pd.read_csv(path / cfg.output.name / cfg.output.model6_preds)
-    lgbm_preds7 = pd.read_csv(path / cfg.output.name / cfg.output.model7_preds)
-    xgb_preds = pd.read_csv(path / cfg.output.name / cfg.output.xgb_preds)
+    # xgb_preds = pd.read_csv(path / cfg.output.name / cfg.output.xgb_preds)
     tabnet_preds = pd.read_csv(path / cfg.output.name / cfg.output.tabnet_preds)
-    cb1_preds = pd.read_csv(path / cfg.output.name / cfg.output.cb1_preds)
-    cb2_preds = pd.read_csv(path / cfg.output.name / cfg.output.cb2_preds)
-
+    # cb1_preds = pd.read_csv(path / cfg.output.name / cfg.output.cb1_preds)
+    # cb2_preds = pd.read_csv(path / cfg.output.name / cfg.output.cb2_preds)
+    # cb3_preds = pd.read_csv(path / cfg.output.name / cfg.output.cb3_preds)
+    # cb4_preds = pd.read_csv(path / cfg.output.name / cfg.output.cb4_preds)
+    # cb5_preds = pd.read_csv(path / cfg.output.name / cfg.output.cb5_preds)
     oofs = [
+        tabnet_oof.prediction.to_numpy(),
+        # xgb_oof.oof_preds,
         lgbm_oofs1.oof_preds,
         lgbm_oofs2.oof_preds,
         lgbm_oofs3.oof_preds,
         lgbm_oofs4.oof_preds,
         lgbm_oofs5.oof_preds,
-        # lgbm_oofs6.oof_preds,
-        lgbm_oofs7.oof_preds,
-        tabnet_oof,
-        cb1_oof.prediction.to_numpy(),
-        cb2_oof.prediction.to_numpy(),
+        lgbm_oofs6.oof_preds,
+        # cb1_oof.prediction.to_numpy(),
+        # cb2_oof.prediction.to_numpy(),
+        # cb3_oof.oof_preds,
+        # cb4_oof.prediction.to_numpy(),
+        # cb5_oof.prediction.to_numpy(),
     ]
 
     preds = [
+        tabnet_preds.prediction.to_numpy(),
+        # xgb_preds.prediction.to_numpy(),
         lgbm_preds1.prediction.to_numpy(),
         lgbm_preds2.prediction.to_numpy(),
         lgbm_preds3.prediction.to_numpy(),
         lgbm_preds4.prediction.to_numpy(),
         lgbm_preds5.prediction.to_numpy(),
-        # lgbm_preds6.prediction.to_numpy(),
-        lgbm_preds7.prediction.to_numpy(),
-        tabnet_preds.prediction.to_numpy(),
-        cb1_preds.prediction.to_numpy(),
-        cb2_preds.prediction.to_numpy(),
+        lgbm_preds6.prediction.to_numpy(),
+        # cb1_preds.prediction.to_numpy(),
+        # cb2_preds.prediction.to_numpy(),
+        # cb3_preds.prediction.to_numpy(),
+        # cb4_preds.prediction.to_numpy(),
+        # cb5_preds.prediction.to_numpy(),
     ]
 
     best_weights = get_best_weights(oofs, target.to_numpy(), cfg.score.name)
 
     oof_preds = np.average(oofs, weights=best_weights, axis=0)
+    # train_labels["prediction"] = oof_preds
+    # train_labels.to_csv(
+    #     path / cfg.model.path / "oof_5fold_catboost_lag_features_gradient.csv",
+    #     index=False,
+    # )
     print(f"OOF Score: {amex_metric(target.to_numpy(), oof_preds)}")
     blending_preds = np.average(preds, weights=best_weights, axis=0)
     submission["prediction"] = blending_preds

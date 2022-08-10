@@ -53,28 +53,6 @@ def create_categorical_test(test: pd.DataFrame, config: DictConfig) -> pd.DataFr
     return test
 
 
-def add_rate_features(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Create diff feature
-    Args:
-        df: dataframe
-    Returns:
-        dataframe
-    """
-    # Get the difference between last and mean
-    num_cols = [col for col in df.columns if "last" in col]
-    num_cols = [col[:-5] for col in num_cols if "round" not in col]
-
-    for col in num_cols:
-        try:
-            df[f"{col}_last_mean_rate"] = df[f"{col}_last"] / df[f"{col}_mean"]
-            df[f"{col}_last_mean_rate_round2"] = df[f"{col}_last_mean_rate"].round(2)
-        except Exception:
-            pass
-
-    return df
-
-
 def add_diff_features(df: pd.DataFrame) -> pd.DataFrame:
     """
     Create diff feature
@@ -90,7 +68,6 @@ def add_diff_features(df: pd.DataFrame) -> pd.DataFrame:
     for col in num_cols:
         try:
             df[f"{col}_last_mean_diff"] = df[f"{col}_last"] - df[f"{col}_mean"]
-            df[f"{col}_last_mean_diff_round2"] = df[f"{col}_last_mean_diff"].round(2)
         except Exception:
             pass
 
@@ -111,14 +88,11 @@ def add_lag_features(df: pd.DataFrame) -> pd.DataFrame:
     # Lag Features
     for col in num_cols:
         try:
-            df[f"{col}_lag_sub"] = df[f"{col}_last"] - df[f"{col}_first"]
-            df[f"{col}_lag_div"] = df[f"{col}_last"] / df[f"{col}_first"]
-            df[f"{col}_last_std_diff"] = df[f"{col}_last"] - df[f"{col}_std"]
+            df[f"{col}_last_first_diff"] = df[f"{col}_last"] - df[f"{col}_first"]
+            df[f"{col}_last_first_div"] = df[f"{col}_last"] / df[f"{col}_first"]
             df[f"{col}_last_std_div"] = df[f"{col}_last"] / df[f"{col}_std"]
-            df[f"{col}_last_max_diff"] = df[f"{col}_last"] - df[f"{col}_max"]
-            df[f"{col}_last_max_div"] = df[f"{col}_last"] / df[f"{col}_max"]
-            df[f"{col}_last_max_min"] = df[f"{col}_last"] - df[f"{col}_min"]
-            df[f"{col}_last_max_min_div"] = df[f"{col}_last"] / df[f"{col}_min"]
+            df[f"{col}_last_max_div"] = df[f"{col}_last"] / df[f"{col}_min"]
+            df[f"{col}_last_min_div"] = df[f"{col}_last"] / df[f"{col}_max"]
         except Exception:
             pass
 
@@ -149,6 +123,25 @@ def get_difference(df: pd.DataFrame, num_features: List[str]) -> pd.DataFrame:
     return df_diff
 
 
+def add_pay_features(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Create pay features
+    Args:
+        df: dataframe
+    Returns:
+        dataframe
+    """
+    # compute "after pay" features
+    before_cols = ["B_9", "B_11", "B_14", "B_17", "D_39", "D_131", "S_16", "S_23"]
+    after_cols = ["P_2", "P_3"]
+    for bcol in before_cols:
+        for pcol in after_cols:
+            if bcol in df.columns:
+                df[f"{bcol}-{pcol}"] = df[bcol] - df[pcol]
+                df[f"{bcol}X{pcol}"] = df[bcol] * df[pcol]
+    return df
+
+
 def add_trick_features(df: pd.DataFrame) -> pd.DataFrame:
     """
     Create nan feature
@@ -171,7 +164,7 @@ def add_trick_features(df: pd.DataFrame) -> pd.DataFrame:
 def build_features(df: pd.DataFrame) -> pd.DataFrame:
     # FEATURE ENGINEERING FROM
     # https://www.kaggle.com/code/huseyincot/amex-agg-data-how-it-created
-    # df = df.drop(columns=["B_29", "S_9", "D_103", "D_107", "D_139", "D_145"])
+    # df = add_pay_features(df)
     df["S_2"] = pd.to_datetime(df["S_2"])
     df["SDist"] = df[["customer_ID", "S_2"]].groupby(
         "customer_ID"

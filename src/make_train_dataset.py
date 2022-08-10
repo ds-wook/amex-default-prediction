@@ -32,7 +32,7 @@ def _main(cfg: DictConfig) -> NoReturn:
 
     train = pd.read_parquet(path / f"{cfg.dataset.train}_0.parquet")
 
-    for num in range(1, cfg.dataset.num):
+    for num in range(1, cfg.dataset.num_train):
         train_sample = pd.read_parquet(path / f"{cfg.dataset.train}_{num}.parquet")
         train = pd.concat([train, train_sample], axis=0)
         del train_sample
