@@ -5,15 +5,15 @@ params:
   objective: binary
   num_leaves: 100
   lambda_l2: 2
-  feature_fraction: 0.2
+  feature_fraction: 0.35
   bagging_fraction: 0.5
   bagging_freq: 10
   min_child_samples: 40
-  seed: 22
+  seed: 42
   verbose: -1
   num_threads: 8
 path: res/models/
-name: 5fold_lightgbm_shap_features_seed22.pkl
+name: 5fold_lightgbm_shap_features_seed42.pkl
 early_stopping_rounds: 1500
 num_boost_round: 10500
 verbose: 500

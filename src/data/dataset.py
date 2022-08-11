@@ -37,7 +37,6 @@ def load_train_dataset(config: DictConfig) -> Tuple[pd.DataFrame, pd.Series]:
     train_x = add_trick_features(train_x)
     train_x = add_diff_features(train_x)
     # train_x = add_lag_features(train_x)
-    # train_x = add_rate_features(train_x)
     train_x = create_categorical_train(train_x, config)
     train_x = reduce_mem_usage(train_x)
     logging.info(f"train: {train_x.shape}, target: {train_y.shape}")
@@ -60,7 +59,6 @@ def load_test_dataset(config: DictConfig, num: int = 0) -> pd.DataFrame:
     test_x = add_trick_features(test_x)
     test_x = add_diff_features(test_x)
     # test_x = add_lag_features(test_x)
-    # test_x = add_rate_features(test_x)
     test_x = create_categorical_test(test_x, config)
     logging.info(f"test: {test_x.shape}")
 

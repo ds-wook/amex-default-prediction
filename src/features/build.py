@@ -68,6 +68,29 @@ def add_diff_features(df: pd.DataFrame) -> pd.DataFrame:
     for col in num_cols:
         try:
             df[f"{col}_last_mean_diff"] = df[f"{col}_last"] - df[f"{col}_mean"]
+            df[f"{col}_first_mean_diff"] = df[f"{col}_first"] - df[f"{col}_mean"]
+        except Exception:
+            pass
+
+    return df
+
+
+def add_rate_features(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Create diff feature
+    Args:
+        df: dataframe
+    Returns:
+        dataframe
+    """
+    # Get the difference between last and mean
+    num_cols = [col for col in df.columns if "last" in col]
+    num_cols = [col[:-5] for col in num_cols if "round" not in col]
+
+    for col in num_cols:
+        try:
+            df[f"{col}_last_mean_rate"] = df[f"{col}_last"] / df[f"{col}_mean"]
+            df[f"{col}_first_mean_rate"] = df[f"{col}_first"] / df[f"{col}_mean"]
         except Exception:
             pass
 
@@ -89,10 +112,6 @@ def add_lag_features(df: pd.DataFrame) -> pd.DataFrame:
     for col in num_cols:
         try:
             df[f"{col}_last_first_diff"] = df[f"{col}_last"] - df[f"{col}_first"]
-            df[f"{col}_last_first_div"] = df[f"{col}_last"] / df[f"{col}_first"]
-            df[f"{col}_last_std_div"] = df[f"{col}_last"] / df[f"{col}_std"]
-            df[f"{col}_last_max_div"] = df[f"{col}_last"] / df[f"{col}_min"]
-            df[f"{col}_last_min_div"] = df[f"{col}_last"] / df[f"{col}_max"]
         except Exception:
             pass
 
