@@ -65,6 +65,12 @@ This repository is the code that placed ?th [American Express - Default Predicti
         └── utils.py
 ```
 
+### Setting
+```
+conda env create -f environment.yaml  # might be optional
+conda activate amex
+```
+
 ### Reference
 + [DART: Dropouts meet Multiple Additive Regression Trees](https://arxiv.org/abs/1505.01866)
 + [rounding-trick](https://www.kaggle.com/code/jiweiliu/amex-catboost-rounding-trick)
