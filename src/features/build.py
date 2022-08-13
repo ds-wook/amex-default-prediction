@@ -68,7 +68,7 @@ def add_diff_features(df: pd.DataFrame) -> pd.DataFrame:
     for col in num_cols:
         try:
             df[f"{col}_last_mean_diff"] = df[f"{col}_last"] - df[f"{col}_mean"]
-            df[f"{col}_first_mean_diff"] = df[f"{col}_first"] - df[f"{col}_mean"]
+            # df[f"{col}_first_mean_diff"] = df[f"{col}_first"] - df[f"{col}_mean"]
         except Exception:
             pass
 
@@ -90,7 +90,7 @@ def add_rate_features(df: pd.DataFrame) -> pd.DataFrame:
     for col in num_cols:
         try:
             df[f"{col}_last_mean_rate"] = df[f"{col}_last"] / df[f"{col}_mean"]
-            df[f"{col}_first_mean_rate"] = df[f"{col}_first"] / df[f"{col}_mean"]
+            # df[f"{col}_first_mean_rate"] = df[f"{col}_first"] / df[f"{col}_mean"]
         except Exception:
             pass
 
