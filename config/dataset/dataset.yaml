@@ -1,13 +1,14 @@
-path: input/amex-statement-features/
+path: input/amex-bruteforce-features/
 num_train: 5
 num_test: 10
 seed: 42
 target: target
-train: train_statement_features
-test: test_statement_features
+train: train_bruteforce_features
+test: test_bruteforce_features
 drop_features:
 - customer_ID
 - S_2
+- SDist_first
 cat_features:
 - B_30_last
 - B_38_last

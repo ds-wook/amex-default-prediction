@@ -9,11 +9,11 @@ params:
   bagging_fraction: 0.5
   bagging_freq: 10
   min_child_samples: 40
-  seed: 42
+  seed: 23
   verbose: -1
   num_threads: 8
 path: res/models/
-name: 5fold_lightgbm_shap_features_seed42.pkl
+name: 5fold_lightgbm_first_features_seed23.pkl
 early_stopping_rounds: 1500
 num_boost_round: 10500
 verbose: 500

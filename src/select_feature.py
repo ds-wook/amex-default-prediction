@@ -37,30 +37,19 @@ def _main(cfg: DictConfig):
     # ]
 
     shap_importance_df = pd.read_csv(
-        Path(get_original_cwd()) / "input/shap_importance.csv"
+        Path(get_original_cwd()) / "input/first_shap_importance.csv"
     )
-
-    shap_importance = shap_importance_df[shap_importance_df["shap_importance"] > 0.001]
-    not_importance = shap_importance_df[shap_importance_df["shap_importance"] < 0.001]
-    not_importance_features = not_importance["column_name"].values.tolist()
-    shap_features = shap_importance["column_name"].values.tolist()
-    sdist_features = [
-        "LT",
-        "SDist_last",
-        "SDist_first",
-        "SDist_mean",
-        "SDist_max",
-        "SDist_min",
-    ]
-    last_features = [
-        col for col in not_importance_features if "last" in col and "SDist" not in col
-    ]
-    selected_features = shap_features + sdist_features + last_features
-
+    shap_importance_df2 = pd.read_csv(
+        Path(get_original_cwd()) / "input/first_shap_importance2.csv"
+    )
+    shap_importance_df = shap_importance_df[shap_importance_df["shap_importance"] != 0]
+    shap_importance_df2 = shap_importance_df2[shap_importance_df2["shap_importance"] != 0]
+    shap_scores = shap_importance_df["column_name"].values.tolist()
+    shap_scores2 = shap_importance_df2["column_name"].values.tolist()
+    selected_features = shap_scores + shap_scores2
     selected_cat_features = [
         col for col in selected_features if col in cfg.dataset.cat_features
     ]
-    # selected_cat_features += split_cat_feats
 
     logging.info(f"Select {len(selected_features)}")
     split_results = score_feature_selection(
