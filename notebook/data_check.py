@@ -75,3 +75,77 @@ shap_df.head()
 # %%
 shap_df.values.tolist()
 # %%
+train = pd.read_parquet(
+    "../input/amex-bruteforce-features/train_bruteforce_features.parquet"
+)
+train.head()
+
+# %%
+def add_diff_features(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Create diff feature
+    Args:
+        df: dataframe
+    Returns:
+        dataframe
+    """
+    # Get the difference between last and mean
+    num_cols = [col for col in df.columns if "last" in col]
+    num_cols = [col[:-5] for col in num_cols if "round" not in col]
+
+    for col in num_cols:
+        try:
+            df[f"{col}_last_mean_diff"] = df[f"{col}_last"] - df[f"{col}_mean"]
+            # df[f"{col}_first_mean_diff"] = df[f"{col}_first"] - df[f"{col}_mean"]
+        except Exception:
+            pass
+
+    return df
+
+
+def add_lag_features(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Create diff feature
+    Args:
+        df: dataframe
+    Returns:
+        dataframe
+    """
+    num_cols = [col for col in df.columns if "last" in col]
+    num_cols = [col[:-5] for col in num_cols if "round" not in col]
+
+    # Lag Features
+    for col in num_cols:
+        try:
+            df[f"{col}_last_first_diff"] = df[f"{col}_last"] - df[f"{col}_first"]
+        except Exception:
+            pass
+
+    return df
+
+
+def add_trick_features(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Create nan feature
+    Args:
+        df: dataframe
+    Returns:
+        dataframe
+    """
+    num_cols = df.dtypes[
+        (df.dtypes == "float32") | (df.dtypes == "float64")
+    ].index.to_list()
+    num_cols = [col for col in num_cols if "last" in col or "first" in col]
+
+    for col in num_cols:
+        df[col + "_round2"] = df[col].round(2)
+
+    return df
+
+# %%
+train_x = train.drop(columns=["customer_ID", "S_2"])
+train_x = add_trick_features(train_x)
+train_x = add_diff_features(train_x)
+train_x = add_lag_features(train_x)
+train_x.head()
+# %%
