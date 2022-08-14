@@ -9,11 +9,15 @@ params:
   bagging_fraction: 0.5
   bagging_freq: 10
   min_child_samples: 40
-  seed: 23
+  seed: 3407
   verbose: -1
   num_threads: 8
 path: res/models/
-name: 5fold_lightgbm_first_features_seed23.pkl
+result: dart/5fold_lightgbm_custom_loss
+name: 5fold_lightgbm_custom_loss_seed3407.pkl
 early_stopping_rounds: 1500
 num_boost_round: 10500
 verbose: 500
+loss:
+  mult_no4prec: 5.0
+  max_weights: 2.0

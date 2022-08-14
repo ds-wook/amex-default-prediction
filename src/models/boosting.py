@@ -1,4 +1,5 @@
 import warnings
+from functools import partial
 from typing import NoReturn, Optional
 
 import lightgbm as lgb
@@ -12,6 +13,7 @@ from lightgbm import Booster
 
 from evaluation.evaluate import CatBoostEvalMetricAmex, lgb_amex_metric, xgb_amex_metric
 from models.base import BaseModel
+from models.callbacks import weighted_logloss
 
 warnings.filterwarnings("ignore")
 
@@ -42,13 +44,21 @@ class LightGBMTrainer(BaseModel):
         )
 
         model = lgb.train(
-            params=dict(self.config.model.params),
             train_set=train_set,
             valid_sets=[train_set, valid_set],
+            params=dict(self.config.model.params),
             verbose_eval=self.config.model.verbose,
             num_boost_round=self.config.model.num_boost_round,
-            callbacks=[wandb_lgb.wandb_callback()],
             feval=lgb_amex_metric,
+            fobj=partial(
+                weighted_logloss,
+                mult_no4prec=self.config.model.loss.mult_no4prec,
+                max_weights=self.config.model.loss.max_weights,
+            ),
+            callbacks=[
+                wandb_lgb.wandb_callback(),
+                self._save_dart_model(),
+            ],
         )
 
         wandb_lgb.log_summary(model)

@@ -1,9 +1,22 @@
+import collections
 import pickle
-from typing import TypeVar, NoReturn
+from typing import NoReturn, Tuple
 
 import lightgbm as lgb
+import numpy as np
 
-Object = TypeVar("Object")
+# Callback environment used by callbacks
+CallbackEnv = collections.namedtuple(
+    "CallbackEnv",
+    [
+        "model",
+        "params",
+        "iteration",
+        "begin_iteration",
+        "end_iteration",
+        "evaluation_result_list",
+    ],
+)
 
 
 class DartEarlyStopping:
@@ -25,10 +38,10 @@ class DartEarlyStopping:
             else (self.best_score > metric_score)
         )
 
-    def _deepcopy(self, x: Object) -> Object:
+    def _deepcopy(self, x: CallbackEnv) -> CallbackEnv:
         return pickle.loads(pickle.dumps(x))
 
-    def __call__(self, env: Object) -> NoReturn:
+    def __call__(self, env: CallbackEnv) -> NoReturn:
         evals = env.evaluation_result_list
         for data, metric, score, is_higher_better in evals:
             if data != self.data_name or metric != self.monitor_metric:
@@ -58,3 +71,44 @@ class DartEarlyStopping:
             self.best_score = score
             return
         raise ValueError("monitoring metric not found")
+
+
+def weighted_logloss(
+    preds: np.ndarray, dtrain: lgb.Dataset, mult_no4prec: float, max_weights: float
+) -> Tuple[float, float]:
+    """
+    weighted logloss for dart
+    Args:
+        preds: prediction
+        dtrain: lgb.Dataset
+        mult_no4prec: weight for no4prec
+        max_weights: max weight for no4prec
+    Returns:
+        gradient, hessian
+    """
+    eps = 1e-16
+    labels = dtrain.get_label()
+    preds = 1.0 / (1.0 + np.exp(-preds))
+
+    # top 4%
+    labels_mat = np.transpose(np.array([np.arange(len(labels)), labels, preds]))
+    pos_ord = labels_mat[:, 2].argsort()[::-1]
+    labels_mat = labels_mat[pos_ord]
+    weights_4perc = np.where(labels_mat[:, 1] == 0, 20, 1)
+    top4 = np.cumsum(weights_4perc) <= int(0.04 * np.sum(weights_4perc))
+    top4 = top4[labels_mat[:, 0].argsort()]
+
+    weights = (
+        1
+        + np.exp(-mult_no4prec * np.linspace(max_weights - 1, 0, len(top4)))[
+            labels_mat[:, 0].argsort()
+        ]
+    )
+    weights[
+        top4 & (labels == 1.0)
+    ] = 1.0  # Set to one weights of positive labels in top 4%
+    weights[(labels == 0.0)] = 1.0  # Set to one weights of negative labels
+
+    grad = (preds - labels) * weights
+    hess = np.maximum(preds * (1.0 - preds) * weights, eps)
+    return grad, hess
