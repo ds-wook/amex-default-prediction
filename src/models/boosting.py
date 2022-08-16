@@ -16,7 +16,6 @@ from lightgbm import Booster
 from evaluation.evaluate import (
     CatBoostEvalMetricAmex,
     lgb_amex_metric,
-    logloss_eval,
     xgb_amex_metric,
 )
 from models.base import BaseModel
@@ -31,12 +30,16 @@ class LightGBMTrainer(BaseModel):
 
     def _save_dart_model(self) -> Callable:
         def callback(env: CallbackEnv):
-            # iteration = env.iteration
-            score = env.evaluation_result_list[3][2]
+            iteration = env.iteration
+            score = (
+                env.evaluation_result_list[1][2]
+                if self.config.model.loss.is_customized
+                else env.evaluation_result_list[3][2]
+            )
 
             if self._max_score < score:
                 self._max_score = score
-                # print(f"High Score: iteration {iteration}, score={self._max_score}")
+                print(f"High Score: iteration {iteration}, score={self._max_score}")
                 env.model.save_model(
                     Path(get_original_cwd())
                     / self.config.model.path
@@ -67,13 +70,13 @@ class LightGBMTrainer(BaseModel):
             categorical_feature=self.config.features.cat_features,
         )
 
-        model = lgb.train(
+        lgb.train(
             train_set=train_set,
             valid_sets=[train_set, valid_set],
             params=dict(self.config.model.params),
             verbose_eval=self.config.model.verbose,
             num_boost_round=self.config.model.num_boost_round,
-            feval=[logloss_eval, lgb_amex_metric],
+            feval=lgb_amex_metric,
             fobj=partial(
                 weighted_logloss,
                 mult_no4prec=self.config.model.loss.mult_no4prec,
@@ -87,6 +90,11 @@ class LightGBMTrainer(BaseModel):
             ],
         )
 
+        model = lgb.Booster(
+            model_file=Path(get_original_cwd())
+            / self.config.model.path
+            / f"{self.config.model.result}_fold{self._num_fold_iter}.lgb"
+        )
         wandb_lgb.log_summary(model)
 
         return model

@@ -100,16 +100,6 @@ class BaseModel(metaclass=ABCMeta):
 
             # model
             model = self._train(X_train, y_train, X_valid, y_valid)
-            model = (
-                lgb.Booster(
-                    model_file=Path(get_original_cwd())
-                    / self.config.model.path
-                    / f"{self.config.model.result}_fold{fold}.lgb"
-                )
-                if isinstance(model, lgb.Booster)
-                else model
-            )
-
             models[f"fold_{fold}"] = model
 
             # validation
