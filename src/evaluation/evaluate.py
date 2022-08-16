@@ -94,3 +94,13 @@ def xgb_amex_metric(y_pred: np.ndarray, dtrain: DMatrix) -> Tuple[str, float]:
     """The competition metric with xgboost's calling convention"""
     y_true = dtrain.get_label()
     return "amex", amex_metric(y_true, y_pred)
+
+
+# DEFINE CUSTOM EVAL LOSS FUNCTION
+def logloss_eval(preds: np.ndarray, data: np.ndarray) -> Tuple[str, float, bool]:
+    y_true = data.get_label()
+    preds = np.where(
+        preds >= 0, 1.0 / (1.0 + np.exp(-preds)), np.exp(preds) / (1.0 + np.exp(preds))
+    )
+    loss = -(y_true * np.log(preds)) - ((1 - y_true) * np.log(1 - preds))
+    return "binary_logloss", np.mean(loss), False

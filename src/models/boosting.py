@@ -1,6 +1,7 @@
 import warnings
 from functools import partial
-from typing import NoReturn, Optional
+from pathlib import Path
+from typing import Callable, NoReturn, Optional
 
 import lightgbm as lgb
 import pandas as pd
@@ -9,11 +10,17 @@ import wandb.lightgbm as wandb_lgb
 import wandb.xgboost as wandb_xgb
 import xgboost as xgb
 from catboost import CatBoostClassifier, Pool
+from hydra.utils import get_original_cwd
 from lightgbm import Booster
 
-from evaluation.evaluate import CatBoostEvalMetricAmex, lgb_amex_metric, xgb_amex_metric
+from evaluation.evaluate import (
+    CatBoostEvalMetricAmex,
+    lgb_amex_metric,
+    logloss_eval,
+    xgb_amex_metric,
+)
 from models.base import BaseModel
-from models.callbacks import weighted_logloss
+from models.callbacks import CallbackEnv, weighted_logloss
 
 warnings.filterwarnings("ignore")
 
@@ -21,6 +28,23 @@ warnings.filterwarnings("ignore")
 class LightGBMTrainer(BaseModel):
     def __init__(self, **kwargs) -> NoReturn:
         super().__init__(**kwargs)
+
+    def _save_dart_model(self) -> Callable:
+        def callback(env: CallbackEnv):
+            # iteration = env.iteration
+            score = env.evaluation_result_list[3][2]
+
+            if self._max_score < score:
+                self._max_score = score
+                # print(f"High Score: iteration {iteration}, score={self._max_score}")
+                env.model.save_model(
+                    Path(get_original_cwd())
+                    / self.config.model.path
+                    / f"{self.config.model.result}_fold{self._num_fold_iter}.lgb"
+                )
+
+        callback.order = 0
+        return callback
 
     def _train(
         self,
@@ -49,12 +73,14 @@ class LightGBMTrainer(BaseModel):
             params=dict(self.config.model.params),
             verbose_eval=self.config.model.verbose,
             num_boost_round=self.config.model.num_boost_round,
-            feval=lgb_amex_metric,
+            feval=[logloss_eval, lgb_amex_metric],
             fobj=partial(
                 weighted_logloss,
                 mult_no4prec=self.config.model.loss.mult_no4prec,
                 max_weights=self.config.model.loss.max_weights,
-            ),
+            )
+            if self.config.model.loss.is_customized
+            else None,
             callbacks=[
                 wandb_lgb.wandb_callback(),
                 self._save_dart_model(),

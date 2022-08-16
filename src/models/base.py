@@ -17,8 +17,6 @@ from omegaconf import DictConfig
 from sklearn.model_selection import StratifiedKFold
 from wandb.sklearn import plot_feature_importances
 
-from models.callbacks import CallbackEnv
-
 warnings.filterwarnings("ignore")
 
 
@@ -39,8 +37,8 @@ class BaseModel(metaclass=ABCMeta):
         self.config = config
         self.metric = metric
         self.search = search
-        self.__max_score = 0.0
-        self.__num_fold_iter = 0
+        self._max_score = 0.0
+        self._num_fold_iter = 0
         self.result = None
 
     @abstractclassmethod
@@ -55,25 +53,6 @@ class BaseModel(metaclass=ABCMeta):
         Trains the model.
         """
         raise NotImplementedError
-
-    def _save_dart_model(self) -> Callable:
-        def callback(env: CallbackEnv):
-            # iteration = env.iteration
-            score = env.evaluation_result_list[1][2]
-
-            if self.__max_score < score:
-                self.__max_score = score
-                # print(f"High Score: iteration {iteration}, score={self.__max_score}")
-                env.model.save_model(
-                    Path(get_original_cwd())
-                    / self.config.model.path
-                    / f"{self.config.model.result}_fold{self.__num_fold_iter}.lgb"
-                )
-            else:
-                pass
-
-        callback.order = 0
-        return callback
 
     def save_model(self) -> NoReturn:
         """
@@ -106,8 +85,8 @@ class BaseModel(metaclass=ABCMeta):
 
         for fold, (train_idx, valid_idx) in enumerate(splits, 1):
             # save dart parameters
-            self.__max_score = 0.0
-            self.__num_fold_iter = fold
+            self._max_score = 0.0
+            self._num_fold_iter = fold
 
             # split train and validation data
             X_train, y_train = train_x.iloc[train_idx], train_y.iloc[train_idx]

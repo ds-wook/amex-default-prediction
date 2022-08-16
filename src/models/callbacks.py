@@ -90,7 +90,7 @@ def weighted_logloss(
     labels = dtrain.get_label()
     preds = 1.0 / (1.0 + np.exp(-preds))
 
-    # top 4%
+    # top 4 perc
     labels_mat = np.transpose(np.array([np.arange(len(labels)), labels, preds]))
     pos_ord = labels_mat[:, 2].argsort()[::-1]
     labels_mat = labels_mat[pos_ord]
@@ -104,11 +104,12 @@ def weighted_logloss(
             labels_mat[:, 0].argsort()
         ]
     )
-    weights[
-        top4 & (labels == 1.0)
-    ] = 1.0  # Set to one weights of positive labels in top 4%
-    weights[(labels == 0.0)] = 1.0  # Set to one weights of negative labels
+    # Set to one weights of positive labels in top 4perc
+    weights[top4 & (labels == 1.0)] = 1.0
+    # Set to one weights of negative labels
+    weights[(labels == 0.0)] = 1.0
 
-    grad = (preds - labels) * weights
-    hess = np.maximum(preds * (1.0 - preds) * weights, eps)
+    grad = preds * (1 + weights * labels - labels) - (weights * labels)
+    hess = np.maximum(preds * (1.0 - preds) * (1 + weights * labels - labels), eps)
+
     return grad, hess

@@ -68,7 +68,6 @@ def add_diff_features(df: pd.DataFrame) -> pd.DataFrame:
     for col in num_cols:
         try:
             df[f"{col}_last_mean_diff"] = df[f"{col}_last"] - df[f"{col}_mean"]
-            # df[f"{col}_first_mean_diff"] = df[f"{col}_first"] - df[f"{col}_mean"]
         except Exception:
             pass
 
@@ -90,7 +89,6 @@ def add_rate_features(df: pd.DataFrame) -> pd.DataFrame:
     for col in num_cols:
         try:
             df[f"{col}_last_mean_rate"] = df[f"{col}_last"] / df[f"{col}_mean"]
-            # df[f"{col}_first_mean_rate"] = df[f"{col}_first"] / df[f"{col}_mean"]
         except Exception:
             pass
 
@@ -180,10 +178,51 @@ def add_trick_features(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def add_customized_features(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Create customized features
+    Args:
+        df: dataframe
+    Returns:
+        dataframe
+    """
+    df["c_PD_239"] = df["D_39_last"] / ((df["P_2_last"] * -1) + 0.0001)
+    df["c_PB_29"] = (df["P_2_last"] * -1) / (df["B_9_last"] + 0.0001)
+    df["c_PR_21"] = (df["P_2_last"] * -1) / (df["R_1_last"] + 0.0001)
+
+    df["c_BBBB"] = (df["B_9_last"] + 0.001) / (
+        df["B_23_last"] + df["B_3_last"] + 0.0001
+    )
+    df["c_BBBB1"] = (df["B_33_last"] * -1) + (
+        df["B_18_last"] * (-1) + df["S_25_last"] * (1) + 0.0001
+    )
+    df["c_BBBB2"] = df["B_19_last"] + df["B_20_last"] + df["B_4_last"] + 0.0001
+
+    df["c_RRR0"] = (df["R_3_last"] + 0.001) / (df["R_2_last"] + df["R_4_last"] + 0.0001)
+    df["c_RRR1"] = (df["D_62_last"] + 0.001) / (
+        df["D_112_last"] + df["R_27_last"] + 0.0001
+    )
+
+    df["c_PD_348"] = df["D_48_last"] / (df["P_3_last"] + 0.0001)
+    df["c_PD_355"] = df["D_55_last"] / (df["P_3_last"] + 0.0001)
+
+    df["c_PD_439"] = df["D_39_last"] / (df["P_4_last"] + 0.0001)
+    df["c_PB_49"] = df["B_9_last"] / (df["P_4_last"] + 0.0001)
+    df["c_PR_41"] = df["R_1_last"] / (df["P_4_last"] + 0.0001)
+
+    return df
+
+
 def build_features(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Build features
+    Args:
+        df: dataframe
+    Returns:
+        dataframe
+    """
     # FEATURE ENGINEERING FROM
     # https://www.kaggle.com/code/huseyincot/amex-agg-data-how-it-created
-    # df = add_pay_features(df)
     df["S_2"] = pd.to_datetime(df["S_2"])
     df["SDist"] = df[["customer_ID", "S_2"]].groupby(
         "customer_ID"

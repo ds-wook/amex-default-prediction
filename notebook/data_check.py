@@ -5,21 +5,21 @@ from scipy.stats import rankdata
 
 # %%
 preds1 = pd.read_csv("../output/5fold_lightgbm_lag_features_ensemble.csv")
-preds2 = pd.read_csv("../output/10fold_xgboost_stacking.csv")
-preds3 = pd.read_csv("../output/10fold_stacking_tabnet.csv")
-preds4 = pd.read_csv("../output/keras-cnn_sub.csv")
+preds2 = pd.read_csv("../output/lb_overfitting.csv")
+# preds3 = pd.read_csv("../output/10fold_stacking_tabnet.csv")
+# preds4 = pd.read_csv("../output/keras-cnn_sub.csv")
 preds1.head()
 # %%
 preds1["prediction"] = (
-    0.984 * preds1["prediction"]
-    + 0.005 * preds2["prediction"]
-    + 0.01 * preds3["prediction"]
-    + 0.001 * preds4["prediction"]
+    0.0001 * preds1["prediction"]
+    + 0.9999 * preds2["prediction"]
 )
 preds1.head()
 
 # %%
-preds1.to_csv("../output/final_submit_ensemble.csv", index=False)
+preds2.head()
+# %%
+preds1.to_csv("../output/final_submit_ensemble_test.csv", index=False)
 # %%
 df = preds1.copy()
 df.head()
