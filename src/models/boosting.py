@@ -28,9 +28,9 @@ class LightGBMTrainer(BaseModel):
     def __init__(self, **kwargs) -> NoReturn:
         super().__init__(**kwargs)
 
-    def _save_dart_model(self) -> Callable:
-        def callback(env: CallbackEnv):
-            iteration = env.iteration
+    def _save_dart_model(self) -> Callable[[CallbackEnv], NoReturn]:
+        def callback(env: CallbackEnv) -> NoReturn:
+            # iteration = env.iteration
             score = (
                 env.evaluation_result_list[1][2]
                 if self.config.model.loss.is_customized
@@ -39,7 +39,7 @@ class LightGBMTrainer(BaseModel):
 
             if self._max_score < score:
                 self._max_score = score
-                print(f"High Score: iteration {iteration}, score={self._max_score}")
+                # print(f"High Score: iteration {iteration}, score={self._max_score}")
                 env.model.save_model(
                     Path(get_original_cwd())
                     / self.config.model.path

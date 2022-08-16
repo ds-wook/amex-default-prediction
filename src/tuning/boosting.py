@@ -1,6 +1,7 @@
 from typing import Callable, NoReturn
 
 import lightgbm as lgb
+import numpy as np
 import pandas as pd
 from omegaconf import DictConfig
 from optuna.trial import FrozenTrial
@@ -16,7 +17,7 @@ class LightGBMTuner(BaseTuner):
         train_x: pd.DataFrame,
         train_y: pd.Series,
         config: DictConfig,
-        metric: Callable,
+        metric: Callable[[np.ndarray, np.ndarray], float],
     ) -> NoReturn:
         self.train_x = train_x
         self.train_y = train_y

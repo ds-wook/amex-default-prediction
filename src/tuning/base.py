@@ -3,6 +3,7 @@ from abc import ABCMeta, abstractclassmethod
 from pathlib import Path
 from typing import Callable
 
+import numpy as np
 import optuna
 import wandb
 from hydra.utils import get_original_cwd
@@ -18,7 +19,9 @@ warnings.filterwarnings("ignore")
 
 
 class BaseTuner(metaclass=ABCMeta):
-    def __init__(self, config: DictConfig, metric: Callable):
+    def __init__(
+        self, config: DictConfig, metric: Callable[[np.ndarray, np.ndarray], float]
+    ):
         self.config = config
         self.metric = metric
 

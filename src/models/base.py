@@ -31,7 +31,7 @@ class BaseModel(metaclass=ABCMeta):
     def __init__(
         self,
         config: DictConfig,
-        metric: Callable,
+        metric: Callable[[np.ndarray, np.ndarray], float],
         search: bool = False,
     ):
         self.config = config
