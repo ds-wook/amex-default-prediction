@@ -11,15 +11,15 @@ preds2 = pd.read_csv("../output/lb_overfitting.csv")
 preds1.head()
 # %%
 preds1["prediction"] = (
-    0.0001 * preds1["prediction"]
-    + 0.9999 * preds2["prediction"]
+    0.0005 * preds1["prediction"]
+    + 0.9995 * preds2["prediction"]
 )
 preds1.head()
 
 # %%
 preds2.head()
 # %%
-preds1.to_csv("../output/final_submit_ensemble_test.csv", index=False)
+preds1.to_csv("../output/final_submit_ensemble.csv", index=False)
 # %%
 df = preds1.copy()
 df.head()

@@ -11,8 +11,6 @@ import wandb.xgboost as wandb_xgb
 import xgboost as xgb
 from catboost import CatBoostClassifier, Pool
 from hydra.utils import get_original_cwd
-from lightgbm import Booster
-
 
 from evaluation.evaluate import CatBoostEvalMetricAmex, lgb_amex_metric, xgb_amex_metric
 from models.base import BaseModel
@@ -27,7 +25,6 @@ class LightGBMTrainer(BaseModel):
 
     def _save_dart_model(self) -> Callable[[CallbackEnv], NoReturn]:
         def callback(env: CallbackEnv) -> NoReturn:
-            # iteration = env.iteration
             score = (
                 env.evaluation_result_list[1][2]
                 if self.config.model.loss.is_customized
@@ -35,7 +32,6 @@ class LightGBMTrainer(BaseModel):
             )
             if self._max_score < score:
                 self._max_score = score
-                # print(f"High Score: iteration {iteration}, score={self._max_score}")
                 env.model.save_model(
                     Path(get_original_cwd())
                     / self.config.model.path
@@ -82,8 +78,10 @@ class LightGBMTrainer(BaseModel):
         # Set to one weights of negative labels
         weights[(labels == 0.0)] = 1.0
 
-        grad = preds * (1 - weights + weights * labels) - weights * labels
-        hess = np.maximum(((1 - labels + weights * labels) * preds * (1 - preds)), eps)
+        grad = preds * (1 + weights * labels - labels) - (weights * labels)
+        hess = np.maximum(
+            ((2 * preds - 3 * preds**2) * (1 + weights * labels - labels)), eps
+        )
 
         return grad, hess
 
@@ -93,7 +91,7 @@ class LightGBMTrainer(BaseModel):
         y_train: pd.Series,
         X_valid: Optional[pd.DataFrame] = None,
         y_valid: Optional[pd.Series] = None,
-    ) -> Booster:
+    ) -> lgb.Booster:
         """
         load train model
         """
@@ -182,7 +180,7 @@ class XGBoostTrainer(BaseModel):
         y_train: pd.Series,
         X_valid: Optional[pd.DataFrame] = None,
         y_valid: Optional[pd.Series] = None,
-    ) -> Booster:
+    ) -> xgb.Booster:
         """
         load train model
         """

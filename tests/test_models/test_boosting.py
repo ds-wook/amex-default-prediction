@@ -7,7 +7,6 @@ import lightgbm as lgb
 import numpy as np
 import pandas as pd
 from hydra.utils import get_original_cwd
-from lightgbm import Booster
 from test_evaluation.test_evaluate import lgb_amex_metric
 from test_models.test_base import BaseModel
 from test_models.test_callbacks import CallbackEnv
@@ -78,8 +77,10 @@ class LightGBMTrainer(BaseModel):
         # Set to one weights of negative labels
         weights[(labels == 0.0)] = 1.0
 
-        grad = preds * (1 - weights + weights * labels) - weights * labels
-        hess = np.maximum(((1 - labels + weights * labels) * preds * (1 - preds)), eps)
+        grad = preds * (1 + weights * labels - labels) - (weights * labels)
+        hess = np.maximum(
+            ((2 * preds - 3 * preds**2) * (1 + weights * labels - labels)), eps
+        )
 
         return grad, hess
 
@@ -89,7 +90,7 @@ class LightGBMTrainer(BaseModel):
         y_train: pd.Series,
         X_valid: Optional[pd.DataFrame] = None,
         y_valid: Optional[pd.Series] = None,
-    ) -> Booster:
+    ) -> lgb.Booster:
         """
         load train model
         """
@@ -104,7 +105,7 @@ class LightGBMTrainer(BaseModel):
             categorical_feature=self.config.features.cat_features,
         )
 
-        lgb.train(
+        model = lgb.train(
             train_set=train_set,
             valid_sets=[train_set, valid_set],
             params=dict(self.config.model.params),
@@ -114,7 +115,7 @@ class LightGBMTrainer(BaseModel):
             fobj=self._weighted_logloss
             if self.config.model.loss.is_customized
             else None,
-            # callbacks=[self._save_dart_model()],
+            callbacks=[self._save_dart_model()],
         )
 
         model = lgb.Booster(
