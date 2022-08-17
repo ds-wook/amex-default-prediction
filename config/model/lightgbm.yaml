@@ -16,7 +16,7 @@ path: res/models/
 result: dart/5fold_lightgbm_custom_loss_seed99
 name: 5fold_lightgbm_custom_loss_seed99.pkl
 early_stopping_rounds: 1500
-num_boost_round: 10500
+num_boost_round: 1500
 verbose: 500
 loss:
   is_customized: True
