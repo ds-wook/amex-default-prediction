@@ -1,15 +1,13 @@
-import logging
 import warnings
-from pathlib import Path
-from typing import Callable, NoReturn, Optional, Tuple
+from typing import NoReturn, Optional, Tuple
 
 import lightgbm as lgb
 import numpy as np
 import pandas as pd
-from hydra.utils import get_original_cwd
+
 from test_evaluation.test_evaluate import lgb_amex_metric
 from test_models.test_base import BaseModel
-from test_models.test_callbacks import CallbackEnv
+
 
 warnings.filterwarnings("ignore")
 
@@ -17,28 +15,6 @@ warnings.filterwarnings("ignore")
 class LightGBMTrainer(BaseModel):
     def __init__(self, **kwargs) -> NoReturn:
         super().__init__(**kwargs)
-
-    def _save_dart_model(self) -> Callable[[CallbackEnv], NoReturn]:
-        def callback(env: CallbackEnv) -> NoReturn:
-            iteration = env.iteration
-            score = (
-                env.evaluation_result_list[1][2]
-                if self.config.model.loss.is_customized
-                else env.evaluation_result_list[3][2]
-            )
-            if self._max_score < score:
-                self._max_score = score
-                logging.info(
-                    f"High Score: iteration {iteration}, score={self._max_score}"
-                )
-                env.model.save_model(
-                    Path(get_original_cwd())
-                    / self.config.model.path
-                    / f"{self.config.model.result}_fold{self._num_fold_iter}.lgb"
-                )
-
-        callback.order = 0
-        return callback
 
     def _weighted_logloss(
         self, preds: np.ndarray, dtrain: lgb.Dataset
@@ -53,7 +29,6 @@ class LightGBMTrainer(BaseModel):
         Returns:
             gradient, hessian
         """
-        eps = 1e-16
         labels = dtrain.get_label()
         preds = 1.0 / (1.0 + np.exp(-preds))
 
@@ -78,9 +53,7 @@ class LightGBMTrainer(BaseModel):
         weights[(labels == 0.0)] = 1.0
 
         grad = preds * (1 + weights * labels - labels) - (weights * labels)
-        hess = np.maximum(
-            ((2 * preds - 3 * preds**2) * (1 + weights * labels - labels)), eps
-        )
+        hess = preds * (1 - preds) * (1 + weights * labels - labels)
 
         return grad, hess
 
@@ -115,13 +88,7 @@ class LightGBMTrainer(BaseModel):
             fobj=self._weighted_logloss
             if self.config.model.loss.is_customized
             else None,
-            callbacks=[self._save_dart_model()],
-        )
-
-        model = lgb.Booster(
-            model_file=Path(get_original_cwd())
-            / self.config.model.path
-            / f"{self.config.model.result}_fold{self._num_fold_iter}.lgb"
+            callbacks=[self.save_dart_model()],
         )
 
         return model

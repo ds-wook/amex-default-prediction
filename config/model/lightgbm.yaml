@@ -1,4 +1,4 @@
-fold: 5
+fold: 3
 params:
   boosting: dart
   learning_rate: 0.01
@@ -9,12 +9,12 @@ params:
   bagging_fraction: 0.5
   bagging_freq: 10
   min_child_samples: 40
-  seed: 99
+  seed: 3407
   verbose: -1
   num_threads: 8
 path: res/models/
-result: dart/5fold_lightgbm_custom_loss_seed99
-name: 5fold_lightgbm_custom_loss_seed99.pkl
+result: dart/5fold_lightgbm_bruteforce_custom_seed3407
+name: 5fold_lightgbm_bruteforce_custom_seed3407.pkl
 early_stopping_rounds: 1500
 num_boost_round: 10500
 verbose: 500

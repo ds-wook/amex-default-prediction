@@ -2,8 +2,9 @@ from typing import Tuple
 
 import lightgbm as lgb
 import numpy as np
+import pandas as pd
+import xgboost as xgb
 from pytorch_tabnet.metrics import Metric
-from xgboost import DMatrix
 
 
 class AmexMetric(Metric):
@@ -33,7 +34,7 @@ class CatBoostEvalMetricAmex:
         return amex_metric(np.array(target), np.array(preds)), 0
 
 
-def amex_metric(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+def amex_metric(y_true: pd.Series, y_pred: np.ndarray) -> float:
     labels = np.transpose(np.array([y_true, y_pred]))
     labels = labels[labels[:, 1].argsort()[::-1]]
     weights = np.where(labels[:, 0] == 0, 20, 1)
@@ -85,13 +86,13 @@ def amex_metric_numpy(y_true: np.array, y_pred: np.array) -> float:
     return 0.5 * (g + d)
 
 
-def lgb_amex_metric(y_pred: np.ndarray, y_true: np.ndarray) -> Tuple[str, float, bool]:
+def lgb_amex_metric(y_pred: np.ndarray, y_true: lgb.Dataset) -> Tuple[str, float, bool]:
     """The competition metric with lightgbm's calling convention"""
     y_true = y_true.get_label()
     return "amex", amex_metric(y_true, y_pred), True
 
 
-def xgb_amex_metric(y_pred: np.ndarray, dtrain: DMatrix) -> Tuple[str, float]:
+def xgb_amex_metric(y_pred: np.ndarray, dtrain: xgb.DMatrix) -> Tuple[str, float]:
     """The competition metric with xgboost's calling convention"""
     y_true = dtrain.get_label()
     return "amex", amex_metric(y_true, y_pred)
