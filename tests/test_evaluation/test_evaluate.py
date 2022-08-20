@@ -85,9 +85,9 @@ def amex_metric_numpy(y_true: np.array, y_pred: np.array) -> float:
     return 0.5 * (g + d)
 
 
-def lgb_amex_metric(y_pred: np.ndarray, y_true: lgb.Dataset) -> Tuple[str, float, bool]:
+def lgb_amex_metric(y_pred: np.ndarray, dtrain: lgb.Dataset) -> Tuple[str, float, bool]:
     """The competition metric with lightgbm's calling convention"""
-    y_true = y_true.get_label()
+    y_true = dtrain.get_label()
     return "amex", amex_metric(y_true, y_pred), True
 
 

@@ -104,15 +104,15 @@ class LightGBMTrainer(BaseModel):
         train_set = lgb.Dataset(
             data=X_train,
             label=y_train,
-            categorical_feature=self.config.features.cat_features,
+            categorical_feature=[*self.config.features.cat_features],
         )
         valid_set = lgb.Dataset(
             data=X_valid,
             label=y_valid,
-            categorical_feature=self.config.features.cat_features,
+            categorical_feature=[*self.config.features.cat_features],
         )
 
-        lgb.train(
+        model = lgb.train(
             train_set=train_set,
             valid_sets=[train_set, valid_set],
             params=dict(self.config.model.params),
@@ -128,12 +128,17 @@ class LightGBMTrainer(BaseModel):
             ],
         )
 
-        model = lgb.Booster(
-            model_file=Path(get_original_cwd())
-            / self.config.model.path
-            / self.config.model.working
-            / f"{self.config.model.name}_fold{self._num_fold_iter}.lgb"
+        model = (
+            lgb.Booster(
+                model_file=Path(get_original_cwd())
+                / self.config.model.path
+                / self.config.model.working
+                / f"{self.config.model.name}_fold{self._num_fold_iter}.lgb"
+            )
+            if not self.config.model.loss.is_customized
+            else model
         )
+
         wandb_lgb.log_summary(model)
 
         return model
@@ -154,10 +159,14 @@ class CatBoostTrainer(BaseModel):
         load train model
         """
         train_data = Pool(
-            data=X_train, label=y_train, cat_features=self.config.features.cat_features
+            data=X_train,
+            label=y_train,
+            cat_features=[*self.config.features.cat_features],
         )
         valid_data = Pool(
-            data=X_valid, label=y_valid, cat_features=self.config.features.cat_features
+            data=X_valid,
+            label=y_valid,
+            cat_features=[*self.config.features.cat_features],
         )
 
         model = CatBoostClassifier(

@@ -19,40 +19,6 @@ class LightGBMTrainer(BaseModel):
     def __init__(self, **kwargs) -> NoReturn:
         super().__init__(**kwargs)
 
-    def _save_dart_model(self) -> Callable[[CallbackEnv], NoReturn]:
-        def callback(env: CallbackEnv) -> NoReturn:
-            iteration = env.iteration
-            score = (
-                env.evaluation_result_list[1][2]
-                if self.config.model.loss.is_customized
-                else env.evaluation_result_list[3][2]
-            )
-            if self._max_score < score:
-                self._max_score = score
-                path = (
-                    Path(get_original_cwd())
-                    / self.config.model.path
-                    / self.config.model.dart
-                )
-                model_name = f"{self.config.model.name}_fold{self._num_fold_iter}.lgb"
-                model_path = path / model_name
-
-                if model_path.is_file():
-                    os.remove(os.path.join(path, model_name))
-
-                logging.info(
-                    f"High Score: iteration {iteration}, score={self._max_score}"
-                )
-                env.model.save_model(model_path)
-
-                # model = lgb.Booster(model_file=model_path)
-                test_score = amex_metric(self.y_valid, env.model.predict(self.X_valid))
-                print(test_score)
-                assert self._max_score == test_score
-
-        callback.order = 0
-        return callback
-
     def _weighted_logloss(
         self, preds: np.ndarray, dtrain: lgb.Dataset
     ) -> Tuple[float, float]:
@@ -68,7 +34,6 @@ class LightGBMTrainer(BaseModel):
         """
         labels = dtrain.get_label()
         preds = 1.0 / (1.0 + np.exp(-preds))
-
         # top 4%
         labels_mat = np.transpose(np.array([np.arange(len(labels)), labels, preds]))
         pos_ord = labels_mat[:, 2].argsort()[::-1]
@@ -78,7 +43,12 @@ class LightGBMTrainer(BaseModel):
         top4 = top4[labels_mat[:, 0].argsort()]
 
         weights = (
-            1 + np.exp(-5 * np.linspace(1, 0, len(top4)))[labels_mat[:, 0].argsort()]
+            1
+            + np.exp(
+                -1
+                * self.config.model.loss.mult_no4prec
+                * np.linspace(self.config.model.loss.max_weights - 1, 0, len(top4))
+            )[labels_mat[:, 0].argsort()]
         )
         # Set to one weights of positive labels in top 4perc
         weights[top4 & (labels == 1.0)] = 1.0
@@ -89,6 +59,43 @@ class LightGBMTrainer(BaseModel):
         hess = preds * (1 - preds) * (1 + weights * labels - labels)
 
         return grad, hess
+
+    def _save_dart_model(self) -> Callable[[CallbackEnv], NoReturn]:
+        def callback(env: CallbackEnv) -> NoReturn:
+            iteration = env.iteration
+            score = (
+                env.evaluation_result_list[1][2]
+                if self.config.model.loss.is_customized
+                else env.evaluation_result_list[3][2]
+            )
+            if self._max_score < score:
+                self._max_score = score
+                path = (
+                    Path(get_original_cwd())
+                    / self.config.model.path
+                    / self.config.model.working
+                )
+                model_name = f"{self.config.model.name}_fold{self._num_fold_iter}.lgb"
+                model_path = path / model_name
+
+                if model_path.is_file():
+                    os.remove(os.path.join(path, model_name))
+
+                logging.info(
+                    f"High Score: iteration {iteration}, score={self._max_score}"
+                )
+                env.model.save_model(model_path)
+
+                model = lgb.Booster(model_file=model_path)
+                preds = model.predict(self.X_valid)
+                preds = 1 / (1 + np.exp(-preds))
+
+                test_score = amex_metric(self.y_valid, preds)
+                logging.info(f"Test Score: {test_score}")
+                assert self._max_score == test_score
+
+        callback.order = 0
+        return callback
 
     def _train(
         self,
@@ -118,16 +125,14 @@ class LightGBMTrainer(BaseModel):
             verbose_eval=self.config.model.verbose,
             num_boost_round=self.config.model.num_boost_round,
             feval=lgb_amex_metric,
-            fobj=self._weighted_logloss
-            if self.config.model.loss.is_customized
-            else None,
+            fobj=self._weighted_logloss,
             callbacks=[self._save_dart_model()],
         )
 
         model = lgb.Booster(
             model_file=Path(get_original_cwd())
             / self.config.model.path
-            / self.config.model.dart
+            / self.config.model.working
             / f"{self.config.model.name}_fold{self._num_fold_iter}.lgb"
         )
 
