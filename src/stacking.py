@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
-from scipy.stats import rankdata
 
 from evaluation.evaluate import amex_metric
 from models.boosting import XGBoostTrainer

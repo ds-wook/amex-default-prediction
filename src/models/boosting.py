@@ -1,5 +1,7 @@
+import os
 import warnings
-from typing import NoReturn, Optional, Tuple
+from pathlib import Path
+from typing import Callable, NoReturn, Optional, Tuple
 
 import lightgbm as lgb
 import numpy as np
@@ -9,10 +11,11 @@ import wandb.lightgbm as wandb_lgb
 import wandb.xgboost as wandb_xgb
 import xgboost as xgb
 from catboost import CatBoostClassifier, Pool
+from hydra.utils import get_original_cwd
 
 from evaluation.evaluate import CatBoostEvalMetricAmex, lgb_amex_metric, xgb_amex_metric
 from models.base import BaseModel
-
+from models.callbacks import CallbackEnv
 
 warnings.filterwarnings("ignore")
 
@@ -20,6 +23,31 @@ warnings.filterwarnings("ignore")
 class LightGBMTrainer(BaseModel):
     def __init__(self, **kwargs) -> NoReturn:
         super().__init__(**kwargs)
+
+    def _save_dart_model(self) -> Callable[[CallbackEnv], NoReturn]:
+        def callback(env: CallbackEnv) -> NoReturn:
+            score = (
+                env.evaluation_result_list[1][2]
+                if self.config.model.loss.is_customized
+                else env.evaluation_result_list[3][2]
+            )
+            if self._max_score < score:
+                self._max_score = score
+                path = (
+                    Path(get_original_cwd())
+                    / self.config.model.path
+                    / self.config.model.working
+                )
+                model_name = f"{self.config.model.name}_fold{self._num_fold_iter}.lgb"
+                model_path = path / model_name
+
+                if model_path.is_file():
+                    os.remove(os.path.join(path, model_name))
+
+                env.model.save_model(model_path)
+
+        callback.order = 0
+        return callback
 
     def _weighted_logloss(
         self, preds: np.ndarray, dtrain: lgb.Dataset
@@ -34,6 +62,7 @@ class LightGBMTrainer(BaseModel):
         Returns:
             gradient, hessian
         """
+        eps = 1e-16
         labels = dtrain.get_label()
         preds = 1.0 / (1.0 + np.exp(-preds))
 
@@ -59,7 +88,7 @@ class LightGBMTrainer(BaseModel):
         weights[(labels == 0.0)] = 1.0
 
         grad = preds * (1 + weights * labels - labels) - (weights * labels)
-        hess = preds * (1 - preds) * (1 + weights * labels - labels)
+        hess = np.maximum(preds * (1 - preds) * (1 + weights * labels - labels), eps)
         return grad, hess
 
     def _train(
@@ -83,7 +112,7 @@ class LightGBMTrainer(BaseModel):
             categorical_feature=self.config.features.cat_features,
         )
 
-        model = lgb.train(
+        lgb.train(
             train_set=train_set,
             valid_sets=[train_set, valid_set],
             params=dict(self.config.model.params),
@@ -94,11 +123,17 @@ class LightGBMTrainer(BaseModel):
             if self.config.model.loss.is_customized
             else None,
             callbacks=[
-                self.save_dart_model(),
+                self._save_dart_model(),
                 wandb_lgb.wandb_callback(),
             ],
         )
 
+        model = lgb.Booster(
+            model_file=Path(get_original_cwd())
+            / self.config.model.path
+            / self.config.model.working
+            / f"{self.config.model.name}_fold{self._num_fold_iter}.lgb"
+        )
         wandb_lgb.log_summary(model)
 
         return model

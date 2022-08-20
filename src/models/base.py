@@ -13,12 +13,9 @@ import pandas as pd
 import wandb
 import xgboost as xgb
 from hydra.utils import get_original_cwd
-from models.callbacks import CallbackEnv
 from omegaconf import DictConfig
 from sklearn.model_selection import RepeatedStratifiedKFold
 from wandb.sklearn import plot_feature_importances
-
-from evaluation.evaluate import amex_metric
 
 warnings.filterwarnings("ignore")
 
@@ -31,11 +28,17 @@ class ModelResult:
 
 
 class BaseModel(metaclass=ABCMeta):
-    def __init__(self, config: DictConfig, search: bool = False) -> NoReturn:
+    def __init__(
+        self,
+        config: DictConfig,
+        metric: Callable[[np.ndarray, np.ndarray], float],
+        search: bool = False,
+    ):
         self.config = config
+        self.metric = metric
         self.search = search
-        self.__max_score = 0.0
-        self.__num_fold_iter = 0
+        self._max_score = 0.0
+        self._num_fold_iter = 0
         self.result = None
 
     @abstractclassmethod
@@ -51,30 +54,12 @@ class BaseModel(metaclass=ABCMeta):
         """
         raise NotImplementedError
 
-    def save_dart_model(self) -> Callable[[CallbackEnv], NoReturn]:
-        def callback(env: CallbackEnv) -> NoReturn:
-            score = (
-                env.evaluation_result_list[1][2]
-                if self.config.model.loss.is_customized
-                else env.evaluation_result_list[3][2]
-            )
-            if self.__max_score < score:
-                self.__max_score = score
-                env.model.save_model(
-                    Path(get_original_cwd())
-                    / self.config.model.path
-                    / f"{self.config.model.result}_fold{self.__num_fold_iter}.lgb"
-                )
-
-        callback.order = 0
-        return callback
-
     def save_model(self) -> NoReturn:
         """
         Save model
         """
         model_path = (
-            Path(get_original_cwd()) / self.config.model.path / self.config.model.name
+            Path(get_original_cwd()) / self.config.model.path / self.config.model.result
         )
 
         with open(model_path, "wb") as output:
@@ -115,15 +100,6 @@ class BaseModel(metaclass=ABCMeta):
 
             # model
             model = self._train(X_train, y_train, X_valid, y_valid)
-            model = (
-                lgb.Booster(
-                    model_file=Path(get_original_cwd())
-                    / self.config.model.path
-                    / f"{self.config.model.result}_fold{self.__num_fold_iter}.lgb"
-                )
-                if isinstance(model, lgb.Booster)
-                else model
-            )
             models[f"fold_{fold}"] = model
 
             # validation
@@ -136,14 +112,13 @@ class BaseModel(metaclass=ABCMeta):
             )
 
             # score
-            score = amex_metric(y_valid, oof_preds[valid_idx])
+            score = self.metric(y_valid, oof_preds[valid_idx])
 
-            scores[f"fold_{fold}"] = self.__max_score
+            scores[f"fold_{fold}"] = score
 
             wandb.log({"fold score": score})
 
             if not self.search:
-                logging.info(f"Best score: {self.__max_score}")
                 logging.info(f"Fold {fold}: {score}")
 
             if not isinstance(model, (lgb.Booster, xgb.Booster)):
@@ -152,7 +127,10 @@ class BaseModel(metaclass=ABCMeta):
             del X_train, X_valid, y_train, y_valid, model
             gc.collect()
 
-        oof_score = amex_metric(train_y, oof_preds)
+            # Close run for that fold
+            wandb.finish()
+
+        oof_score = self.metric(train_y, oof_preds)
         logging.info(f"OOF Score: {oof_score}")
         logging.info(f"CV means: {np.mean(list(scores.values()))}")
         logging.info(f"CV std: {np.std(list(scores.values()))}")

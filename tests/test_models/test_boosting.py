@@ -1,13 +1,16 @@
+import logging
+import os
 import warnings
-from typing import NoReturn, Optional, Tuple
+from pathlib import Path
+from typing import Callable, NoReturn, Optional, Tuple
 
 import lightgbm as lgb
 import numpy as np
 import pandas as pd
-
-from test_evaluation.test_evaluate import lgb_amex_metric
+from hydra.utils import get_original_cwd
+from test_evaluation.test_evaluate import amex_metric, lgb_amex_metric
 from test_models.test_base import BaseModel
-
+from test_models.test_callbacks import CallbackEnv
 
 warnings.filterwarnings("ignore")
 
@@ -15,6 +18,40 @@ warnings.filterwarnings("ignore")
 class LightGBMTrainer(BaseModel):
     def __init__(self, **kwargs) -> NoReturn:
         super().__init__(**kwargs)
+
+    def _save_dart_model(self) -> Callable[[CallbackEnv], NoReturn]:
+        def callback(env: CallbackEnv) -> NoReturn:
+            iteration = env.iteration
+            score = (
+                env.evaluation_result_list[1][2]
+                if self.config.model.loss.is_customized
+                else env.evaluation_result_list[3][2]
+            )
+            if self._max_score < score:
+                self._max_score = score
+                path = (
+                    Path(get_original_cwd())
+                    / self.config.model.path
+                    / self.config.model.dart
+                )
+                model_name = f"{self.config.model.name}_fold{self._num_fold_iter}.lgb"
+                model_path = path / model_name
+
+                if model_path.is_file():
+                    os.remove(os.path.join(path, model_name))
+
+                logging.info(
+                    f"High Score: iteration {iteration}, score={self._max_score}"
+                )
+                env.model.save_model(model_path)
+
+                # model = lgb.Booster(model_file=model_path)
+                test_score = amex_metric(self.y_valid, env.model.predict(self.X_valid))
+                print(test_score)
+                assert self._max_score == test_score
+
+        callback.order = 0
+        return callback
 
     def _weighted_logloss(
         self, preds: np.ndarray, dtrain: lgb.Dataset
@@ -41,11 +78,7 @@ class LightGBMTrainer(BaseModel):
         top4 = top4[labels_mat[:, 0].argsort()]
 
         weights = (
-            1
-            + np.exp(
-                -self.config.model.loss.mult_no4prec
-                * np.linspace(self.config.model.loss.max_weights - 1, 0, len(top4))
-            )[labels_mat[:, 0].argsort()]
+            1 + np.exp(-5 * np.linspace(1, 0, len(top4)))[labels_mat[:, 0].argsort()]
         )
         # Set to one weights of positive labels in top 4perc
         weights[top4 & (labels == 1.0)] = 1.0
@@ -88,7 +121,14 @@ class LightGBMTrainer(BaseModel):
             fobj=self._weighted_logloss
             if self.config.model.loss.is_customized
             else None,
-            callbacks=[self.save_dart_model()],
+            callbacks=[self._save_dart_model()],
+        )
+
+        model = lgb.Booster(
+            model_file=Path(get_original_cwd())
+            / self.config.model.path
+            / self.config.model.dart
+            / f"{self.config.model.name}_fold{self._num_fold_iter}.lgb"
         )
 
         return model
