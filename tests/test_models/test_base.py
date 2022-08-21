@@ -19,13 +19,13 @@ warnings.filterwarnings("ignore")
 
 
 @dataclass
-class ModelResult:
+class TestModelResult:
     oof_preds: np.ndarray
     models: Dict[str, Any]
     scores: Dict[str, Dict[str, float]]
 
 
-class BaseModel(metaclass=ABCMeta):
+class TestBaseModel(metaclass=ABCMeta):
     def __init__(
         self,
         config: DictConfig,
@@ -67,7 +67,7 @@ class BaseModel(metaclass=ABCMeta):
         with open(model_path, "wb") as output:
             pickle.dump(self.result, output, pickle.HIGHEST_PROTOCOL)
 
-    def train(self, train_x: pd.DataFrame, train_y: pd.Series) -> ModelResult:
+    def train(self, train_x: pd.DataFrame, train_y: pd.Series) -> TestModelResult:
         """
         Train data
         Args:
@@ -134,7 +134,7 @@ class BaseModel(metaclass=ABCMeta):
         logging.info(f"CV means: {np.mean(list(scores.values()))}")
         logging.info(f"CV std: {np.std(list(scores.values()))}")
 
-        self.result = ModelResult(
+        self.result = TestModelResult(
             oof_preds=oof_preds,
             models=models,
             scores={"oof_score": oof_score, "KFold_scores": scores},

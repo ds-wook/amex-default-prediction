@@ -7,6 +7,9 @@ import numpy as np
 import pandas as pd
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
+from tqdm import tqdm
+
+tqdm.pandas()
 
 
 def split_dataset(a: np.ndarray, n: int) -> Tuple[np.ndarray]:
@@ -71,8 +74,11 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     df["SDist"] = df["SDist"].fillna(30.53)
 
     all_cols = [c for c in list(df.columns) if c not in ["customer_ID", "S_2"]]
+    # cat_features = (
+    #     "B_30, B_38, D_114, D_116, D_117, D_120, D_126, D_63, D_64, D_66, D_68"
+    # )
     cat_features = (
-        "B_30, B_38, D_114, D_116, D_117, D_120, D_126, D_63, D_64, D_66, D_68"
+        "B_30, B_38, D_114, D_116, D_117, D_120, D_126, D_63, D_64, D_68"
     )
     cat_features = cat_features.split(", ")
     num_features = [col for col in all_cols if col not in cat_features]
@@ -131,7 +137,7 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-@hydra.main(config_path="../config/", config_name="data")
+@hydra.main(config_path="../config/", config_name="data", version_base="1.2.0")
 def _main(cfg: DictConfig) -> NoReturn:
     path = Path(get_original_cwd())
     train = pd.read_parquet(path / "input/amex-data-parquet/train.parquet")

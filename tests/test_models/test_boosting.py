@@ -9,13 +9,13 @@ import numpy as np
 import pandas as pd
 from hydra.utils import get_original_cwd
 from test_evaluation.test_evaluate import amex_metric, lgb_amex_metric
-from test_models.test_base import BaseModel
+from test_models.test_base import TestBaseModel
 from test_models.test_callbacks import CallbackEnv
 
 warnings.filterwarnings("ignore")
 
 
-class LightGBMTrainer(BaseModel):
+class TestLightGBMTrainer(TestBaseModel):
     def __init__(self, **kwargs) -> NoReturn:
         super().__init__(**kwargs)
 

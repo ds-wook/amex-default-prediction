@@ -18,7 +18,7 @@ CallbackEnv = collections.namedtuple(
 )
 
 
-class DartEarlyStopping:
+class TestDartEarlyStopping:
     def __init__(self, data_name: str, monitor_metric: str, stopping_round: int):
         self.data_name = data_name
         self.monitor_metric = monitor_metric
