@@ -14,7 +14,7 @@ import wandb
 import xgboost as xgb
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
-from sklearn.model_selection import RepeatedStratifiedKFold
+from sklearn.model_selection import StratifiedKFold
 from wandb.sklearn import plot_feature_importances
 
 warnings.filterwarnings("ignore")
@@ -79,7 +79,7 @@ class BaseModel(metaclass=ABCMeta):
         folds = self.config.model.fold
         seed = self.config.dataset.seed
 
-        str_kf = RepeatedStratifiedKFold(n_splits=folds, n_repeats=2, random_state=seed)
+        str_kf = StratifiedKFold(n_splits=folds, shuffle=True, random_state=seed)
         splits = str_kf.split(train_x, train_y)
         oof_preds = np.zeros(len(train_x))
 
