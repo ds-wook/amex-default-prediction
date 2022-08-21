@@ -4,7 +4,7 @@ from omegaconf import DictConfig
 from data.dataset import load_train_dataset
 from evaluation.evaluate import amex_metric
 from tuning.boosting import LightGBMTuner
-from utils import reduce_mem_usage, seed_everything
+from utils.utils import reduce_mem_usage, seed_everything
 
 
 @hydra.main(config_path="../config/", config_name="search")

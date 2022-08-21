@@ -4,7 +4,7 @@ from omegaconf import DictConfig
 from test_data.test_dataset import load_train_dataset
 from test_evaluation.test_evaluate import amex_metric
 from test_models.test_boosting import LightGBMTrainer
-from utils import seed_everything
+from utils.utils import seed_everything
 
 
 @hydra.main(config_path="../config/", config_name="train")

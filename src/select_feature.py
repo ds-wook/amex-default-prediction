@@ -9,7 +9,7 @@ from sklearn.model_selection import train_test_split
 
 from data.dataset import load_train_dataset
 from features.select import get_score_correlation, score_feature_selection
-from utils import seed_everything
+from utils.utils import seed_everything
 
 
 @hydra.main(config_path="../config/", config_name="train")

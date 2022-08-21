@@ -4,7 +4,7 @@ from omegaconf import DictConfig
 from data.dataset import load_train_dataset
 from evaluation.evaluate import amex_metric
 from models.boosting import CatBoostTrainer
-from utils import seed_everything
+from utils.utils import seed_everything
 
 
 @hydra.main(config_path="../config/", config_name="train")
