@@ -1,6 +1,6 @@
-path: input/amex-bruteforce-features/
+path: input/amex-cleaning-features/
 num_train: 5
-num_test: 10
+num_test: 5
 seed: 42
 target: target
 train: train_bruteforce_features

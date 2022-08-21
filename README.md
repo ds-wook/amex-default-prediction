@@ -24,6 +24,7 @@ This repository is the code that placed ?th [American Express - Default Predicti
 |LightGBM(5-StratifiedKFold sdist-features - dart) - seed2222|0.7976|**0.799**|-|
 |LightGBM(5-StratifiedKFold sdist-features - dart) - seed3407|0.7977|**0.799**|-|
 |LightGBM(5-StratifiedKFold sdist-lag-features - dart) - seed3407|0.7977|**0.799**|-|
+|LightGBM(5-StratifiedKFold bruteforce-features - dart) - seed3407|0.7978|**0.799**|-|
 |LightGBM(5-StratifiedKFold sdist-lag-features - dart) - seed5230|0.7963|**0.799**|-|
 |XGBoost(10-KFold - stacking regression)|0.7985|0.799|-|
 |LightGBM-Gradient Ensemble|**0.7993**|**0.799**|-|

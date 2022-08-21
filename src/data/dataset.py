@@ -3,7 +3,6 @@ import warnings
 from pathlib import Path
 from typing import Tuple
 
-import numpy as np
 import pandas as pd
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
@@ -65,16 +64,3 @@ def load_test_dataset(config: DictConfig, num: int = 0) -> pd.DataFrame:
     logging.info(f"test: {test_x.shape}")
 
     return test_x
-
-
-def split_dataset(a: np.ndarray, n: int) -> Tuple[np.ndarray]:
-    """
-    Split array into n parts
-    Args:
-        a: array
-        n: number of parts
-    Returns:
-        array of tuple
-    """
-    k, m = divmod(len(a), n)
-    return (a[i * k + min(i, m) : (i + 1) * k + min(i + 1, m)] for i in range(n))

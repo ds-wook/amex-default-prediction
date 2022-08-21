@@ -16,7 +16,7 @@ def _main(cfg: DictConfig):
     path = Path(get_original_cwd()) / cfg.output.path
 
     # model load
-    results = load_model(cfg, cfg.model.name)
+    results = load_model(cfg, cfg.model.result)
 
     # infer test
     preds_proba = []
