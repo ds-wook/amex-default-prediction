@@ -130,12 +130,6 @@ dmypy.json
 
 .vscode/*
 input/*
-!input/.gitkeep
 output/*
-!output/.gitkeep
-res/models/*
-!res/models/.gitkeep
-res/data/*
-!res/data/.gitkeep
+res/*
 log/*
-!log/.gitkeep
