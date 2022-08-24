@@ -32,7 +32,7 @@ This repository is the code that placed ?th [American Express - Default Predicti
 |LightGBM(5-StratifiedKFold bruteforce-features - dart) - seed3407|0.7978|**0.799**|-|
 |LightGBM(5-StratifiedKFold sdist-lag-features - dart) - seed5230|0.7963|**0.799**|-|
 |XGBoost(10-KFold - stacking regression)|0.7985|0.799|-|
-|LightGBM-Gradient Ensemble|**0.7993**|**0.799**|-|
+|Ensemble is Always Answer|**0.79952**|**0.799**|-|
 
 ### Project Organization
 ```
