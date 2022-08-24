@@ -3,10 +3,11 @@
 This repository is the code that placed ?th [American Express - Default Prediction](https://www.kaggle.com/competitions/amex-default-prediction/overview)
 
 ### Model
-My model's name is EAA(Ensemble is Always Answer).
+My model's name is **EAA(Ensemble is Always Answer)**.
 |Architecture|
 |-------------------|
 |<img src="res/image/architecture.png">|
+
 Among the boosting models, the LightGBM DART model performed the best. Due to the high noise of the metric, it is slow but can guarantee performance
 I decided to use a DART model. Meanwhile, in the case of Catboost, categorical features were learned by adding first features.
 TabNet is a type of neural network, and in order to secure the diversity of the GBDT model, an ensemble was attempted by giving a small weight value even if the performance was poor.
