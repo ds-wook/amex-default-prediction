@@ -129,7 +129,7 @@ dmypy.json
 .pyre/
 
 .vscode/*
-input/*
-output/*
-res/*
-log/*
+input/
+output/
+res/
+log/
