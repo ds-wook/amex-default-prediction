@@ -1,8 +1,7 @@
 name: amex
 dependencies:
   - pip:
-    - pyarrow
-    - fastparquet
+    - pyarrow==8.0.0
     - black==22.3.0
     - catboost==1.0.6
     - category-encoders==2.4.1
