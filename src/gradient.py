@@ -1,6 +1,5 @@
 import logging
 import warnings
-from functools import partial
 from pathlib import Path
 from typing import List
 
@@ -23,8 +22,17 @@ def get_score(
     train_idx: List[int],
     oofs: List[np.ndarray],
     target: np.ndarray,
-    score: str,
 ) -> float:
+    """
+    Calculate score of weights
+    Args:
+        weights: weights
+        train_idx: index of train data
+        oofs: oofs of models
+        target: target of train data
+    Returns:
+        score of weights
+    """
     blending = np.zeros_like(oofs[0][train_idx])
 
     for oof, weight in zip(oofs[:-1], weights):
@@ -32,15 +40,20 @@ def get_score(
 
     blending += (1 - np.sum(weights)) * oofs[-1][train_idx]
 
-    scores = (
-        log_loss(target[train_idx], blending)
-        if score == "log_loss"
-        else amex_metric(target[train_idx], blending)
-    )
+    scores = log_loss(target[train_idx], blending)
+
     return scores
 
 
-def get_best_weights(oofs: List[np.ndarray], target: np.ndarray, score: str) -> float:
+def get_best_weights(oofs: List[np.ndarray], target: np.ndarray) -> np.ndarray:
+    """
+    Get best weights
+    Args:
+        oofs: oofs of models
+        target: target of train data
+    Returns:
+        best weights
+    """
     weight_list = []
     weights = np.array([1 / len(oofs) for _ in range(len(oofs) - 1)])
 
@@ -48,7 +61,7 @@ def get_best_weights(oofs: List[np.ndarray], target: np.ndarray, score: str) -> 
     kf = KFold(n_splits=5)
     for fold, (train_idx, _) in enumerate(kf.split(oofs[0]), 1):
         res = minimize(
-            partial(get_score, score=score),
+            get_score,
             weights,
             args=(train_idx, oofs, target),
             method="Nelder-Mead",
