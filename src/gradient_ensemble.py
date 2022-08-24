@@ -14,7 +14,6 @@ from sklearn.metrics import log_loss
 from sklearn.model_selection import KFold
 
 from evaluation.evaluate import amex_metric
-from models.infer import load_model
 
 warnings.filterwarnings("ignore")
 
