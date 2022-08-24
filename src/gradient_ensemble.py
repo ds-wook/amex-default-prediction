@@ -72,30 +72,24 @@ def _main(cfg: DictConfig):
     train_labels = pd.read_csv(path / cfg.input.name / cfg.input.train_labels)
     target = train_labels["target"]
 
-    tabnet_oof = pd.read_csv(path / cfg.model.path / cfg.model.tabnet_oof)
     lgbm1_oof = pd.read_csv(path / cfg.model.path / cfg.model.lgbm1_oof)
     lgbm2_oof = pd.read_csv(path / cfg.model.path / cfg.model.lgbm2_oof)
     cb1_oof = pd.read_csv(path / cfg.model.path / cfg.model.cb1_oof)
-    cb2_oof = pd.read_csv(path / cfg.model.path / cfg.model.cb2_oof)
 
-    tabnet_preds = pd.read_csv(path / cfg.output.name / cfg.output.tabnet_preds)
     lgbm1_preds = pd.read_csv(path / cfg.output.name / cfg.output.lgbm1_preds)
     lgbm2_preds = pd.read_csv(path / cfg.output.name / cfg.output.lgbm2_preds)
     cb1_preds = pd.read_csv(path / cfg.output.name / cfg.output.cb1_preds)
-    cb2_preds = pd.read_csv(path / cfg.output.name / cfg.output.cb2_preds)
 
     oofs = [
         lgbm1_oof.prediction.to_numpy(),
         lgbm2_oof.prediction.to_numpy(),
         cb1_oof.prediction.to_numpy(),
-        # cb2_oof.prediction.to_numpy(),
     ]
 
     preds = [
         lgbm1_preds.prediction.to_numpy(),
         lgbm2_preds.prediction.to_numpy(),
         cb1_preds.prediction.to_numpy(),
-        # cb2_preds.prediction.to_numpy(),
     ]
 
     best_weights = get_best_weights(oofs, target.to_numpy(), cfg.score.name)

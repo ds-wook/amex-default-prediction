@@ -1,0 +1,22 @@
+hydra:
+  run:
+    dir: log/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  output_subdir: null
+  job:
+    chdir: True
+input:
+  name: input/amex-default-prediction
+  train_labels: train_labels.csv
+model:
+  path: res/models/
+  xgb_oof: oof_5fold_stacking_gradient.csv
+  tabnet_oof: oof_5fold_cb_nn_gradient.csv
+  lgbm_oof: oof_5fold_boosting_gradient.csv
+output:
+  name: output
+  submission: sample_submission.csv
+  xgb_preds: 5fold_stacking_gradient.csv
+  tabnet_preds: 5fold_cb_nn_gradient.csv
+  lgbm_preds: 5fold_boosting_gradient.csv
+  oof: oof_final_ensemble_submit_ver5.csv
+  preds: final_ensemble_submit_ver5.csv

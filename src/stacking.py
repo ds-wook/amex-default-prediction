@@ -1,5 +1,6 @@
 from pathlib import Path
-import logging
+from typing import Tuple
+
 import hydra
 import numpy as np
 import pandas as pd
@@ -10,6 +11,42 @@ from sklearn.model_selection import StratifiedKFold
 
 from evaluation.evaluate import amex_metric, xgb_amex_metric
 from models.infer import load_model
+
+
+# DEFINE CUSTOM EVAL LOSS FUNCTION
+def weighted_logloss(
+    preds: np.ndarray,
+    dtrain: xgb.DMatrix,
+    mult_no4prec: float = 5.0,
+    max_weights: float = 2.0,
+) -> Tuple[float, float]:
+    labels = dtrain.get_label()
+
+    preds = 1.0 / (1.0 + np.exp(-preds))
+
+    # top 4%
+    labels_mat = np.transpose(np.array([np.arange(len(labels)), labels, preds]))
+    pos_ord = labels_mat[:, 2].argsort()[::-1]
+    labels_mat = labels_mat[pos_ord]
+    weights_4perc = np.where(labels_mat[:, 1] == 0, 20, 1)
+    top4 = np.cumsum(weights_4perc) <= int(0.04 * np.sum(weights_4perc))
+    top4 = top4[labels_mat[:, 0].argsort()]
+
+    weights = (
+        1
+        + np.exp(-mult_no4prec * np.linspace(max_weights - 1, 0, len(top4)))[
+            labels_mat[:, 0].argsort()
+        ]
+    )
+
+    # Set to one weights of positive labels in top 4perc
+    weights[top4 & (labels == 1.0)] = 1.0
+    # Set to one weights of negative labels
+    weights[(labels == 0.0)] = 1.0
+
+    grad = preds * (1 + weights * labels - labels) - (weights * labels)
+    hess = preds * (1 - preds) * (1 + weights * labels - labels)
+    return grad, hess
 
 
 @hydra.main(config_path="../config/", config_name="stacking.yaml")
@@ -33,9 +70,6 @@ def _main(cfg: DictConfig):
     lgbm_oofs13 = load_model(cfg, cfg.model.model13_oof)
     lgbm_oofs14 = load_model(cfg, cfg.model.model14_oof)
     lgbm_oofs15 = load_model(cfg, cfg.model.model15_oof)
-    cb1_oof = pd.read_csv(path / cfg.model.path / cfg.model.cb1_oof)
-    cb2_oof = pd.read_csv(path / cfg.model.path / cfg.model.cb2_oof)
-
     target = train_labels["target"]
 
     oof_array = np.column_stack(
@@ -55,8 +89,6 @@ def _main(cfg: DictConfig):
             lgbm_oofs13.oof_preds,
             lgbm_oofs14.oof_preds,
             lgbm_oofs15.oof_preds,
-            cb1_oof.prediction.to_numpy(),
-            cb2_oof.prediction.to_numpy(),
         ]
     )
 
@@ -75,8 +107,6 @@ def _main(cfg: DictConfig):
     lgbm_preds13 = pd.read_csv(path / cfg.output.name / cfg.output.model13_preds)
     lgbm_preds14 = pd.read_csv(path / cfg.output.name / cfg.output.model14_preds)
     lgbm_preds15 = pd.read_csv(path / cfg.output.name / cfg.output.model15_preds)
-    cb1_preds = pd.read_csv(path / cfg.output.name / cfg.output.cb1_preds)
-    cb2_preds = pd.read_csv(path / cfg.output.name / cfg.output.cb2_preds)
 
     preds_array = np.column_stack(
         [
@@ -95,8 +125,6 @@ def _main(cfg: DictConfig):
             lgbm_preds13.prediction.to_numpy(),
             lgbm_preds14.prediction.to_numpy(),
             lgbm_preds15.prediction.to_numpy(),
-            cb1_preds.prediction.to_numpy(),
-            cb2_preds.prediction.to_numpy(),
         ]
     )
 
@@ -131,6 +159,7 @@ def _main(cfg: DictConfig):
             dtrain=dtrain,
             evals=watchlist,
             feval=xgb_amex_metric,
+            obj=weighted_logloss,
             maximize=True,
             num_boost_round=cfg.model.num_boost_round,
             early_stopping_rounds=cfg.model.early_stopping_rounds,
@@ -143,13 +172,12 @@ def _main(cfg: DictConfig):
 
         # score
         score = amex_metric(y_valid, oof_preds[valid_idx])
-        logging.info(f"Fold {fold}: {score}")
+        print(f"Fold {fold}: {score}")
 
         del X_train, X_valid, y_train, y_valid, model
 
     oof_score = amex_metric(target, oof_preds)
-    logging.info(f"OOF Score: {oof_score}")
-
+    print(f"OOF Score: {oof_score}")
     oof_df = pd.DataFrame(
         {
             "customer_ID": train_labels["customer_ID"],
@@ -157,12 +185,12 @@ def _main(cfg: DictConfig):
             "prediction": oof_preds,
         }
     )
-    oof_df.to_csv(
-        path / cfg.output.name / "oof_10fold_xgboost_stacking_ver1.csv",
-        index=False,
-    )
+    # oof_df.to_csv(
+    #     path / cfg.output.name / "oof_10fold_xgboost_stacking_ver1.csv",
+    #     index=False,
+    # )
     submission["prediction"] = preds_proba
-    submission.to_csv(path / cfg.output.name / cfg.output.preds, index=False)
+    submission.to_csv(path / cfg.model.path / cfg.output.preds, index=False)
 
 
 if __name__ == "__main__":

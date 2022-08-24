@@ -4,18 +4,6 @@ import pandas as pd
 from scipy.stats import rankdata
 
 # %%
-preds1 = pd.read_csv("../output/5fold_best_boosting_gradient.csv")
-preds2 = pd.read_csv("../output/lb_overfitting.csv")
-# preds3 = pd.read_csv("../output/10fold_stacking_tabnet.csv")
-# preds4 = pd.read_csv("../output/keras-cnn_sub.csv")
-preds2.head()
-# %%
-preds1["prediction"] = 0.7 * preds1["prediction"] + 0.3 * preds2["prediction"]
-preds1.head()
-
-# %%
-preds1.to_csv("../output/final_ensemble_submit_ver1.csv", index=False)
-# %%
 
 
 def amex_metric(y_true, y_pred) -> float:
@@ -40,15 +28,47 @@ def amex_metric(y_true, y_pred) -> float:
 
 
 # %%
-oof_scores = pd.read_csv("../res/models/oof_5fold_best_boosting_gradient.csv")
+oof_scores = pd.read_csv("../res/models/oof_5fold_boosting_gradient.csv")
+stacking_scores = pd.read_csv("../res/models/oof_5fold_stacking_gradient.csv")
 print(amex_metric(oof_scores["target"], oof_scores["prediction"]))
-catboost_oof_scores = pd.read_csv(
-    "../res/models/oof_5fold_tabnet_bruteforce_features_seed3407.csv"
-)
-oof_scores["prediction"] = (
-    oof_scores["prediction"] * 0.999996 + catboost_oof_scores["prediction"] * 0.000004
-)
-print(amex_metric(oof_scores["target"], oof_scores["prediction"]))
+print(amex_metric(stacking_scores["target"], stacking_scores["prediction"]))
 # %%
-np.exp(-10)
+import optuna
+
+
+def objective(trial):
+    w1 = trial.suggest_uniform("w1", 0, 1)
+    oof_preds = oof_scores["prediction"] * (1 - w1) + stacking_scores["prediction"] * w1
+    return amex_metric(oof_scores["target"], oof_preds)
+
+
+study = optuna.create_study(direction="maximize")
+study.optimize(objective, n_trials=100)
+print(study.best_params)
+# %%
+oof_preds = pd.DataFrame()
+oof_preds["prediction"] = (
+    oof_scores["prediction"] * (1-0.03221084221328546) + stacking_scores["prediction"] * 0.03221084221328546
+)
+print(amex_metric(oof_scores["target"], oof_preds["prediction"]))
+# %%
+preds1 = pd.read_csv("../output/5fold_boosting_gradient.csv")
+preds2 = pd.read_csv("../output/5fold_stacking_gradient.csv")
+preds3 = pd.read_csv("../output/keras-cnn_sub.csv")
+preds4 = pd.read_csv("../output/lb_overfitting.csv")
+preds1.head()
+# %%
+preds1["prediction"] = 0.999 * preds1["prediction"] + 0.001 * preds2["prediction"]
+preds1.head()
+
+# %%
+preds1.to_csv("../output/final_ensemble_submit_ver1.csv", index=False)
+
+# %%
+preds1["prediction"] = 0.9999 * preds1["prediction"] + 0.0001 * preds3["prediction"]
+preds1.head()
+# %%
+preds1.to_csv("../output/final_ensemble_submit_ver2.csv", index=False)
+# %%
+preds1
 # %%

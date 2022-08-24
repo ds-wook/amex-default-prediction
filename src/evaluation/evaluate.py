@@ -98,32 +98,3 @@ def xgb_amex_metric(y_pred: np.ndarray, dtrain: xgb.DMatrix) -> Tuple[str, float
     """The competition metric with xgboost's calling convention"""
     y_true = dtrain.get_label()
     return "amex", amex_metric(y_true, y_pred)
-
-
-# DEFINE CUSTOM EVAL LOSS FUNCTION
-def weighted_logloss_eval(
-    preds: np.ndarray,
-    dtrain: lgb.Dataset,
-    mult_no4prec: float = 5.0,
-    max_weights: float = 2.0,
-) -> Tuple[str, float, bool]:
-    labels = dtrain.get_label()
-    preds = 1.0 / (1.0 + np.exp(-preds))
-    # top 4 perc
-    labels_mat = np.transpose(np.array([np.arange(len(labels)), labels, preds]))
-    pos_ord = labels_mat[:, 2].argsort()[::-1]
-    labels_mat = labels_mat[pos_ord]
-    weights_4perc = np.where(labels_mat[:, 1] == 0, 20, 1)
-    top4 = np.cumsum(weights_4perc) <= int(0.04 * np.sum(weights_4perc))
-    top4 = top4[labels_mat[:, 0].argsort()]
-
-    weights = (
-        1
-        + np.exp(-mult_no4prec * np.linspace(max_weights - 1, 0, len(top4)))[
-            labels_mat[:, 0].argsort()
-        ]
-    )
-
-    loss = -weights * labels * np.log(preds) - (1 - labels) * np.log(1 - preds)
-
-    return "binary_logloss", np.mean(loss), False

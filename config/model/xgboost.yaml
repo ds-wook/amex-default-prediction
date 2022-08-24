@@ -9,6 +9,6 @@ params:
   seed: 42
 path: res/models/
 num_boost_round: 10000
-early_stopping_rounds: 75
+early_stopping_rounds: 100
 search: False
 verbose: 100

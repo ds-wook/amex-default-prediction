@@ -26,6 +26,7 @@ model:
   model15_oof: 5fold_lightgbm_selected_features_seed3407.pkl
   lgbm1_oof: oof_5fold_lightgbm_statement_features_gradient.csv
   lgbm2_oof: oof_5fold_lightgbm_bruteforce_features_gradient.csv
+  stacking_oof: oof_10fold_xgboost_stacking_ver1.csv
   cb1_oof: oof_5fold_catboost_smart_bruteforce_features_gradient.csv
   cb2_oof: oof_5fold_catboost_cat_features_gradient.csv
 output:
@@ -48,9 +49,10 @@ output:
   model15_preds: 5fold_lightgbm_selected_features_seed3407.csv
   lgbm1_preds: 5fold_lightgbm_statement_features_gradient.csv
   lgbm2_preds: 5fold_lightgbm_bruteforce_features_gradient.csv
+  stacking_preds: 10fold_xgboost_stacking_ver1.csv
   cb1_preds: 5fold_catboost_lag_features_gradient.csv
   cb2_preds: 5fold_catboost_cat_features_gradient.csv
-  preds: 10fold_xgboost_stacking_ver1.csv
+  preds: 10fold_xgboost_stacking_ver2.csv
 defaults:
   - dataset: dataset
   - features: features
