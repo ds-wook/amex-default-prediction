@@ -60,8 +60,7 @@ This repository is the code that placed ?th [American Express - Default Predicti
     |   ├── boosting.py
     |   ├── callbacks.py   
     |   ├── infer.py
-    |   ├── network.py
-    |   └── stacking.py
+    |   └── network.py
     |
     ├── tuning             <- tuning models by optuna
     |   ├── base.py
