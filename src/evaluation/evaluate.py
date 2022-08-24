@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Union
 
 import lightgbm as lgb
 import numpy as np
@@ -34,7 +34,9 @@ class CatBoostEvalMetricAmex:
         return amex_metric(np.array(target), np.array(preds)), 0
 
 
-def amex_metric(y_true: pd.Series, y_pred: np.ndarray) -> float:
+def amex_metric(
+    y_true: Union[pd.Series, np.ndarray], y_pred: Union[pd.Series, np.ndarray]
+) -> float:
     labels = np.transpose(np.array([y_true, y_pred]))
     labels = labels[labels[:, 1].argsort()[::-1]]
     weights = np.where(labels[:, 0] == 0, 20, 1)
@@ -99,7 +101,7 @@ def xgb_amex_metric(y_pred: np.ndarray, dtrain: xgb.DMatrix) -> Tuple[str, float
 
 
 # DEFINE CUSTOM EVAL LOSS FUNCTION
-def logloss_eval(
+def weighted_logloss_eval(
     preds: np.ndarray,
     dtrain: lgb.Dataset,
     mult_no4prec: float = 5.0,

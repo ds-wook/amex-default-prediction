@@ -24,7 +24,7 @@ def create_categorical_train(train: pd.DataFrame, config: DictConfig) -> pd.Data
 
     le_encoder = LabelEncoder()
 
-    for cat_feature in tqdm(config.dataset.cat_features):
+    for cat_feature in tqdm(config.features.cat_features):
         train[cat_feature] = le_encoder.fit_transform(train[cat_feature])
         with open(path / f"{cat_feature}.pkl", "wb") as f:
             pickle.dump(le_encoder, f)
@@ -43,7 +43,7 @@ def create_categorical_test(test: pd.DataFrame, config: DictConfig) -> pd.DataFr
     """
     path = Path(get_original_cwd()) / config.dataset.encoder
 
-    for cat_feature in tqdm(config.dataset.cat_features):
+    for cat_feature in tqdm(config.features.cat_features):
         le_encoder = pickle.load(open(path / f"{cat_feature}.pkl", "rb"))
         test[cat_feature] = le_encoder.transform(test[cat_feature])
         gc.collect()
@@ -87,27 +87,6 @@ def add_rate_features(df: pd.DataFrame) -> pd.DataFrame:
     for col in num_cols:
         try:
             df[f"{col}_last_mean_rate"] = df[f"{col}_last"] / df[f"{col}_mean"]
-        except Exception:
-            pass
-
-    return df
-
-
-def add_lag_features(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Create diff feature
-    Args:
-        df: dataframe
-    Returns:
-        dataframe
-    """
-    num_cols = [col for col in df.columns if "last" in col]
-    num_cols = [col[:-5] for col in num_cols if "round" not in col]
-
-    # Lag Features
-    for col in num_cols:
-        try:
-            df[f"{col}_last_first_diff"] = df[f"{col}_last"] - df[f"{col}_first"]
         except Exception:
             pass
 

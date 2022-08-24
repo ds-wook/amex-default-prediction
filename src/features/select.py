@@ -2,11 +2,15 @@ import gc
 import time
 from typing import List, Optional, Tuple
 
+import eli5
 import lightgbm as lgb
 import numpy as np
 import pandas as pd
+from eli5.sklearn import PermutationImportance
+from lightgbm import LGBMClassifier
 from omegaconf import DictConfig
 from shap import TreeExplainer
+from sklearn.model_selection import train_test_split
 
 from evaluation.evaluate import amex_metric, lgb_amex_metric
 
@@ -216,3 +220,40 @@ def score_feature_selection(
     )
     # Return the last mean / std values
     return hist["amex-mean"][-1], hist["amex-stdv"][-1]
+
+
+def selected_permutation_importances(
+    config: DictConfig, data: pd.DataFrame, label: pd.Series
+) -> pd.DataFrame:
+    """
+    Permutation importance
+    Args:
+        data: dataframe
+        label: label
+        config: config
+    Returns:
+        imp_df: importance dataframe
+    """
+    X_train, X_test, y_train, y_test = train_test_split(
+        data,
+        label,
+        test_size=0.3,
+        random_state=config.model.params.seed,
+        stratify=label,
+    )
+    model = LGBMClassifier(random_state=config.model.params.seed)
+    model.fit(X_train, y_train)
+    perm_lgbm = PermutationImportance(
+        model,
+        scoring=None,
+        n_iter=1,
+        cv=None,
+        refit=False,
+        random_state=config.model.params.seed,
+    ).fit(X_test, y_test)
+
+    pi_features = eli5.explain_weights_df(
+        perm_lgbm, feature_names=X_train.columns.tolist()
+    )
+
+    return pi_features

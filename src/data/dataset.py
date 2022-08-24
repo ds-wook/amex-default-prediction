@@ -9,8 +9,8 @@ from omegaconf import DictConfig
 
 from features.build import (
     add_diff_features,
-    add_trick_features,
     add_rate_features,
+    add_trick_features,
     add_customized_features,
     create_categorical_test,
     create_categorical_train,

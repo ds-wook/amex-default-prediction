@@ -10,11 +10,11 @@ input:
 model:
   path: res/models/
   model1_oof: 5fold_lightgbm_time_diff_features_seed42.pkl
-  model2_oof: 5fold_lightgbm_gradient_features_seed42.pkl
-  model3_oof: 5fold_lightgbm_rate_features_seed42.pkl
-  model4_oof: 5fold_lightgbm_rate_features_seed52.pkl
-  model5_oof: 5fold_lightgbm_time_feature_trick.pkl
-  model6_oof: 5fold_lightgbm_time_features_dart.pkl
+  model2_oof: 5fold_lightgbm_custom_loss_seed22.pkl
+  model3_oof: 5fold_lightgbm_custom_loss_seed99.pkl
+  model4_oof: 5fold_lightgbm_custom_loss_seed3407.pkl
+  model5_oof: 5fold_lightgbm_rate_features_seed42.pkl
+  model6_oof: 5fold_lightgbm_rate_features_seed52.pkl
   model7_oof: 5fold_lightgbm_trick_features_seed22.pkl
   model8_oof: 5fold_lightgbm_trick_features_seed42.pkl
   model9_oof: 5fold_lightgbm_trick_features_seed94.pkl
@@ -24,15 +24,19 @@ model:
   model13_oof: 5fold_lightgbm_lag_features_seed5230.pkl
   model14_oof: 5fold_lightgbm_lag_features_seed42.pkl
   model15_oof: 5fold_lightgbm_selected_features_seed3407.pkl
+  lgbm1_oof: oof_5fold_lightgbm_statement_features_gradient.csv
+  lgbm2_oof: oof_5fold_lightgbm_bruteforce_features_gradient.csv
+  cb1_oof: oof_5fold_catboost_smart_bruteforce_features_gradient.csv
+  cb2_oof: oof_5fold_catboost_cat_features_gradient.csv
 output:
   name: output
   submission: sample_submission.csv
   model1_preds: 5fold_lightgbm_time_diff_features_seed42.csv
-  model2_preds: 5fold_lightgbm_gradient_features_seed42.csv
-  model3_preds: 5fold_lightgbm_rate_features_seed42.csv
-  model4_preds: 5fold_lightgbm_rate_features_seed52.csv
-  model5_preds: 5fold_lightgbm_time_feature_trick.csv
-  model6_preds: 5fold_lightgbm_time_features_dart.csv
+  model2_preds: 5fold_lightgbm_custom_loss_seed22.csv
+  model3_preds: 5fold_lightgbm_custom_loss_seed99.csv
+  model4_preds: 5fold_lightgbm_custom_loss_seed3407.csv
+  model5_preds: 5fold_lightgbm_rate_features_seed42.csv
+  model6_preds: 5fold_lightgbm_rate_features_seed52.csv
   model7_preds: 5fold_lightgbm_trick_features_seed22.csv
   model8_preds: 5fold_lightgbm_trick_features_seed42.csv
   model9_preds: 5fold_lightgbm_trick_features_seed94.csv
@@ -42,7 +46,11 @@ output:
   model13_preds: 5fold_lightgbm_lag_features_seed5230.csv
   model14_preds: 5fold_lightgbm_lag_features_seed42.csv
   model15_preds: 5fold_lightgbm_selected_features_seed3407.csv
-  preds: 10fold_xgboost_stacking.csv
+  lgbm1_preds: 5fold_lightgbm_statement_features_gradient.csv
+  lgbm2_preds: 5fold_lightgbm_bruteforce_features_gradient.csv
+  cb1_preds: 5fold_catboost_lag_features_gradient.csv
+  cb2_preds: 5fold_catboost_cat_features_gradient.csv
+  preds: 10fold_xgboost_stacking_ver1.csv
 defaults:
   - dataset: dataset
   - features: features

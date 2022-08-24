@@ -21,7 +21,7 @@ def _main(cfg: DictConfig):
     # infer test
     preds_proba = []
 
-    for num in range(cfg.dataset.num_test):
+    for num in range(cfg.dataset.num):
         try:
             seed_everything(cfg.model.params.seed)
         except Exception:

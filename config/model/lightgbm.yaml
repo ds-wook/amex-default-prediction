@@ -10,12 +10,12 @@ params:
   bagging_fraction: 0.5
   bagging_freq: 10
   min_data_in_leaf: 40
-  seed: 3407
+  seed: 42
   verbose: -1
 path: res/models/
 working: working
-name: 5fold_lightgbm_bruteforce_features_seed3407
-result: 5fold_lightgbm_bruteforce_features_seed3407.pkl
+name: 5fold_lightgbm_permutation_features_seed42
+result: 5fold_lightgbm_permutation_features_seed42.pkl
 early_stopping_rounds: 1500
 num_boost_round: 10500
 verbose: 500

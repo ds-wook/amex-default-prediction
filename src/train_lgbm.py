@@ -13,8 +13,8 @@ def _main(cfg: DictConfig):
     # create dataset
     train_x, train_y = load_train_dataset(cfg)
 
-    # # select features
-    # train_x = train_x[cfg.features.selected_features]
+    # select features
+    train_x = train_x[cfg.features.selected_features]
 
     # train model
     lgb_trainer = LightGBMTrainer(config=cfg, metric=amex_metric)

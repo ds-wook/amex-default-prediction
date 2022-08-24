@@ -1,4 +1,5 @@
 import gc
+import warnings
 from pathlib import Path
 from typing import List, NoReturn, Tuple
 
@@ -9,6 +10,7 @@ from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 from tqdm import tqdm
 
+warnings.filterwarnings("ignore")
 tqdm.pandas()
 
 
@@ -57,14 +59,6 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         dataframe
     """
-    # drop nan >=75% features
-    drop_features = (
-        "D_42, D_49, D_66, D_73, D_76, R_9, B_29, D_87, D_88, D_106, R_26, D_108, "
-        "D_110, D_111, B_39, B_42, D_132, D_134, D_135, D_136, D_137, D_138, D_142"
-    )
-    drop_features = drop_features.split(", ")
-    df = df.drop(columns=drop_features)
-
     # FEATURE ENGINEERING FROM
     # https://www.kaggle.com/code/huseyincot/amex-agg-data-how-it-created
     df["S_2"] = pd.to_datetime(df["S_2"])
@@ -74,11 +68,8 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     df["SDist"] = df["SDist"].fillna(30.53)
 
     all_cols = [c for c in list(df.columns) if c not in ["customer_ID", "S_2"]]
-    # cat_features = (
-    #     "B_30, B_38, D_114, D_116, D_117, D_120, D_126, D_63, D_64, D_66, D_68"
-    # )
     cat_features = (
-        "B_30, B_38, D_114, D_116, D_117, D_120, D_126, D_63, D_64, D_68"
+        "B_30, B_38, D_114, D_116, D_117, D_120, D_126, D_63, D_64, D_66, D_68"
     )
     cat_features = cat_features.split(", ")
     num_features = [col for col in all_cols if col not in cat_features]
@@ -157,7 +148,7 @@ def _main(cfg: DictConfig) -> NoReturn:
     gc.collect()
 
     # build test features
-    split_ids = split_dataset(test.customer_ID.unique(), cfg.dataset.num_test)
+    split_ids = split_dataset(test.customer_ID.unique(), cfg.dataset.num)
 
     for (i, ids) in enumerate(split_ids):
         test_sample = test[test.customer_ID.isin(ids)]

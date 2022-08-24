@@ -10,34 +10,33 @@ input:
 model:
   path: res/models/
   xgb_oof: 10fold_xgboost_stacking.pkl
-  tabnet_oof: oof_5fold_cb_nn_gradient.csv
-  model1_oof: 5fold_lightgbm_statement_features_seed88.pkl
-  model2_oof: 5fold_lightgbm_statement_features_seed99.pkl
-  model3_oof: 5fold_lightgbm_statement_features_seed3407.pkl
-  model4_oof: 5fold_lightgbm_statement_features_seed22.pkl
-  model5_oof: 5fold_lightgbm_lag_features_seed3407.pkl
-  model6_oof: 5fold_lightgbm_statement_features_seed42.pkl
-  cb1_oof: oof_5fold_catboost_lag_features_seed22.csv
-  cb2_oof: oof_5fold_catboost_lag_features_seed99.csv
-  cb3_oof: 5fold_catboost_lag_features_seed42.pkl
-  cb4_oof: oof_5fold_catboost_lag_features_seed1119.csv
-  cb5_oof: oof_5fold_catboost_lag_features_seed3407.csv
+  tabnet_oof: oof_5fold_tabnet_bruteforce_features_seed3407.csv
+  model1_oof: 5fold_lightgbm_bruteforce_features_seed22.pkl
+  model2_oof: 5fold_lightgbm_bruteforce_features_seed42.pkl
+  model3_oof: 5fold_lightgbm_bruteforce_features_seed99.pkl
+  model4_oof: 5fold_lightgbm_bruteforce_features_seed1119.pkl
+  model5_oof: 5fold_lightgbm_bruteforce_features_seed3407.pkl
+  model6_oof: 5fold_lightgbm_lag_features_seed3407.pkl
+  lgbm1_oof: oof_5fold_lightgbm_statement_features_gradient.csv
+  lgbm2_oof: oof_5fold_lightgbm_bruteforce_features_gradient.csv
+  cb1_oof: oof_5fold_catboost_smart_bruteforce_features_gradient.csv
+  cb2_oof: oof_5fold_catboost_cat_features_gradient.csv
 output:
   name: output
   submission: sample_submission.csv
   xgb_preds: 10fold_xgboost_stacking.csv
-  tabnet_preds: 5fold_cb_nn_gradient.csv
-  model1_preds: 5fold_lightgbm_statement_features_seed22.csv
-  model2_preds: 5fold_lightgbm_statement_features_seed88.csv
-  model3_preds: 5fold_lightgbm_statement_features_seed99.csv
-  model4_preds: 5fold_lightgbm_statement_features_seed3407.csv
-  model5_preds: 5fold_lightgbm_statement_features_seed42.csv
+  tabnet_preds: 5fold_tabnet_bruteforce_features_seed3407.csv
+  model1_preds: 5fold_lightgbm_bruteforce_features_seed22.csv
+  model2_preds: 5fold_lightgbm_bruteforce_features_seed42.csv
+  model3_preds: 5fold_lightgbm_bruteforce_features_seed99.csv
+  model4_preds: 5fold_lightgbm_bruteforce_features_seed1119.csv
+  model5_preds: 5fold_lightgbm_bruteforce_features_seed3407.csv
   model6_preds: 5fold_lightgbm_lag_features_seed3407.csv
-  cb1_preds: 5fold_catboost_lag_features_gradient.csv
-  cb2_preds: 5fold_catboost_lag_features_seed99.csv
-  cb3_preds: 5fold_catboost_lag_features_seed42.csv
-  cb4_preds: 5fold_catboost_lag_features_seed1119.csv
-  cb5_preds: 5fold_catboost_lag_features_seed3407.csv
-  preds: gradient_ensemble.csv
+  lgbm1_preds: 5fold_lightgbm_statement_features_gradient.csv
+  lgbm2_preds: 5fold_lightgbm_bruteforce_features_gradient.csv
+  cb1_preds: 5fold_catboost_smart_bruteforce_features_gradient.csv
+  cb2_preds: 5fold_catboost_cat_features_gradient.csv
+  oof: oof_5fold_boosting_gradient.csv
+  preds: 5fold_boosting_gradient.csv
 score:
   name: log_loss
