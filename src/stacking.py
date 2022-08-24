@@ -185,10 +185,7 @@ def _main(cfg: DictConfig):
             "prediction": oof_preds,
         }
     )
-    # oof_df.to_csv(
-    #     path / cfg.output.name / "oof_10fold_xgboost_stacking_ver1.csv",
-    #     index=False,
-    # )
+    oof_df.to_csv(path / cfg.output.name / cfg.output.oof, index=False)
     submission["prediction"] = preds_proba
     submission.to_csv(path / cfg.model.path / cfg.output.preds, index=False)
 

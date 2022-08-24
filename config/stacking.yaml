@@ -52,6 +52,7 @@ output:
   stacking_preds: 10fold_xgboost_stacking_ver1.csv
   cb1_preds: 5fold_catboost_lag_features_gradient.csv
   cb2_preds: 5fold_catboost_cat_features_gradient.csv
+  oof: oof_10fold_xgboost_stacking_ver2.csv
   preds: 10fold_xgboost_stacking_ver2.csv
 defaults:
   - dataset: dataset

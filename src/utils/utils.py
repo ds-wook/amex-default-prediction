@@ -94,14 +94,3 @@ def reduce_mem_usage(df: pd.DataFrame, verbose: bool = True) -> pd.DataFrame:
             )
         )
     return df
-
-
-def reduce_float_memory(df: pd.DataFrame) -> pd.DataFrame:
-    # Transform float64 and float32 to float16
-    num_cols = list(
-        df.dtypes[(df.dtypes == "float32") | (df.dtypes == "float64")].index
-    )
-    for col in tqdm(num_cols):
-        df[col] = df[col].astype(np.float16)
-
-    return df
