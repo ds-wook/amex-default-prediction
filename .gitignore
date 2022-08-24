@@ -129,7 +129,13 @@ dmypy.json
 .pyre/
 
 .vscode/*
-input/
-output/
-res/
-log/
+input/*
+!input/.gitkeep
+output/*
+!output/.gitkeep
+res/models/*
+!res/models/.gitkeep
+res/data/*
+!res/data/.gitkeep
+log/*
+!log/.gitkeep
