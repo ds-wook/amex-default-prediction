@@ -2,6 +2,9 @@
 ### Introduction
 This repository is the code that placed ?th [American Express - Default Prediction](https://www.kaggle.com/competitions/amex-default-prediction/overview)
 
+### Model Architecture
+<img src="res/image/architecture.png">
+
 ### Benchmark
 |Model|CV|Public LB|Private LB|
 |-----|--|------|---------|
