@@ -4,7 +4,7 @@
 My model's name is **EAA(Ensemble is Always Answer)**.
 |Architecture|
 |-------------------|
-|<img src="res/image/architecture.png">|
+|![architecture](https://user-images.githubusercontent.com/46340424/186546573-ab0b711c-6d65-4bd3-8c11-39a681f42143.png)|
 
 Among the boosting models, the LightGBM DART model performed the best. Due to the high noise of the metric, it is slow but can guarantee performance
 I decided to use a DART model. Meanwhile, in the case of Catboost, categorical features were learned by adding first features.
