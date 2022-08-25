@@ -1,6 +1,6 @@
 # American Express - Default Prediction
 ### Introduction
-This repository is the code that placed ?th [American Express - Default Prediction](https://www.kaggle.com/competitions/amex-default-prediction/overview)
+This repository is the code that placed th [American Express - Default Prediction](https://www.kaggle.com/competitions/amex-default-prediction/overview)
 
 ### Model
 My model's name is **EAA(Ensemble is Always Answer)**.
