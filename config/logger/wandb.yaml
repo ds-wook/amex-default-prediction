@@ -1,4 +1,4 @@
 project: amex-default-prediction
 entity: ds-wook
-name: lightgbm_gradient_2
+name: lightgbm_meta_1
 experiment: True
