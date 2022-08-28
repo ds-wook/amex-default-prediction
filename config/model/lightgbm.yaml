@@ -1,7 +1,7 @@
 fold: 5
 params:
-  boosting: gbdt
-  learning_rate: 0.03
+  boosting: dart
+  learning_rate: 0.01
   objective: binary
   num_leaves: 100
   lambda_l2: 2
@@ -14,10 +14,10 @@ params:
   verbose: -1
 path: res/models/
 working: working
-name: meta_features_lightgbm
-result: 5fold_lightgbm_permutation_features_seed42.pkl
+name: 5fold_lightgbm_meta_features_seed42
+result: 5fold_lightgbm_meta_features_seed42.pkl
 early_stopping_rounds: 100
-num_boost_round: 1500
+num_boost_round: 10500
 verbose: 500
 loss:
   is_customized: False

@@ -131,9 +131,10 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
 @hydra.main(config_path="../config/", config_name="data", version_base="1.2.0")
 def _main(cfg: DictConfig) -> NoReturn:
     path = Path(get_original_cwd())
-    train = pd.read_parquet(path / "input/amex-data-parquet/train.parquet")
+    train = pd.read_parquet(path / "input/amex-default-prediction/train_meta.parquet")
+    train = train.drop(columns=["target"])
     label = pd.read_csv(path / "input/amex-default-prediction/train_labels.csv")
-    test = pd.read_parquet(path / "input/amex-data-parquet/test.parquet")
+    test = pd.read_parquet(path / "input/amex-default-prediction/test_meta.parquet")
     path = Path(get_original_cwd()) / cfg.dataset.path
 
     # build train features

@@ -147,5 +147,3 @@ def add_customized_features(df: pd.DataFrame) -> pd.DataFrame:
     df["c_PR_41"] = df["R_1_last"] / (df["P_4_last"] + 0.0001)
 
     return df
-
-

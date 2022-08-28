@@ -1,6 +1,7 @@
 import gc
 import warnings
 from pathlib import Path
+from typing import Tuple
 
 import hydra
 import lightgbm as lgb
@@ -9,6 +10,7 @@ import pandas as pd
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 from sklearn.model_selection import StratifiedKFold
+from tqdm import tqdm
 
 warnings.filterwarnings("ignore")
 
@@ -38,24 +40,11 @@ def make_meta_features(
         train_set = lgb.Dataset(data=X_train, label=y_train)
         valid_set = lgb.Dataset(data=X_valid, label=y_valid)
 
-        lgb_params = {
-            "objective": "binary",
-            "metric": "binary_logloss",
-            "seed": 42,
-            "num_leaves": 100,
-            "learning_rate": 0.01,
-            "feature_fraction": 0.20,
-            "bagging_freq": 10,
-            "bagging_fraction": 0.50,
-            "n_jobs": -1,
-            "lambda_l2": 2,
-            "min_data_in_leaf": 40,
-        }
         # model
         model = lgb.train(
             train_set=train_set,
             valid_sets=[train_set, valid_set],
-            params=lgb_params,
+            params=dict(config.model.params),
             verbose_eval=config.model.verbose,
             num_boost_round=config.model.num_boost_round,
             early_stopping_rounds=config.model.early_stopping_rounds,
@@ -75,17 +64,39 @@ def make_meta_features(
     return oof_preds
 
 
-def load_model(config: DictConfig, fold: int) -> lgb.Booster:
+def split_dataset(a: np.ndarray, n: int) -> Tuple[np.ndarray]:
+    """
+    Split array into n parts
+    Args:
+        a: array
+        n: number of parts
+    Returns:
+        array of tuple
+    """
+    k, m = divmod(len(a), n)
+    return (a[i * k + min(i, m) : (i + 1) * k + min(i + 1, m)] for i in range(n))
+
+
+def predict_meta_features(config: DictConfig, test_x: pd.DataFrame) -> np.ndarray:
     """
     load model
     Args:
-        model_path: path to model
+        config: config
+        test_x: test dataframe
     Returns:
-        model
+        predictions
     """
     path = Path(get_original_cwd()) / config.model.path / config.model.working
-    model_path = path / f"{config.model.name}_fold{fold}.lgb"
-    return lgb.Booster(model_file=model_path)
+    models = [
+        lgb.Booster(model_file=path / f"{config.model.name}_fold{fold}.lgb")
+        for fold in range(1, 5 + 1)
+    ]
+    preds = np.zeros(len(test_x))
+
+    for model in tqdm(models, total=len(models)):
+        preds += model.predict(test_x) / len(models)
+
+    return preds
 
 
 @hydra.main(config_path="../config/", config_name="train", version_base="1.2.0")
@@ -94,7 +105,7 @@ def _main(cfg: DictConfig):
     # create dataset
     train = pd.read_parquet(path / "train.parquet")
     target = pd.read_csv(path / "train_labels.csv")
-
+    test = pd.read_parquet(path / "test.parquet")
     train = pd.merge(train, target, on="customer_ID")
     train_x = train.drop(
         columns=[*cfg.dataset.drop_features] + [cfg.dataset.target], axis=1
@@ -104,16 +115,24 @@ def _main(cfg: DictConfig):
     # make meta features
     oof_preds = make_meta_features(train_x, train_y, cfg)
     train["preds"] = oof_preds
+    train = train.drop(cfg.dataset.target, axis=1)
     train.to_parquet(path / "train_meta.parquet")
-    test = pd.read_parquet(path / "test.parquet")
-    test_x = test.drop(columns=[*cfg.dataset.drop_features], axis=1)
-    preds = np.zeros(len(test_x))
-    models = [load_model(cfg, fold) for fold in range(1, 5 + 1)]
 
-    for model in models:
-        preds += model.predict(test_x) / len(models)
+    del train, train_x, train_y, oof_preds
 
-    test["preds"] = preds
+    # build test features
+    split_ids = split_dataset(test.customer_ID.unique(), 10)
+    # infer test
+    preds_proba = []
+
+    for (i, ids) in enumerate(split_ids):
+        print(f"Inferring test fold {i}")
+        test_sample = test[test.customer_ID.isin(ids)]
+        test_x = test_sample.drop(columns=[*cfg.dataset.drop_features], axis=1)
+        preds = predict_meta_features(cfg, test_x)
+        preds_proba.extend(preds)
+
+    test["preds"] = preds_proba
     test.to_parquet(path / "test_meta.parquet")
 
 
