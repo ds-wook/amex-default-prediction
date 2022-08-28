@@ -77,7 +77,7 @@ def get_best_weights(oofs: List[np.ndarray], target: np.ndarray) -> np.ndarray:
     return mean_weight
 
 
-@hydra.main(config_path="../config/", config_name="gradient.yaml")
+@hydra.main(config_path="../config/", config_name="gradient", version_base="1.2.0")
 def _main(cfg: DictConfig):
     path = Path(get_original_cwd())
     submission = pd.read_csv(path / cfg.output.name / cfg.output.submission)

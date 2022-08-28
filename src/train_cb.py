@@ -7,7 +7,7 @@ from models.boosting import CatBoostTrainer
 from utils.utils import seed_everything
 
 
-@hydra.main(config_path="../config/", config_name="train")
+@hydra.main(config_path="../config/", config_name="train", version_base="1.2.0")
 def _main(cfg: DictConfig):
     seed_everything(cfg.model.seed)
     # create dataset

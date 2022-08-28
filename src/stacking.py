@@ -49,7 +49,7 @@ def weighted_logloss(
     return grad, hess
 
 
-@hydra.main(config_path="../config/", config_name="stacking.yaml")
+@hydra.main(config_path="../config/", config_name="stacking", version_base="1.2.0")
 def _main(cfg: DictConfig):
     path = Path(get_original_cwd())
     submission = pd.read_csv(path / cfg.output.name / cfg.output.submission)

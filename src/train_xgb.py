@@ -6,7 +6,7 @@ from evaluation.evaluate import amex_metric
 from models.boosting import XGBoostTrainer
 
 
-@hydra.main(config_path="../config/", config_name="train")
+@hydra.main(config_path="../config/", config_name="train", version_base="1.2.0")
 def _main(cfg: DictConfig):
     train_x, train_y = load_train_dataset(cfg)
     lgb_trainer = XGBoostTrainer(config=cfg, metric=amex_metric)

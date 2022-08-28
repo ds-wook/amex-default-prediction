@@ -11,7 +11,7 @@ from models.infer import inference, load_model
 from utils.utils import seed_everything
 
 
-@hydra.main(config_path="../config/", config_name="predict")
+@hydra.main(config_path="../config/", config_name="predict", version_base="1.2.0")
 def _main(cfg: DictConfig):
     path = Path(get_original_cwd()) / cfg.output.path
 

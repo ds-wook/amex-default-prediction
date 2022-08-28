@@ -27,7 +27,7 @@ def optimize_objective(
     return amex_metric(target, blending)
 
 
-@hydra.main(config_path="../config/", config_name="optimize")
+@hydra.main(config_path="../config/", config_name="optimize", version_base="1.2.0")
 def _main(cfg: DictConfig):
     path = Path(get_original_cwd())
     submission = pd.read_csv(path / cfg.output.name / cfg.output.submission)

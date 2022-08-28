@@ -7,7 +7,7 @@ from tuning.boosting import LightGBMTuner
 from utils.utils import reduce_mem_usage, seed_everything
 
 
-@hydra.main(config_path="../config/", config_name="search")
+@hydra.main(config_path="../config/", config_name="search", version_base="1.2.0")
 def _main(cfg: DictConfig):
     seed_everything(cfg.dataset.seed)
 
