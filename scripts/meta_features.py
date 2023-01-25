@@ -15,9 +15,7 @@ from tqdm import tqdm
 warnings.filterwarnings("ignore")
 
 
-def make_meta_features(
-    train_x: pd.DataFrame, train_y: pd.Series, config: DictConfig
-) -> pd.DataFrame:
+def make_meta_features(train_x: pd.DataFrame, train_y: pd.Series, config: DictConfig) -> pd.DataFrame:
     """
     Create meta features
     Args:
@@ -33,7 +31,7 @@ def make_meta_features(
     splits = str_kf.split(train_x, train_y)
     oof_preds = np.zeros(len(train_x))
 
-    for fold, (train_idx, valid_idx) in enumerate(splits, 1):
+    for fold, (train_idx, valid_idx) in tqdm(enumerate(splits, 1), leave=False):
         # split train and validation data
         X_train, y_train = train_x.iloc[train_idx], train_y.iloc[train_idx]
         X_valid, y_valid = train_x.iloc[valid_idx], train_y.iloc[valid_idx]
@@ -87,13 +85,10 @@ def predict_meta_features(config: DictConfig, test_x: pd.DataFrame) -> np.ndarra
         predictions
     """
     path = Path(get_original_cwd()) / config.model.path / config.model.working
-    models = [
-        lgb.Booster(model_file=path / f"{config.model.name}_fold{fold}.lgb")
-        for fold in range(1, 5 + 1)
-    ]
+    models = [lgb.Booster(model_file=path / f"{config.model.name}_fold{fold}.lgb") for fold in range(1, 5 + 1)]
     preds = np.zeros(len(test_x))
 
-    for model in tqdm(models, total=len(models)):
+    for model in tqdm(models, total=len(models), leave=False):
         preds += model.predict(test_x) / len(models)
 
     return preds
@@ -107,9 +102,7 @@ def _main(cfg: DictConfig):
     target = pd.read_csv(path / "train_labels.csv")
     test = pd.read_parquet(path / "test.parquet")
     train = pd.merge(train, target, on="customer_ID")
-    train_x = train.drop(
-        columns=[*cfg.dataset.drop_features] + [cfg.dataset.target], axis=1
-    )
+    train_x = train.drop(columns=[*cfg.dataset.drop_features] + [cfg.dataset.target], axis=1)
     train_y = train[cfg.dataset.target]
 
     # make meta features
@@ -121,7 +114,8 @@ def _main(cfg: DictConfig):
     del train, train_x, train_y, oof_preds
 
     # build test features
-    split_ids = split_dataset(test.customer_ID.unique(), 10)
+    split_ids = split_dataset(test.customer_ID.unique(), 5)
+
     # infer test
     preds_proba = []
 

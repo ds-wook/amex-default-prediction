@@ -1,25 +1,19 @@
+from __future__ import annotations
+
 import logging
 import warnings
 from pathlib import Path
-from typing import Tuple
 
 import pandas as pd
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 
-from features.build import (
-    add_diff_features,
-    add_rate_features,
-    add_trick_features,
-    add_customized_features,
-    create_categorical_test,
-    create_categorical_train,
-)
+from features.build import add_customized_features, add_diff_features, create_categorical_test, create_categorical_train
 
 warnings.filterwarnings("ignore")
 
 
-def load_train_dataset(config: DictConfig) -> Tuple[pd.DataFrame, pd.Series]:
+def load_train_dataset(config: DictConfig) -> tuple[pd.DataFrame, pd.Series]:
     """
     Load train dataset
     Args:
@@ -34,9 +28,7 @@ def load_train_dataset(config: DictConfig) -> Tuple[pd.DataFrame, pd.Series]:
     train = pd.read_parquet(path / f"{config.dataset.train}.parquet")
     train_y = train[config.dataset.target]
     train_x = train.drop(columns=[*config.dataset.drop_features, config.dataset.target])
-    train_x = add_trick_features(train_x)
     train_x = add_diff_features(train_x)
-    train_x = add_rate_features(train_x)
     train_x = add_customized_features(train_x)
     train_x = create_categorical_train(train_x, config)
     logging.info(f"train: {train_x.shape}, target: {train_y.shape}")
@@ -56,9 +48,7 @@ def load_test_dataset(config: DictConfig, num: int = 0) -> pd.DataFrame:
     logging.info("Loading test dataset...")
     test = pd.read_parquet(path / f"{config.dataset.test}_{num}.parquet")
     test_x = test.drop(columns=[*config.dataset.drop_features])
-    test_x = add_trick_features(test_x)
     test_x = add_diff_features(test_x)
-    test_x = add_rate_features(test_x)
     test_x = add_customized_features(test_x)
     test_x = create_categorical_test(test_x, config)
     logging.info(f"test: {test_x.shape}")

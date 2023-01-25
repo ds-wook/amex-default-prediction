@@ -1,14 +1,13 @@
+from __future__ import annotations
+
 import os
 import warnings
 from pathlib import Path
-from typing import Callable, NoReturn, Optional, Tuple
+from typing import Callable, NoReturn, Tuple
 
 import lightgbm as lgb
 import numpy as np
 import pandas as pd
-import wandb.catboost as wandb_cb
-import wandb.lightgbm as wandb_lgb
-import wandb.xgboost as wandb_xgb
 import xgboost as xgb
 from catboost import CatBoostClassifier, Pool
 from hydra.utils import get_original_cwd
@@ -33,11 +32,7 @@ class LightGBMTrainer(BaseModel):
             )
             if self._max_score < score:
                 self._max_score = score
-                path = (
-                    Path(get_original_cwd())
-                    / self.config.model.path
-                    / self.config.model.working
-                )
+                path = Path(get_original_cwd()) / self.config.model.path / self.config.model.working
                 model_name = f"{self.config.model.name}_fold{self._num_fold_iter}.lgb"
                 model_path = path / model_name
 
@@ -49,9 +44,7 @@ class LightGBMTrainer(BaseModel):
         callback.order = 0
         return callback
 
-    def _weighted_logloss(
-        self, preds: np.ndarray, dtrain: lgb.Dataset
-    ) -> Tuple[float, float]:
+    def _weighted_logloss(self, preds: np.ndarray, dtrain: lgb.Dataset) -> Tuple[float, float]:
         """
         weighted logloss for dart
         Args:
@@ -77,8 +70,7 @@ class LightGBMTrainer(BaseModel):
         weights = (
             1
             + np.exp(
-                -self.config.model.loss.mult_no4prec
-                * np.linspace(self.config.model.loss.max_weights - 1, 0, len(top4))
+                -self.config.model.loss.mult_no4prec * np.linspace(self.config.model.loss.max_weights - 1, 0, len(top4))
             )[labels_mat[:, 0].argsort()]
         )
 
@@ -95,22 +87,14 @@ class LightGBMTrainer(BaseModel):
         self,
         X_train: pd.DataFrame,
         y_train: pd.Series,
-        X_valid: Optional[pd.DataFrame] = None,
-        y_valid: Optional[pd.Series] = None,
+        X_valid: pd.DataFrame | None = None,
+        y_valid: pd.Series | None = None,
     ) -> lgb.Booster:
         """
         load train model
         """
-        train_set = lgb.Dataset(
-            data=X_train,
-            label=y_train,
-            categorical_feature=[*self.config.features.cat_features],
-        )
-        valid_set = lgb.Dataset(
-            data=X_valid,
-            label=y_valid,
-            categorical_feature=[*self.config.features.cat_features],
-        )
+        train_set = lgb.Dataset(data=X_train, label=y_train, categorical_feature=[*self.config.features.cat_features])
+        valid_set = lgb.Dataset(data=X_valid, label=y_valid, categorical_feature=[*self.config.features.cat_features])
 
         model = lgb.train(
             train_set=train_set,
@@ -119,13 +103,8 @@ class LightGBMTrainer(BaseModel):
             verbose_eval=self.config.model.verbose,
             num_boost_round=self.config.model.num_boost_round,
             feval=lgb_amex_metric,
-            fobj=self._weighted_logloss
-            if self.config.model.loss.is_customized
-            else None,
-            callbacks=[
-                self._save_dart_model(),
-                wandb_lgb.wandb_callback(),
-            ],
+            fobj=self._weighted_logloss if self.config.model.loss.is_customized else None,
+            callbacks=[self._save_dart_model()],
         )
 
         model = (
@@ -139,8 +118,6 @@ class LightGBMTrainer(BaseModel):
             else model
         )
 
-        wandb_lgb.log_summary(model)
-
         return model
 
 
@@ -152,22 +129,14 @@ class CatBoostTrainer(BaseModel):
         self,
         X_train: pd.DataFrame,
         y_train: pd.Series,
-        X_valid: Optional[pd.DataFrame] = None,
-        y_valid: Optional[pd.Series] = None,
+        X_valid: pd.DataFrame | None = None,
+        y_valid: pd.Series | None = None,
     ) -> CatBoostClassifier:
         """
         load train model
         """
-        train_data = Pool(
-            data=X_train,
-            label=y_train,
-            cat_features=[*self.config.features.cat_features],
-        )
-        valid_data = Pool(
-            data=X_valid,
-            label=y_valid,
-            cat_features=[*self.config.features.cat_features],
-        )
+        train_data = Pool(data=X_train, label=y_train, cat_features=[*self.config.features.cat_features])
+        valid_data = Pool(data=X_valid, label=y_valid, cat_features=[*self.config.features.cat_features])
 
         model = CatBoostClassifier(
             random_state=self.config.model.seed,
@@ -180,7 +149,6 @@ class CatBoostTrainer(BaseModel):
             eval_set=valid_data,
             early_stopping_rounds=self.config.model.early_stopping_rounds,
             verbose=self.config.model.verbose,
-            callbacks=[wandb_cb.WandbCallback()],
         )
 
         return model
@@ -194,8 +162,8 @@ class XGBoostTrainer(BaseModel):
         self,
         X_train: pd.DataFrame,
         y_train: pd.Series,
-        X_valid: Optional[pd.DataFrame] = None,
-        y_valid: Optional[pd.Series] = None,
+        X_valid: pd.DataFrame | None = None,
+        y_valid: pd.Series | None = None,
     ) -> xgb.Booster:
         """
         load train model
@@ -210,7 +178,6 @@ class XGBoostTrainer(BaseModel):
             evals=watchlist,
             feval=xgb_amex_metric,
             maximize=True,
-            callbacks=[wandb_xgb.WandbCallback()],
             num_boost_round=self.config.model.num_boost_round,
             early_stopping_rounds=self.config.model.early_stopping_rounds,
             verbose_eval=self.config.model.verbose,

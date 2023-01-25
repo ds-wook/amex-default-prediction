@@ -1,4 +1,4 @@
-path: input/amex-meta-features/
+path: input/amex-default-prediction/
 num: 5
 seed: 42
 target: target

@@ -14,11 +14,11 @@ params:
   verbose: -1
 path: res/models/
 working: working
-name: 5fold_lightgbm_meta_features_seed42
-result: 5fold_lightgbm_meta_features_seed42.pkl
+name: 5fold-lightgb-meta-features-seed42
+result: 5fold-lightgbm-meta-features-seed42.pkl
 early_stopping_rounds: 100
 num_boost_round: 10500
-verbose: 500
+verbose: 100
 loss:
   is_customized: False
   mult_no4prec: 5.0
