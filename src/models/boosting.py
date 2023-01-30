@@ -20,7 +20,7 @@ warnings.filterwarnings("ignore")
 
 
 class LightGBMTrainer(BaseModel):
-    def __init__(self, **kwargs) -> NoReturn:
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     def _save_dart_model(self) -> Callable[[CallbackEnv], NoReturn]:
@@ -32,7 +32,7 @@ class LightGBMTrainer(BaseModel):
             )
             if self._max_score < score:
                 self._max_score = score
-                path = Path(get_original_cwd()) / self.config.model.path / self.config.model.working
+                path = Path(get_original_cwd()) / self.config.model.path
                 model_name = f"{self.config.model.name}_fold{self._num_fold_iter}.lgb"
                 model_path = path / model_name
 
@@ -101,28 +101,19 @@ class LightGBMTrainer(BaseModel):
             valid_sets=[train_set, valid_set],
             params=dict(self.config.model.params),
             verbose_eval=self.config.model.verbose,
-            num_boost_round=self.config.model.num_boost_round,
             feval=lgb_amex_metric,
-            fobj=self._weighted_logloss if self.config.model.loss.is_customized else None,
-            callbacks=[self._save_dart_model()],
-        )
-
-        model = (
-            lgb.Booster(
-                model_file=Path(get_original_cwd())
-                / self.config.model.path
-                / self.config.model.working
-                / f"{self.config.model.name}_fold{self._num_fold_iter}.lgb"
-            )
-            if not self.config.model.loss.is_customized
-            else model
+            callbacks=[
+                self._save_dart_model(),
+                lgb.early_stopping(self.config.model.early_stopping_rounds),
+                lgb.log_evaluation(self.config.model.verbose),
+            ],
         )
 
         return model
 
 
 class CatBoostTrainer(BaseModel):
-    def __init__(self, **kwargs) -> NoReturn:
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     def _train(
@@ -147,15 +138,15 @@ class CatBoostTrainer(BaseModel):
         model.fit(
             train_data,
             eval_set=valid_data,
-            early_stopping_rounds=self.config.model.early_stopping_rounds,
             verbose=self.config.model.verbose,
+            early_stopping_rounds=self.config.model.early_stopping_rounds,
         )
 
         return model
 
 
 class XGBoostTrainer(BaseModel):
-    def __init__(self, **kwargs) -> NoReturn:
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     def _train(

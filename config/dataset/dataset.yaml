@@ -6,7 +6,6 @@ train: train_meta_features
 test: test_meta_features
 drop_features:
 - customer_ID
-- S_2
 cat_features:
 - B_30_last
 - B_38_last

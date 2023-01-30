@@ -4,6 +4,7 @@ hydra:
   output_subdir: null
 
 defaults:
+  - _self_
   - dataset: dataset
   - features: features
   - logger: wandb

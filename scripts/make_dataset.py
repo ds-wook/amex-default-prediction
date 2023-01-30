@@ -40,9 +40,7 @@ def get_difference(df: pd.DataFrame, num_features: List[str]) -> pd.DataFrame:
     df_diff = (
         df.loc[:, num_features + ["customer_ID"]]
         .groupby(["customer_ID"])
-        .progress_apply(
-            lambda x: np.diff(x.values[-2:, :], axis=0).squeeze().astype(np.float32)
-        )
+        .progress_apply(lambda x: np.diff(x.values[-2:, :], axis=0).squeeze().astype(np.float32))
     )
     cols = [col + "_diff1" for col in df[num_features].columns]
     df_diff = pd.DataFrame(df_diff.values.tolist(), columns=cols, index=df_diff.index)
@@ -60,69 +58,34 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
         dataframe
     """
     # FEATURE ENGINEERING FROM
-    # https://www.kaggle.com/code/huseyincot/amex-agg-data-how-it-created
-    df["S_2"] = pd.to_datetime(df["S_2"])
-    df["SDist"] = df[["customer_ID", "S_2"]].groupby(
-        "customer_ID"
-    ).diff() / np.timedelta64(1, "D")
-    df["SDist"] = df["SDist"].fillna(30.53)
 
     all_cols = [c for c in list(df.columns) if c not in ["customer_ID", "S_2"]]
-    cat_features = (
-        "B_30, B_38, D_114, D_116, D_117, D_120, D_126, D_63, D_64, D_66, D_68"
-    )
-    cat_features = cat_features.split(", ")
-    num_features = [col for col in all_cols if col not in cat_features]
+    cat_features = ["B_30", "B_38", "D_114", "D_116", "D_117", "D_120", "D_126", "D_63", "D_64", "D_66", "D_68"]
+    num_features = [col for col in all_cols if col not in cat_features + ["preds"]]
 
     # Get the difference
     df_diff_agg = get_difference(df, num_features)
 
-    df_num_agg = df.groupby("customer_ID")[num_features].agg(
-        ["first", "mean", "std", "min", "max", "last"]
-    )
+    num_features = [col for col in all_cols if col not in cat_features]
+    df_num_agg = df.groupby("customer_ID")[num_features].agg(["first", "mean", "std", "min", "max", "last"])
     df_num_agg.columns = ["_".join(x) for x in df_num_agg.columns]
     df_num_agg.reset_index(inplace=True)
 
-    df_cat_agg = df.groupby("customer_ID")[cat_features].agg(
-        ["last", "nunique", "count"]
-    )
+    df_cat_agg = df.groupby("customer_ID")[cat_features].agg(["count", "first", "last", "nunique"])
     df_cat_agg.columns = ["_".join(x) for x in df_cat_agg.columns]
     df_cat_agg.reset_index(inplace=True)
 
-    # add last statement date, statements count and "new customer" category (LT=0.5)
-    df_date_agg = df.groupby("customer_ID")[["S_2", "B_3", "D_104"]].agg(
-        ["last", "count"]
-    )
-    df_date_agg.columns = ["_".join(x) for x in df_date_agg.columns]
-    df_date_agg.rename(columns={"S_2_count": "LT", "S_2_last": "S_2"}, inplace=True)
-    df_date_agg.loc[(df_date_agg.B_3_last.isnull()) & (df_date_agg.LT == 1), "LT"] = 0.5
-    df_date_agg.loc[
-        (df_date_agg.D_104_last.isnull()) & (df_date_agg.LT == 1), "LT"
-    ] = 0.5
-    df_date_agg.drop(
-        ["B_3_last", "D_104_last", "B_3_count", "D_104_count"], axis=1, inplace=True
-    )
-    df_date_agg.reset_index(inplace=True)
-
     # Transform int64 columns to int32
     cols = list(df_num_agg.dtypes[df_num_agg.dtypes == "float64"].index)
-    df_num_agg.loc[:, cols] = df_num_agg.loc[:, cols].progress_apply(
-        lambda x: x.astype(np.float32)
-    )
+    df_num_agg.loc[:, cols] = df_num_agg.loc[:, cols].progress_apply(lambda x: x.astype(np.float32))
 
     # Transform int64 columns to int32
     cols = list(df_cat_agg.dtypes[df_cat_agg.dtypes == "int64"].index)
-    df_cat_agg.loc[:, cols] = df_cat_agg.loc[:, cols].progress_apply(
-        lambda x: x.astype(np.int32)
-    )
+    df_cat_agg.loc[:, cols] = df_cat_agg.loc[:, cols].progress_apply(lambda x: x.astype(np.int32))
 
-    df = (
-        df_num_agg.merge(df_cat_agg, how="inner", on="customer_ID")
-        .merge(df_diff_agg, how="inner", on="customer_ID")
-        .merge(df_date_agg, how="inner", on="customer_ID")
-    )
+    df = df_num_agg.merge(df_cat_agg, how="inner", on="customer_ID").merge(df_diff_agg, how="inner", on="customer_ID")
 
-    del df_num_agg, df_cat_agg, df_diff_agg, df_date_agg
+    del df_num_agg, df_cat_agg, df_diff_agg
     gc.collect()
 
     return df
@@ -132,14 +95,13 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
 def _main(cfg: DictConfig) -> NoReturn:
     path = Path(get_original_cwd())
     train = pd.read_parquet(path / "input/amex-default-prediction/train_meta.parquet")
-    train = train.drop(columns=["target"])
     label = pd.read_csv(path / "input/amex-default-prediction/train_labels.csv")
     test = pd.read_parquet(path / "input/amex-default-prediction/test_meta.parquet")
     path = Path(get_original_cwd()) / cfg.dataset.path
 
     # build train features
     train = build_features(train)
-    train = pd.merge(train, label, on="customer_ID")
+    train = pd.merge(train, label, how="left", on="customer_ID")
 
     print(train.shape)
 

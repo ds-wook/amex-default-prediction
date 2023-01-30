@@ -1,7 +1,5 @@
 import gc
-import warnings
 from pathlib import Path
-from typing import Tuple
 
 import hydra
 import lightgbm as lgb
@@ -12,10 +10,35 @@ from omegaconf import DictConfig
 from sklearn.model_selection import StratifiedKFold
 from tqdm import tqdm
 
-warnings.filterwarnings("ignore")
+
+def amex_metric(y_true: pd.Series | np.ndarray, y_pred: pd.Series | np.ndarray) -> float:
+    labels = np.transpose(np.array([y_true, y_pred]))
+    labels = labels[labels[:, 1].argsort()[::-1]]
+    weights = np.where(labels[:, 0] == 0, 20, 1)
+    cut_vals = labels[np.cumsum(weights) <= int(0.04 * np.sum(weights))]
+    top_four = np.sum(cut_vals[:, 0]) / np.sum(labels[:, 0])
+    gini = [0, 0]
+
+    for i in [1, 0]:
+        labels = np.transpose(np.array([y_true, y_pred]))
+        labels = labels[labels[:, i].argsort()[::-1]]
+        weight = np.where(labels[:, 0] == 0, 20, 1)
+        weight_random = np.cumsum(weight / np.sum(weight))
+        total_pos = np.sum(labels[:, 0] * weight)
+        cum_pos_found = np.cumsum(labels[:, 0] * weight)
+        lorentz = cum_pos_found / total_pos
+        gini[i] = np.sum((lorentz - weight_random) * weight)
+
+    return 0.5 * (gini[1] / gini[0] + top_four)
 
 
-def make_meta_features(train_x: pd.DataFrame, train_y: pd.Series, config: DictConfig) -> pd.DataFrame:
+def lgb_amex_metric(y_pred: np.ndarray, y_true: lgb.Dataset) -> tuple[str, float, bool]:
+    """The competition metric with lightgbm's calling convention"""
+    y_true = y_true.get_label()
+    return "amex", amex_metric(y_true, y_pred), True
+
+
+def make_meta_features(train_x: pd.DataFrame, train_y: pd.Series, config: DictConfig) -> np.ndarray:
     """
     Create meta features
     Args:
@@ -43,12 +66,15 @@ def make_meta_features(train_x: pd.DataFrame, train_y: pd.Series, config: DictCo
             train_set=train_set,
             valid_sets=[train_set, valid_set],
             params=dict(config.model.params),
-            verbose_eval=config.model.verbose,
             num_boost_round=config.model.num_boost_round,
-            early_stopping_rounds=config.model.early_stopping_rounds,
+            feval=lgb_amex_metric,
+            callbacks=[
+                lgb.log_evaluation(config.model.verbose),
+                lgb.early_stopping(config.model.early_stopping_rounds),
+            ],
         )
         models[f"fold_{fold}"] = model
-        path = Path(get_original_cwd()) / config.model.path / config.model.working
+        path = Path(get_original_cwd()) / config.model.path
         model_name = f"{config.model.name}_fold{fold}.lgb"
         model_path = path / model_name
 
@@ -62,7 +88,7 @@ def make_meta_features(train_x: pd.DataFrame, train_y: pd.Series, config: DictCo
     return oof_preds
 
 
-def split_dataset(a: np.ndarray, n: int) -> Tuple[np.ndarray]:
+def split_dataset(a: np.ndarray, n: int) -> tuple[np.ndarray]:
     """
     Split array into n parts
     Args:
@@ -84,7 +110,7 @@ def predict_meta_features(config: DictConfig, test_x: pd.DataFrame) -> np.ndarra
     Returns:
         predictions
     """
-    path = Path(get_original_cwd()) / config.model.path / config.model.working
+    path = Path(get_original_cwd()) / config.model.path
     models = [lgb.Booster(model_file=path / f"{config.model.name}_fold{fold}.lgb") for fold in range(1, 5 + 1)]
     preds = np.zeros(len(test_x))
 
@@ -96,6 +122,10 @@ def predict_meta_features(config: DictConfig, test_x: pd.DataFrame) -> np.ndarra
 
 @hydra.main(config_path="../config/", config_name="train", version_base="1.2.0")
 def _main(cfg: DictConfig):
+    import warnings
+
+    warnings.filterwarnings("ignore")
+
     path = Path(get_original_cwd()) / cfg.dataset.path
     # create dataset
     train = pd.read_parquet(path / "train.parquet")

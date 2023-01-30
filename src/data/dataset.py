@@ -1,16 +1,13 @@
 from __future__ import annotations
 
 import logging
-import warnings
 from pathlib import Path
 
 import pandas as pd
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 
-from features.build import add_customized_features, add_diff_features, create_categorical_test, create_categorical_train
-
-warnings.filterwarnings("ignore")
+from features.build import add_diff_features, create_categorical_test, create_categorical_train
 
 
 def load_train_dataset(config: DictConfig) -> tuple[pd.DataFrame, pd.Series]:
@@ -29,7 +26,6 @@ def load_train_dataset(config: DictConfig) -> tuple[pd.DataFrame, pd.Series]:
     train_y = train[config.dataset.target]
     train_x = train.drop(columns=[*config.dataset.drop_features, config.dataset.target])
     train_x = add_diff_features(train_x)
-    train_x = add_customized_features(train_x)
     train_x = create_categorical_train(train_x, config)
     logging.info(f"train: {train_x.shape}, target: {train_y.shape}")
 
@@ -49,7 +45,6 @@ def load_test_dataset(config: DictConfig, num: int = 0) -> pd.DataFrame:
     test = pd.read_parquet(path / f"{config.dataset.test}_{num}.parquet")
     test_x = test.drop(columns=[*config.dataset.drop_features])
     test_x = add_diff_features(test_x)
-    test_x = add_customized_features(test_x)
     test_x = create_categorical_test(test_x, config)
     logging.info(f"test: {test_x.shape}")
 

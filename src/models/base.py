@@ -28,12 +28,7 @@ class ModelResult:
 
 
 class BaseModel(metaclass=ABCMeta):
-    def __init__(
-        self,
-        config: DictConfig,
-        metric: Callable[[np.ndarray, np.ndarray], float],
-        search: bool = False,
-    ):
+    def __init__(self, config: DictConfig, metric: Callable[[np.ndarray, np.ndarray], float], search: bool = False):
         self.config = config
         self.metric = metric
         self.search = search

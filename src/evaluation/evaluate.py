@@ -24,9 +24,7 @@ class CatBoostEvalMetricAmex:
     def is_max_optimal(self) -> bool:
         return True
 
-    def evaluate(
-        self, approxes: np.ndarray, target: np.ndarray, weight: np.ndarray
-    ) -> Tuple[float, int]:
+    def evaluate(self, approxes: np.ndarray, target: np.ndarray, weight: np.ndarray) -> Tuple[float, int]:
         assert len(approxes) == 1
         assert len(target) == len(approxes[0])
         preds = np.array(approxes[0])
@@ -34,9 +32,7 @@ class CatBoostEvalMetricAmex:
         return amex_metric(np.array(target), np.array(preds)), 0
 
 
-def amex_metric(
-    y_true: Union[pd.Series, np.ndarray], y_pred: Union[pd.Series, np.ndarray]
-) -> float:
+def amex_metric(y_true: Union[pd.Series, np.ndarray], y_pred: Union[pd.Series, np.ndarray]) -> float:
     labels = np.transpose(np.array([y_true, y_pred]))
     labels = labels[labels[:, 1].argsort()[::-1]]
     weights = np.where(labels[:, 0] == 0, 20, 1)
